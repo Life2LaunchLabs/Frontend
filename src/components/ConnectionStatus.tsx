@@ -65,7 +65,7 @@ const ConnectionStatus = () => {
     checkConnection()
 
     // Set up polling if enabled
-    let interval: NodeJS.Timeout | null = null
+    let interval: number | null = null
     if (isPolling) {
       interval = setInterval(checkConnection, 5000) // Check every 5 seconds
     }
