@@ -66,7 +66,7 @@ export const Icon: React.FC<IconProps> = ({
   active = false, 
   color = 'inherit' 
 }) => {
-  const { theme, tokens } = useTheme();
+  const { theme } = useTheme();
   const iconStyles = getIconStyles(typography, active, theme, color);
 
   return (
