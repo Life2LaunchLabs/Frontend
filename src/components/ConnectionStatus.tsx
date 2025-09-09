@@ -19,7 +19,19 @@ const ConnectionStatus = () => {
   const [logs, setLogs] = useState<ConnectionLog[]>([])
   const [isPolling, setIsPolling] = useState(true)
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  // Format API URL to ensure it has proper scheme
+  const formatApiUrl = (url: string) => {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      if (url.includes('localhost') || url.includes('127.0.0.1')) {
+        return `http://${url}`
+      } else {
+        return `https://${url}`
+      }
+    }
+    return url
+  }
+
+  const API_URL = formatApiUrl(import.meta.env.VITE_API_URL || 'localhost:8000')
 
   const addLog = (log: ConnectionLog) => {
     setLogs(prev => [log, ...prev.slice(0, 9)]) // Keep last 10 logs
