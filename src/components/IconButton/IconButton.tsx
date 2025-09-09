@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../theme';
 import { Icon } from '../Icon';
-import { borderRadius } from '../../tokens/borderRadius';
-import { spacing } from '../../tokens/spacing';
 
 export interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onToggle'> {
   variant?: 'filled' | 'outlined' | 'standard' | 'elevated' | 'tonal';
@@ -24,7 +22,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   onClick,
   ...props
 }) => {
-  const { theme } = useTheme();
+  const { theme, tokens } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -37,14 +35,14 @@ export const IconButton: React.FC<IconButtonProps> = ({
     const baseStyle = {
       width: '40px',
       height: '40px',
-      borderRadius: borderRadius.full,
-      padding: spacing[2], // 8px for the design requirement of padding 4 (8px total)
+      borderRadius: tokens.borderRadius.full,
+      padding: tokens.spacing[2], // 8px for the design requirement of padding 4 (8px total)
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       border: 'none',
       cursor: disabled ? 'default' : 'pointer',
-      fontFamily: 'Poppins, sans-serif',
+      fontFamily: tokens.typography.fontFamily.default.join(', '),
       transition: 'all 0.15s ease-in-out',
       position: 'relative' as const,
       overflow: 'hidden' as const,

@@ -3,6 +3,7 @@ import reactLogo from '../../../assets/react.svg'
 import viteLogo from '/vite.svg'
 import { useTheme } from '../../../theme/ThemeContext'
 import ConnectionStatus from '../../../components/ConnectionStatus/ConnectionStatus'
+import { CoreLayout } from '../../../layouts'
 
 function HomePage() {
   const [count, setCount] = useState(0)
@@ -18,6 +19,7 @@ function HomePage() {
       backgroundColor: theme.surface,
       color: theme.onSurface,
       padding: tokens.spacing[8],
+      paddingBottom: '100px', // Space for bottom navigation
       fontFamily: tokens.typography.fontFamily.default.join(', '),
     },
     logoContainer: {
@@ -67,7 +69,8 @@ function HomePage() {
   }
 
   return (
-    <div style={styles.container}>
+    <CoreLayout>
+      <div style={styles.container}>
       <div style={styles.logoContainer}>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} style={styles.logo} alt="Vite logo" />
@@ -92,8 +95,9 @@ function HomePage() {
         Click on the Vite and React logos to learn more
       </p>
       
-      <ConnectionStatus />
-    </div>
+        <ConnectionStatus />
+      </div>
+    </CoreLayout>
   )
 }
 

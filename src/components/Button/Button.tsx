@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../theme';
 import { Icon } from '../Icon';
-import { borderRadius } from '../../tokens/borderRadius';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -19,23 +18,21 @@ export const Button: React.FC<ButtonProps> = ({
   onClick,
   ...props
 }) => {
-  const { theme } = useTheme();
+  const { theme, tokens } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
   const getButtonStyles = () => {
     const baseStyle = {
-      borderRadius: borderRadius.full,
-      padding: '10px 24px',
+      borderRadius: tokens.borderRadius.full,
+      padding: `${tokens.spacing[2]} ${tokens.spacing[6]}`,
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
+      gap: tokens.spacing[2],
       border: 'none',
       cursor: disabled ? 'default' : 'pointer',
-      fontFamily: 'Poppins, sans-serif',
-      fontWeight: '500',
-      fontSize: '14px',
+      ...tokens.typography.title.small,
       transition: 'all 0.15s ease-in-out',
       position: 'relative' as const,
       overflow: 'hidden' as const,

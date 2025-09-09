@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTheme } from '../../theme'
 
 interface ConnectionLog {
   timestamp: string
@@ -15,6 +16,7 @@ interface HealthResponse {
 }
 
 const ConnectionStatus = () => {
+  const { theme, tokens } = useTheme()
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
   const [logs, setLogs] = useState<ConnectionLog[]>([])
   const [isPolling, setIsPolling] = useState(true)
@@ -89,9 +91,9 @@ const ConnectionStatus = () => {
 
   const getStatusColor = () => {
     switch (connectionStatus) {
-      case 'connected': return '#4ade80'
-      case 'disconnected': return '#f87171'
-      case 'checking': return '#fbbf24'
+      case 'connected': return theme.tertiary
+      case 'disconnected': return theme.error
+      case 'checking': return theme.tertiary
     }
   }
 
@@ -105,40 +107,61 @@ const ConnectionStatus = () => {
 
   return (
     <div style={{
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      padding: '16px',
-      margin: '16px 0',
-      backgroundColor: '#f9fafb',
-      fontFamily: 'monospace'
+      border: `1px solid ${theme.onSurfaceVariant}`,
+      borderRadius: tokens.borderRadius.large,
+      padding: tokens.spacing[4],
+      margin: `${tokens.spacing[4]} 0`,
+      backgroundColor: theme.surfaceContainerLow,
+      color: theme.onSurface,
+      fontFamily: tokens.typography.fontFamily.mono.join(', ')
     }}>
-      <h3 style={{ margin: '0 0 12px 0', fontSize: '18px' }}>
+      <h3 style={{ 
+        margin: `0 0 ${tokens.spacing[3]} 0`,
+        ...tokens.typography.title.medium,
+        color: theme.onSurface
+      }}>
         Backend Connection Status
       </h3>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: tokens.spacing[2], 
+        marginBottom: tokens.spacing[4] 
+      }}>
         <div style={{
           width: '12px',
           height: '12px',
-          borderRadius: '50%',
+          borderRadius: tokens.borderRadius.full,
           backgroundColor: getStatusColor(),
         }} />
-        <span style={{ fontWeight: 'bold' }}>{getStatusText()}</span>
-        <span style={{ color: '#6b7280', fontSize: '14px' }}>
+        <span style={{ 
+          ...tokens.typography.label.medium,
+          color: theme.onSurface 
+        }}>{getStatusText()}</span>
+        <span style={{ 
+          ...tokens.typography.body.small,
+          color: theme.onSurfaceVariant 
+        }}>
           ({API_URL})
         </span>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: tokens.spacing[2], 
+        marginBottom: tokens.spacing[4] 
+      }}>
         <button
           onClick={checkConnection}
           style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            backgroundColor: '#ffffff',
+            padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+            border: `1px solid ${theme.onSurfaceVariant}`,
+            borderRadius: tokens.borderRadius.medium,
+            backgroundColor: theme.surface,
+            color: theme.onSurface,
             cursor: 'pointer',
-            fontSize: '14px'
+            ...tokens.typography.body.small
           }}
         >
           Test Connection
@@ -146,13 +169,13 @@ const ConnectionStatus = () => {
         <button
           onClick={() => setIsPolling(!isPolling)}
           style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            backgroundColor: isPolling ? '#ef4444' : '#10b981',
-            color: 'white',
+            padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+            border: 'none',
+            borderRadius: tokens.borderRadius.medium,
+            backgroundColor: isPolling ? theme.error : theme.tertiary,
+            color: isPolling ? theme.onError : theme.onTertiary,
             cursor: 'pointer',
-            fontSize: '14px'
+            ...tokens.typography.body.small
           }}
         >
           {isPolling ? 'Stop Auto-check' : 'Start Auto-check'}
@@ -160,13 +183,13 @@ const ConnectionStatus = () => {
         <button
           onClick={() => setLogs([])}
           style={{
-            padding: '6px 12px',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            backgroundColor: '#6b7280',
-            color: 'white',
+            padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
+            border: 'none',
+            borderRadius: tokens.borderRadius.medium,
+            backgroundColor: theme.onSurfaceVariant,
+            color: theme.surface,
             cursor: 'pointer',
-            fontSize: '14px'
+            ...tokens.typography.body.small
           }}
         >
           Clear Logs
@@ -174,26 +197,31 @@ const ConnectionStatus = () => {
       </div>
 
       <div>
-        <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#4b5563' }}>
+        <h4 style={{ 
+          margin: `0 0 ${tokens.spacing[2]} 0`,
+          ...tokens.typography.body.medium,
+          color: theme.onSurfaceVariant
+        }}>
           Connection Logs:
         </h4>
         <div style={{
           height: '200px',
           overflowY: 'auto',
-          backgroundColor: '#1f2937',
-          color: '#f9fafb',
-          padding: '8px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          lineHeight: '1.4'
+          backgroundColor: theme.surfaceContainer,
+          color: theme.onSurface,
+          padding: tokens.spacing[2],
+          borderRadius: tokens.borderRadius.medium,
+          ...tokens.typography.body.small,
+          lineHeight: '1.4',
+          border: `1px solid ${theme.onSurfaceVariant}`
         }}>
           {logs.length === 0 ? (
-            <div style={{ color: '#9ca3af' }}>No logs yet...</div>
+            <div style={{ color: theme.onSurfaceVariant }}>No logs yet...</div>
           ) : (
             logs.map((log, index) => (
               <div key={index} style={{ 
-                marginBottom: '4px',
-                color: log.status === 'success' ? '#4ade80' : '#f87171'
+                marginBottom: tokens.spacing[1],
+                color: log.status === 'success' ? theme.tertiary : theme.error
               }}>
                 [{log.timestamp}] {log.message}
               </div>
