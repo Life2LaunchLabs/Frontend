@@ -1,0 +1,496 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useChatContext } from '../contexts/ChatContext';
+import { designTokens } from '../design/tokens';
+
+function ChatPage({ character, backgroundImage, title }) {
+  const navigate = useNavigate();
+  const [message, setMessage] = useState('');
+  const [isAgendaExpanded, setIsAgendaExpanded] = useState(false);
+  const { chatStates, sendMessage, getAgendaInfo, getSessionId, isSessionComplete } = useChatContext();
+  const chatState = chatStates[character];
+  const agendaInfo = getAgendaInfo(character);
+  
+
+  const handleSend = async () => {
+    if (message.trim() && !chatState.isLoading) {
+      try {
+        await sendMessage(character, message);
+        setMessage('');
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      }
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleQuickInput = async (input) => {
+    if (!chatState.isLoading) {
+      try {
+        await sendMessage(character, input);
+      } catch (error) {
+        console.error('Failed to send quick input message:', error);
+      }
+    }
+  };
+
+  const toggleAgenda = () => {
+    setIsAgendaExpanded(!isAgendaExpanded);
+  };
+
+  return (
+    <div className="fixed inset-0 w-full h-full overflow-hidden">
+      {/* Background image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      />
+      
+      {/* Content area */}
+      <div className="relative z-10 h-full flex flex-col items-center p-4">
+        <div className="w-full max-w-[800px] flex flex-col h-full">
+          
+          {/* Title bar */}
+          <div className="relative mb-4 flex gap-3">
+            <div 
+              className="flex-1 backdrop-blur-sm rounded-lg"
+              style={{
+                backgroundColor: designTokens.colors.surface.container + 'E6', // 90% opacity
+                borderRadius: designTokens.borderRadius.lg,
+              }}
+            >
+              {/* Main title section - clickable */}
+              <div 
+                className="cursor-pointer transition-colors rounded-lg"
+                style={{
+                  padding: `${designTokens.spacing.lg} ${designTokens.spacing.xl}`,
+                  borderRadius: designTokens.borderRadius.lg,
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = designTokens.colors.hover.surface}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onClick={toggleAgenda}
+              >
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <h1 
+                      className="font-semibold"
+                      style={{
+                        fontSize: designTokens.typography.fontSize.xl,
+                        fontWeight: designTokens.typography.fontWeight.semibold,
+                        color: designTokens.colors.onSurface.primary,
+                      }}
+                    >
+                      {title}
+                    </h1>
+                    {agendaInfo.currentItem && (
+                      <p 
+                        className="mt-1"
+                        style={{
+                          fontSize: designTokens.typography.fontSize.sm,
+                          color: designTokens.colors.onSurface.secondary,
+                          marginTop: designTokens.spacing.xs,
+                        }}
+                      >
+                        {agendaInfo.currentItem}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/home');
+                    }}
+                    className="rounded-full transition-colors"
+                    style={{
+                      padding: designTokens.spacing.sm,
+                      borderRadius: designTokens.borderRadius.full,
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = designTokens.colors.hover.surface}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                    aria-label="Back to home"
+                  >
+                    <svg 
+                      className="w-5 h-5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                      style={{ color: designTokens.colors.onSurface.secondary }}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Progress bar with dropdown arrow */}
+                {agendaInfo.agendaItems.length > 0 && (
+                  <div className="w-full flex items-center gap-3">
+                    <div className="flex-1">
+                      <div 
+                        className="flex justify-between mb-1"
+                        style={{
+                          fontSize: designTokens.typography.fontSize.xs,
+                          color: designTokens.colors.onSurface.secondary,
+                          marginBottom: designTokens.spacing.xs,
+                        }}
+                      >
+                        <span>Progress</span>
+                        <span>{agendaInfo.progressPercent}%</span>
+                      </div>
+                      <div 
+                        className="w-full rounded-full h-2"
+                        style={{
+                          backgroundColor: designTokens.colors.surface.variant,
+                          borderRadius: designTokens.borderRadius.full,
+                          height: '8px',
+                        }}
+                      >
+                        <div 
+                          className="h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${agendaInfo.progressPercent}%`,
+                            backgroundColor: designTokens.colors.primary.main,
+                            borderRadius: designTokens.borderRadius.full,
+                            height: '8px',
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    <button
+                      className="transition-transform duration-200"
+                      style={{ 
+                        transform: isAgendaExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                        padding: designTokens.spacing.xs,
+                        color: designTokens.colors.onSurface.tertiary,
+                      }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Overlay dropdown agenda list */}
+            {isAgendaExpanded && agendaInfo.agendaItems.length > 0 && (
+              <div 
+                className="absolute top-full left-0 right-0 z-50 mt-1"
+                onClick={toggleAgenda}
+              >
+                <div 
+                  className="backdrop-blur-sm rounded-lg"
+                  style={{
+                    backgroundColor: designTokens.colors.surface.primary + 'F2', // 95% opacity
+                    borderRadius: designTokens.borderRadius.lg,
+                    boxShadow: designTokens.shadows.lg,
+                    border: `1px solid ${designTokens.colors.border.secondary}`,
+                  }}
+                >
+                  <div 
+                    style={{
+                      padding: `${designTokens.spacing.md} ${designTokens.spacing.xl}`,
+                    }}
+                  >
+                    {agendaInfo.agendaItems.map((item, index) => {
+                      const isCompleted = agendaInfo.completedItems[index] !== null;
+                      const isActive = (agendaInfo.currentItem === item);
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          className="flex items-center"
+                          style={{
+                            paddingTop: designTokens.spacing.sm,
+                            paddingBottom: designTokens.spacing.sm,
+                            backgroundColor: isActive ? designTokens.colors.primary.container : 'transparent',
+                            borderRadius: isActive ? designTokens.borderRadius.md : '0',
+                            padding: isActive ? `${designTokens.spacing.sm} ${designTokens.spacing.sm}` : `${designTokens.spacing.sm} 0`,
+                            marginLeft: isActive ? `-${designTokens.spacing.sm}` : '0',
+                            marginRight: isActive ? `-${designTokens.spacing.sm}` : '0',
+                          }}
+                        >
+                          {/* Completion indicator */}
+                          <div 
+                            className="w-5 h-5 flex items-center justify-center"
+                            style={{ marginRight: designTokens.spacing.md }}
+                          >
+                            {isCompleted ? (
+                              <svg 
+                                className="w-4 h-4" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                                style={{ color: designTokens.colors.success.main }}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <div 
+                                className="w-4 h-4 border-2 rounded-full"
+                                style={{
+                                  borderColor: designTokens.colors.border.secondary,
+                                  borderRadius: designTokens.borderRadius.full,
+                                }}
+                              ></div>
+                            )}
+                          </div>
+                          
+                          {/* Item text */}
+                          <span 
+                            style={{
+                              fontSize: designTokens.typography.fontSize.sm,
+                              fontWeight: isActive ? designTokens.typography.fontWeight.medium : designTokens.typography.fontWeight.normal,
+                              color: isActive ? designTokens.colors.primary.main : designTokens.colors.onSurface.primary,
+                            }}
+                          >
+                            {item}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Results button - appears when 100% complete */}
+            {agendaInfo.progressPercent === 100 && agendaInfo.agendaItems.length > 0 && (
+              <button
+                onClick={() => {
+                  const sessionId = getSessionId(character);
+                  if (sessionId) {
+                    navigate(`/profile/results/${sessionId}`);
+                  } else {
+                    console.error('No session ID available for results');
+                    // Fallback to old behavior
+                    navigate('/journal', { state: { openVisionJourney: true } });
+                  }
+                }}
+                className="font-semibold rounded-lg transition-colors transform hover:scale-105 duration-200"
+                style={{ 
+                  backgroundColor: designTokens.colors.success.main,
+                  color: designTokens.colors.onPrimary.main,
+                  borderRadius: designTokens.borderRadius.lg,
+                  padding: `${designTokens.spacing.md} ${designTokens.spacing.lg}`,
+                  fontWeight: designTokens.typography.fontWeight.semibold,
+                  boxShadow: designTokens.shadows.lg,
+                  height: 'fit-content', 
+                  minHeight: '60px',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = designTokens.colors.success.dark;
+                  e.target.style.boxShadow = designTokens.shadows.xl;
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = designTokens.colors.success.main;
+                  e.target.style.boxShadow = designTokens.shadows.lg;
+                }}
+              >
+                Results
+              </button>
+            )}
+          </div>
+
+          {/* Upper transparent area with emote bubble */}
+          <div className="flex-1 relative flex items-center justify-center">
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+              <div 
+                className="backdrop-blur-sm rounded-full"
+                style={{
+                  backgroundColor: designTokens.colors.surface.container + 'E6', // 90% opacity
+                  borderRadius: designTokens.borderRadius.full,
+                  padding: `${designTokens.spacing.sm} ${designTokens.spacing.lg}`,
+                  boxShadow: designTokens.shadows.lg,
+                }}
+              >
+                <span 
+                  style={{
+                    fontSize: designTokens.typography.fontSize.sm,
+                    color: designTokens.colors.onSurface.secondary,
+                  }}
+                >
+                  {chatState.emote}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Chat area - shares available height evenly */}
+          <div 
+            className="flex-1 backdrop-blur-sm rounded-lg overflow-y-auto"
+            style={{
+              backgroundColor: designTokens.colors.surface.primary + 'CC', // 80% opacity
+              borderRadius: designTokens.borderRadius.lg,
+              padding: designTokens.spacing.lg,
+              marginBottom: designTokens.spacing.lg,
+            }}
+          >
+            {chatState.isLoading ? (
+              <div 
+                className="text-center"
+                style={{ color: designTokens.colors.onSurface.secondary }}
+              >
+                <div className="animate-pulse">
+                  {character.charAt(0).toUpperCase() + character.slice(1)} is thinking...
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="whitespace-pre-wrap"
+                style={{ color: designTokens.colors.onSurface.primary }}
+              >
+                {chatState.message}
+              </div>
+            )}
+          </div>
+
+          {/* Quick input chips area */}
+          <div 
+            className="flex justify-end gap-2 flex-wrap"
+            style={{ 
+              marginBottom: designTokens.spacing.lg,
+              gap: designTokens.spacing.sm,
+            }}
+          >
+            {(chatState.quickInputs || []).map((input, index) => (
+              <button
+                key={index}
+                onClick={() => handleQuickInput(input)}
+                disabled={chatState.isLoading}
+                className="backdrop-blur-sm disabled:cursor-not-allowed rounded-full transition-colors"
+                style={{
+                  backgroundColor: designTokens.colors.surface.primary + 'CC', // 80% opacity
+                  color: designTokens.colors.onSurface.primary,
+                  padding: `${designTokens.spacing.sm} ${designTokens.spacing.lg}`,
+                  borderRadius: designTokens.borderRadius.full,
+                  fontSize: designTokens.typography.fontSize.sm,
+                  boxShadow: designTokens.shadows.sm,
+                  opacity: chatState.isLoading ? '0.5' : '1',
+                }}
+                onMouseEnter={(e) => {
+                  if (!chatState.isLoading) {
+                    e.target.style.backgroundColor = designTokens.colors.surface.container + 'E6'; // 90% opacity
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!chatState.isLoading) {
+                    e.target.style.backgroundColor = designTokens.colors.surface.primary + 'CC'; // 80% opacity
+                  }
+                }}
+              >
+                {input}
+              </button>
+            ))}
+          </div>
+
+          {/* Input area */}
+          <div 
+            className="backdrop-blur-sm rounded-lg flex items-end"
+            style={{
+              backgroundColor: designTokens.colors.surface.container + 'E6', // 90% opacity
+              borderRadius: designTokens.borderRadius.lg,
+              padding: designTokens.spacing.lg,
+              gap: designTokens.spacing.md,
+            }}
+          >
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message..."
+              disabled={chatState.isLoading}
+              className="flex-1 resize-none rounded-lg focus:outline-none disabled:opacity-50"
+              rows={1}
+              style={{ 
+                height: 'auto',
+                minHeight: '48px',
+                maxHeight: '128px',
+                border: `1px solid ${designTokens.colors.border.secondary}`,
+                borderRadius: designTokens.borderRadius.lg,
+                padding: `${designTokens.spacing.md} ${designTokens.spacing.lg}`,
+                backgroundColor: designTokens.colors.surface.primary,
+                color: designTokens.colors.onSurface.primary,
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = designTokens.colors.border.focus;
+                e.target.style.boxShadow = `0 0 0 2px ${designTokens.colors.primary.main}20`;
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = designTokens.colors.border.secondary;
+                e.target.style.boxShadow = 'none';
+              }}
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!message.trim() || chatState.isLoading}
+              className="rounded-full transition-colors flex-shrink-0 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: (!message.trim() || chatState.isLoading) 
+                  ? designTokens.colors.onSurface.disabled 
+                  : designTokens.colors.primary.main,
+                color: designTokens.colors.onPrimary.main,
+                borderRadius: designTokens.borderRadius.full,
+                padding: designTokens.spacing.md,
+              }}
+              onMouseEnter={(e) => {
+                if (message.trim() && !chatState.isLoading) {
+                  e.target.style.backgroundColor = designTokens.colors.primary.dark;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (message.trim() && !chatState.isLoading) {
+                  e.target.style.backgroundColor = designTokens.colors.primary.main;
+                }
+              }}
+              aria-label="Send message"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        body, html {
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
+        #root {
+          margin: 0 !important;
+          padding: 0 !important;
+          max-width: none !important;
+          width: 100vw !important;
+          height: 100vh !important;
+        }
+        .App {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default ChatPage;
+
