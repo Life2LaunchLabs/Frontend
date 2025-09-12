@@ -1,1 +1,0 @@
-export { default as QuestsPage } from "./ui/QuestsPage";
