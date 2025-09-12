@@ -3,6 +3,7 @@ import { lightTheme, darkTheme } from '../tokens/colors';
 import { spacing } from '../tokens/spacing';
 import { borderRadius } from '../tokens/borderRadius';
 import { typography } from '../tokens/typography';
+import { shadows } from '../tokens/shadows';
 
 export type Theme = typeof lightTheme | typeof darkTheme;
 export type ThemeMode = 'light' | 'dark';
@@ -16,6 +17,7 @@ interface ThemeContextType {
     spacing: typeof spacing;
     borderRadius: typeof borderRadius;
     typography: typeof typography;
+    shadows: typeof shadows;
   };
 }
 
@@ -47,6 +49,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       spacing,
       borderRadius,
       typography,
+      shadows,
     },
   };
 

@@ -60,30 +60,68 @@ export function isNetworkError(error: any): boolean {
 /**
  * Format API error for user display
  */
-export function formatApiError(error: any): string {
+export function formatApiError(error: any): { title: string; message: string; type: 'error' | 'warning' } {
   if (error instanceof ApiError) {
     // Return user-friendly messages for common errors
     switch (error.status) {
       case 400:
-        return error.message || 'Invalid request. Please check your input.';
+        return {
+          title: 'Invalid Request',
+          message: error.message || 'Please check your input and try again.',
+          type: 'error'
+        };
       case 401:
-        return 'Please sign in to continue.';
+        return {
+          title: 'Authentication Required',
+          message: 'Please sign in to continue.',
+          type: 'warning'
+        };
       case 403:
-        return 'You do not have permission to perform this action.';
+        return {
+          title: 'Access Denied',
+          message: 'You do not have permission to perform this action.',
+          type: 'error'
+        };
       case 404:
-        return 'The requested resource was not found.';
+        return {
+          title: 'Not Found',
+          message: 'The requested resource could not be found.',
+          type: 'error'
+        };
       case 429:
-        return 'Too many requests. Please wait a moment and try again.';
+        return {
+          title: 'Rate Limited',
+          message: 'Too many requests. Please wait a moment and try again.',
+          type: 'warning'
+        };
       case 500:
-        return 'Server error. Please try again later.';
+      case 502:
+      case 503:
+        return {
+          title: 'System Issues',
+          message: 'We\'re experiencing technical difficulties. Please try again in a few moments.',
+          type: 'error'
+        };
       default:
-        return error.message || 'An unexpected error occurred.';
+        return {
+          title: 'Something Went Wrong',
+          message: error.message || 'An unexpected error occurred.',
+          type: 'error'
+        };
     }
   }
   
   if (isNetworkError(error)) {
-    return 'Network error. Please check your connection and try again.';
+    return {
+      title: 'Connection Problem',
+      message: 'Unable to connect to our servers. Please check your internet connection and try again.',
+      type: 'error'
+    };
   }
   
-  return 'An unexpected error occurred. Please try again.';
+  return {
+    title: 'Unexpected Error',
+    message: 'Something went wrong. Please try again.',
+    type: 'error'
+  };
 }

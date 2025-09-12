@@ -11,16 +11,25 @@ import {
   ChatTextInput,
   type AgendaItem 
 } from '../components';
+import { useSendMessage, useChatHistory } from '../api';
 
 function ChatPage() {
   const { tokens } = useTheme();
   const navigate = useNavigate();
   
-  // Demo state - replace with actual chat context
+  // Chat state
   const [message, setMessage] = useState('');
-  const [chatMessage, setChatMessage] = useState('Welcome! How can I help you today?');
-  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [currentEmote, setCurrentEmote] = useState('😊 friendly');
+  
+  // API hooks
+  const sendMessageMutation = useSendMessage();
+  const { data: historyData, isLoading: isLoadingHistory } = useChatHistory({ session_id: sessionId });
+  
+  // Current chat message (latest assistant message)
+  const latestAssistantMessage = historyData?.messages
+    ?.filter(msg => msg.role === 'assistant')
+    ?.slice(-1)[0]?.content || 'Welcome! How can I help you today?';
   
   // Demo agenda data
   const agendaItems: AgendaItem[] = [
@@ -38,26 +47,45 @@ function ChatPage() {
   ];
 
   const handleSendMessage = async () => {
-    if (message.trim() && !isLoading) {
-      setIsLoading(true);
-      // Simulate sending message
-      setTimeout(() => {
-        setChatMessage(`I received: "${message}". That's interesting! Let me think about that...`);
+    if (message.trim() && !sendMessageMutation.isPending) {
+      try {
+        const response = await sendMessageMutation.mutateAsync({
+          message: message.trim(),
+          session_id: sessionId,
+        });
+        
+        // Update session ID if this is the first message
+        if (!sessionId && response.session_id) {
+          setSessionId(response.session_id);
+        }
+        
         setMessage('');
-        setIsLoading(false);
-        setCurrentEmote('🤔 thinking');
-      }, 1000);
+        setCurrentEmote('😊 friendly');
+      } catch {
+        // Error is handled by the hook with toast notification
+        setCurrentEmote('😔 error');
+      }
     }
   };
 
   const handleQuickInput = async (input: string) => {
-    if (!isLoading) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setChatMessage(`You said: "${input}". Great choice! What would you like to explore next?`);
-        setIsLoading(false);
+    if (!sendMessageMutation.isPending) {
+      try {
+        const response = await sendMessageMutation.mutateAsync({
+          message: input,
+          session_id: sessionId,
+        });
+        
+        // Update session ID if this is the first message
+        if (!sessionId && response.session_id) {
+          setSessionId(response.session_id);
+        }
+        
         setCurrentEmote('😊 helpful');
-      }, 800);
+      } catch {
+        // Error is handled by the hook with toast notification
+        setCurrentEmote('😔 error');
+      }
     }
   };
 
@@ -199,8 +227,8 @@ function ChatPage() {
           {/* Message Area */}
           <div style={styles.messageSection}>
             <MessageArea
-              message={chatMessage}
-              isLoading={isLoading}
+              message={latestAssistantMessage}
+              isLoading={isLoadingHistory || sendMessageMutation.isPending}
               characterName="Assistant"
             />
           </div>
@@ -210,7 +238,7 @@ function ChatPage() {
             <QuickInputChips
               inputs={quickInputs}
               onInputClick={handleQuickInput}
-              disabled={isLoading}
+              disabled={sendMessageMutation.isPending}
               variant="filled"
             />
           </div>
@@ -221,7 +249,7 @@ function ChatPage() {
               value={message}
               onChange={setMessage}
               onSend={handleSendMessage}
-              disabled={isLoading}
+              disabled={sendMessageMutation.isPending}
               placeholder="Type your message..."
             />
           </div>
