@@ -89,7 +89,6 @@ class AuthManager {
 
     try {
       // Temporarily remove auth token to avoid authentication loop
-      const currentToken = this.getAccessToken();
       apiClient.setAuthToken(null);
 
       const response = await apiClient.post<{

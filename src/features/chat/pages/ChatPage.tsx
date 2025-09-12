@@ -13,7 +13,7 @@ import {
 } from '../components';
 
 function ChatPage() {
-  const { theme, tokens } = useTheme();
+  const { tokens } = useTheme();
   const navigate = useNavigate();
   
   // Demo state - replace with actual chat context
