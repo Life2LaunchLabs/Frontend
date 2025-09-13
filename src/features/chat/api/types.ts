@@ -80,3 +80,26 @@ export interface ChatError {
   code?: string;
   details?: any;
 }
+
+/**
+ * Session configuration for creating new chat sessions
+ */
+export interface SessionConfig {
+  preset_key: string;
+  title?: string;
+}
+
+/**
+ * Preset information from backend
+ */
+export interface PresetInfo {
+  presets: Record<string, {
+    name: string;
+    description: string;
+    category: string;
+    provider: string;
+    model: string;
+  }>;
+  categories: string[];
+  default_preset: string;
+}

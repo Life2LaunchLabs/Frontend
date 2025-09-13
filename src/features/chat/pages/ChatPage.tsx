@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import trainCarImage from '../../../shared/assets/images/train_car.png';
 import character1ChatImage from '../assets/images/character_1_chat.png';
@@ -11,7 +11,7 @@ import {
   ChatTextInput,
   type AgendaItem 
 } from '../components';
-import { useSendMessage, useChatHistory } from '../api';
+import { ChatService, useStreamingChat } from '../api';
 
 function ChatPage() {
   const { tokens } = useTheme();
@@ -21,15 +21,42 @@ function ChatPage() {
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [currentEmote, setCurrentEmote] = useState('😊 friendly');
+  const [isInitializing, setIsInitializing] = useState(true);
   
-  // API hooks
-  const sendMessageMutation = useSendMessage();
-  const { data: historyData, isLoading: isLoadingHistory } = useChatHistory({ session_id: sessionId });
+  // Streaming chat hook
+  const {
+    messages,
+    currentStreamingMessage,
+    isConnected,
+    isStreaming,
+    sendMessage: sendStreamingMessage
+  } = useStreamingChat(sessionId);
   
-  // Current chat message (latest assistant message)
-  const latestAssistantMessage = historyData?.messages
-    ?.filter(msg => msg.role === 'assistant')
-    ?.slice(-1)[0]?.content || 'Welcome! How can I help you today?';
+  // Initialize session on component mount
+  useEffect(() => {
+    const initializeSession = async () => {
+      try {
+        setIsInitializing(true);
+        const response = await ChatService.createSession({
+          preset_key: 'claude_balanced',
+          title: 'Chat Session'
+        });
+        setSessionId(response.session_id);
+      } catch (error) {
+        console.error('Failed to initialize session:', error);
+        setCurrentEmote('😔 error');
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeSession();
+  }, []);
+  
+  // Get the latest assistant message
+  const latestAssistantMessage = messages.length > 0 
+    ? messages[messages.length - 1] 
+    : 'Welcome! How can I help you today?';
   
   // Demo agenda data
   const agendaItems: AgendaItem[] = [
@@ -47,43 +74,25 @@ function ChatPage() {
   ];
 
   const handleSendMessage = async () => {
-    if (message.trim() && !sendMessageMutation.isPending) {
+    if (message.trim() && sessionId && isConnected && !isStreaming) {
       try {
-        const response = await sendMessageMutation.mutateAsync({
-          message: message.trim(),
-          session_id: sessionId,
-        });
-        
-        // Update session ID if this is the first message
-        if (!sessionId && response.session_id) {
-          setSessionId(response.session_id);
-        }
-        
+        sendStreamingMessage(message.trim());
         setMessage('');
         setCurrentEmote('😊 friendly');
-      } catch {
-        // Error is handled by the hook with toast notification
+      } catch (error) {
+        console.error('Failed to send message:', error);
         setCurrentEmote('😔 error');
       }
     }
   };
 
   const handleQuickInput = async (input: string) => {
-    if (!sendMessageMutation.isPending) {
+    if (sessionId && isConnected && !isStreaming) {
       try {
-        const response = await sendMessageMutation.mutateAsync({
-          message: input,
-          session_id: sessionId,
-        });
-        
-        // Update session ID if this is the first message
-        if (!sessionId && response.session_id) {
-          setSessionId(response.session_id);
-        }
-        
+        sendStreamingMessage(input);
         setCurrentEmote('😊 helpful');
-      } catch {
-        // Error is handled by the hook with toast notification
+      } catch (error) {
+        console.error('Failed to send quick input:', error);
         setCurrentEmote('😔 error');
       }
     }
@@ -228,7 +237,9 @@ function ChatPage() {
           <div style={styles.messageSection}>
             <MessageArea
               message={latestAssistantMessage}
-              isLoading={isLoadingHistory || sendMessageMutation.isPending}
+              streamingMessage={currentStreamingMessage}
+              isLoading={isInitializing || !isConnected}
+              isStreaming={isStreaming}
               characterName="Assistant"
             />
           </div>
@@ -238,7 +249,7 @@ function ChatPage() {
             <QuickInputChips
               inputs={quickInputs}
               onInputClick={handleQuickInput}
-              disabled={sendMessageMutation.isPending}
+              disabled={!sessionId || !isConnected || isStreaming}
               variant="filled"
             />
           </div>
@@ -249,8 +260,8 @@ function ChatPage() {
               value={message}
               onChange={setMessage}
               onSend={handleSendMessage}
-              disabled={sendMessageMutation.isPending}
-              placeholder="Type your message..."
+              disabled={!sessionId || !isConnected || isStreaming}
+              placeholder={sessionId && isConnected ? "Type your message..." : "Connecting..."}
             />
           </div>
         </div>

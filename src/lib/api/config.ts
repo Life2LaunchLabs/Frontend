@@ -21,9 +21,9 @@ export const formatApiUrl = (url: string): string => {
  * Get the base API URL for the current environment
  */
 export const getBaseApiUrl = (): string => {
-  // In development mode, use relative URLs to leverage Vite proxy
+  // In development mode, explicitly point to backend on port 8001
   if (import.meta.env.DEV) {
-    return '';
+    return 'http://localhost:8001';
   }
   
   // In production, use the configured API URL

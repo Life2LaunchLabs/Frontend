@@ -60,8 +60,25 @@ export function isNetworkError(error: any): boolean {
 /**
  * Format API error for user display
  */
-export function formatApiError(error: any): { title: string; message: string; type: 'error' | 'warning' } {
+export function formatApiError(error: any, context?: string): { title: string; message: string; type: 'error' | 'warning' } {
   if (error instanceof ApiError) {
+    // Handle authentication-specific errors
+    if (context === 'auth') {
+      if (error.status === 400 || error.status === 401) {
+        // Check if it's a credentials error
+        if (error.message.toLowerCase().includes('invalid') || 
+            error.message.toLowerCase().includes('incorrect') ||
+            error.message.toLowerCase().includes('wrong') ||
+            error.message.toLowerCase().includes('credential')) {
+          return {
+            title: 'Login Failed',
+            message: 'Invalid username or password. Please check your credentials and try again.',
+            type: 'error'
+          };
+        }
+      }
+    }
+    
     // Return user-friendly messages for common errors
     switch (error.status) {
       case 400:

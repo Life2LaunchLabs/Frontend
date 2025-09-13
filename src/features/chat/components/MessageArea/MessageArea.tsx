@@ -3,7 +3,9 @@ import { useTheme } from '../../../../styles';
 
 export interface MessageAreaProps {
   message: string;
+  streamingMessage?: string;
   isLoading?: boolean;
+  isStreaming?: boolean;
   loadingText?: string;
   characterName?: string;
   className?: string;
@@ -12,7 +14,9 @@ export interface MessageAreaProps {
 
 export const MessageArea: React.FC<MessageAreaProps> = ({
   message,
+  streamingMessage,
   isLoading = false,
+  isStreaming = false,
   loadingText,
   characterName,
   className,
@@ -53,13 +57,19 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     margin: 0,
   };
 
-  return (
-    <div 
-      className={className}
-      style={containerStyles}
-      data-testid="message-area"
-    >
-      {isLoading ? (
+  const streamingCursorStyles: React.CSSProperties = {
+    display: 'inline-block',
+    width: '2px',
+    height: '1.2em',
+    backgroundColor: theme.primary,
+    marginLeft: '2px',
+    animation: 'blink 1s infinite',
+  };
+
+  // Display content based on state priority
+  const displayContent = () => {
+    if (isLoading) {
+      return (
         <div 
           className="animate-pulse"
           style={loadingStyles}
@@ -67,14 +77,48 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
         >
           {getLoadingText()}
         </div>
-      ) : (
+      );
+    }
+    
+    if (isStreaming && streamingMessage) {
+      return (
         <div 
           style={messageStyles}
-          data-testid="message-content"
+          data-testid="streaming-message"
         >
-          {message || ''}
+          {streamingMessage}
+          <span style={streamingCursorStyles} />
         </div>
-      )}
-    </div>
+      );
+    }
+    
+    return (
+      <div 
+        style={messageStyles}
+        data-testid="message-content"
+      >
+        {message || ''}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <style>
+        {`
+          @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+          }
+        `}
+      </style>
+      <div 
+        className={className}
+        style={containerStyles}
+        data-testid="message-area"
+      >
+        {displayContent()}
+      </div>
+    </>
   );
 };

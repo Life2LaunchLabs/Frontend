@@ -1,5 +1,6 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChatService } from './ChatService';
+import { ChatService, ChatWebSocketService } from './ChatService';
 import { formatApiError } from '../../../lib/api/utils';
 import { useToast } from '../../../shared/components';
 import type { 
@@ -178,4 +179,93 @@ export const useSession = (sessionId: string) => {
     enabled: !!sessionId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+};
+
+/**
+ * Hook for streaming chat functionality
+ */
+export const useStreamingChat = (sessionId?: string) => {
+  const [messages, setMessages] = useState<string[]>([]);
+  const [currentStreamingMessage, setCurrentStreamingMessage] = useState<string>('');
+  const [isConnected, setIsConnected] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const wsRef = useRef<ChatWebSocketService | null>(null);
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const connectWebSocket = async () => {
+      try {
+        const wsService = ChatService.createWebSocketService(
+          sessionId,
+          (message) => {
+            switch (message.type) {
+              case 'stream_start':
+                setCurrentStreamingMessage('');
+                setIsStreaming(true);
+                break;
+              
+              case 'stream_chunk':
+                if (message.chunk) {
+                  setCurrentStreamingMessage(prev => prev + message.chunk);
+                }
+                break;
+              
+              case 'stream_complete':
+                if (message.assistant_message?.content) {
+                  setMessages(prev => [...prev, message.assistant_message.content]);
+                }
+                setCurrentStreamingMessage('');
+                setIsStreaming(false);
+                break;
+              
+              case 'error':
+                console.error('WebSocket error:', message.message);
+                setIsStreaming(false);
+                break;
+            }
+          },
+          (error) => {
+            console.error('WebSocket connection error:', error);
+            setIsConnected(false);
+          },
+          () => {
+            setIsConnected(false);
+          }
+        );
+
+        await wsService.connect();
+        wsRef.current = wsService;
+        setIsConnected(true);
+      } catch (error) {
+        console.error('Failed to connect WebSocket:', error);
+        setIsConnected(false);
+      }
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.disconnect();
+        wsRef.current = null;
+      }
+      setIsConnected(false);
+    };
+  }, [sessionId]);
+
+  const sendMessage = useCallback((message: string) => {
+    if (wsRef.current && isConnected) {
+      setMessages(prev => [...prev, message]);
+      wsRef.current.sendMessage(message);
+    }
+  }, [isConnected]);
+
+  return {
+    messages,
+    currentStreamingMessage,
+    isConnected,
+    isStreaming,
+    sendMessage
+  };
 };
