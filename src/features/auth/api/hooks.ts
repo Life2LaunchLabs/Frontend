@@ -6,9 +6,7 @@ import { formatApiError } from '../../../lib/api/utils';
 import { useToast } from '../../../shared/components';
 import type {
   LoginCredentials,
-  RegisterCredentials,
-  User,
-  AuthError
+  RegisterCredentials
 } from '../types';
 
 // Query keys for React Query caching
@@ -128,12 +126,12 @@ export const useLogout = () => {
       queryClient.clear(); // Clear all cached data
       toast.showSuccess('Goodbye!', 'You have been logged out successfully');
     },
-    onError: (error) => {
+    onError: () => {
       // Still logout locally even if API fails
       logout();
       queryClient.clear();
-      
-      const errorInfo = formatApiError(error);
+
+      // const errorInfo = formatApiError(error);
       toast.showWarning('Logged out locally', 'Server logout failed but you have been logged out locally');
     },
   });

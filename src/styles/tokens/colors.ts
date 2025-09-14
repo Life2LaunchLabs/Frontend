@@ -98,7 +98,11 @@ export const lightTheme = {
   
   surface: colorPrimitives.neutral[50],
   onSurface: colorPrimitives.neutral[900],
+  surfaceVariant: colorPrimitives.neutralVariant[200],
   onSurfaceVariant: colorPrimitives.neutralVariant[600],
+
+  outline: colorPrimitives.neutralVariant[400],
+  outlineVariant: colorPrimitives.neutralVariant[300],
   
   surfaceContainerLowest: '#ffffff',
   surfaceContainerLow: colorPrimitives.neutral[100],
@@ -138,7 +142,11 @@ export const darkTheme = {
   
   surface: colorPrimitives.neutral[800],
   onSurface: colorPrimitives.neutral[100],
+  surfaceVariant: colorPrimitives.neutralVariant[700],
   onSurfaceVariant: colorPrimitives.neutralVariant[300],
+
+  outline: colorPrimitives.neutralVariant[500],
+  outlineVariant: colorPrimitives.neutralVariant[600],
   
   surfaceContainerLowest: colorPrimitives.neutral[900],
   surfaceContainerLow: colorPrimitives.neutral[800],

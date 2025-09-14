@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../../styles';
 import { DevChatService } from '../../api';
+import type { ChatSession } from '../../types';
 
 export interface SessionHistoryViewerProps {
   refreshTrigger?: number;
 }
 
-interface Session {
-  session_id: string;
-  title: string;
-  preset_key: string;
-  created_at: string;
-  expires_at: string;
-  message_count: number;
+interface Session extends ChatSession {
+  preset_key?: string; // Make preset_key optional since API might not provide it
 }
 
 interface Message {
@@ -39,7 +35,7 @@ export const SessionHistoryViewer: React.FC<SessionHistoryViewerProps> = ({
     setError(null);
     try {
       const result = await DevChatService.getSessions();
-      setSessions(result.sessions);
+      setSessions(result.sessions.map(session => ({ ...session, preset_key: session.model_config?.preset_key })));
     } catch (err: any) {
       setError(err.message);
     } finally {

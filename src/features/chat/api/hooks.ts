@@ -101,7 +101,8 @@ export const useCreateSession = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (title?: string) => ChatService.createSession(title),
+    mutationFn: (config: { preset_key?: string; title?: string }) =>
+      ChatService.createSession({ preset_key: config.preset_key || 'claude_balanced', title: config.title }),
     onSuccess: (newSession) => {
       // Add new session to sessions cache
       queryClient.setQueryData(chatQueryKeys.sessions(), (old: any) => {

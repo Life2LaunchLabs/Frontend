@@ -163,12 +163,13 @@ export const Toast: React.FC<ToastProps> = ({
         alignItems: 'flex-start',
         gap: tokens.spacing[3],
       }}>
-        <Icon
-          name={getIconName()}
-          typography="title-medium"
-          color="inherit"
-          style={{ color: getIconColor(), marginTop: tokens.spacing[0.5] }}
-        />
+        <div style={{ color: getIconColor(), marginTop: tokens.spacing[1] }}>
+          <Icon
+            name={getIconName()}
+            typography="title-medium"
+            color="inherit"
+          />
+        </div>
         
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{

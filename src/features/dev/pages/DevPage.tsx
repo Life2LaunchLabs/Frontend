@@ -28,12 +28,12 @@ export const DevPage: React.FC = () => {
     testSessionList,
     testProviderStatus,
     testRealMessage,
-    testConversationContext,
+    // testConversationContext,
     // Phase 3 test methods
     testAnalytics,
     testProviderComparison,
-    testWebSocketStreaming,
-    testSessionInsights
+    testWebSocketStreaming
+    // testSessionInsights
   } = useDevTests();
 
   const handleLogout = () => {

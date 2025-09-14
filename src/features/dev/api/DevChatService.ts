@@ -34,7 +34,12 @@ export class DevChatService {
     session_id: string;
     usage_stats: any;
   }> {
-    const response = await apiClient.post('/api/chat/send/', {
+    const response = await apiClient.post<{
+      user_message: any;
+      assistant_message: any;
+      session_id: string;
+      usage_stats: any;
+    }>('/api/chat/send/', {
       message,
       session_id: sessionId
     });
@@ -49,7 +54,11 @@ export class DevChatService {
     available_count: number;
     total_count: number;
   }> {
-    const response = await apiClient.get('/api/chat/provider-status/');
+    const response = await apiClient.get<{
+      providers: Record<string, { available: boolean; api_key_configured: boolean }>;
+      available_count: number;
+      total_count: number;
+    }>('/api/chat/provider-status/');
     return response.data;
   }
 
@@ -78,7 +87,10 @@ export class DevChatService {
     session_id: string;
     session: any;
   }> {
-    const response = await apiClient.post('/api/chat/sessions/create/', config);
+    const response = await apiClient.post<{
+      session_id: string;
+      session: any;
+    }>('/api/chat/sessions/create/', config);
     return response.data;
   }
 
@@ -95,7 +107,11 @@ export class DevChatService {
       params.append('active_only', 'false');
     }
     
-    const response = await apiClient.get(`/api/chat/sessions/?${params.toString()}`);
+    const response = await apiClient.get<{
+      sessions: ChatSession[];
+      total_count: number;
+      has_more: boolean;
+    }>(`/api/chat/sessions/?${params.toString()}`);
     return response.data;
   }
 
@@ -122,7 +138,7 @@ export class DevChatService {
    * Delete/deactivate session
    */
   static async deleteSession(sessionId: string): Promise<{ message: string }> {
-    const response = await apiClient.delete(`/api/chat/sessions/${sessionId}/`);
+    const response = await apiClient.delete<{ message: string }>(`/api/chat/sessions/${sessionId}/`);
     return response.data;
   }
 
@@ -147,7 +163,14 @@ export class DevChatService {
       params.append('limit', limit.toString());
     }
     
-    const response = await apiClient.get(`/api/chat/sessions/${sessionId}/history/?${params.toString()}`);
+    const response = await apiClient.get<{
+      messages: any[];
+      session_id: string;
+      total_count: number;
+      has_more: boolean;
+      offset: number;
+      limit: number | null;
+    }>(`/api/chat/sessions/${sessionId}/history/?${params.toString()}`);
     return response.data;
   }
 
@@ -170,7 +193,15 @@ export class DevChatService {
     const params = new URLSearchParams();
     params.append('days', days.toString());
     
-    const response = await apiClient.get(`/api/chat/analytics/?${params.toString()}`);
+    const response = await apiClient.get<{
+      period: { start: string; end: string; days: number };
+      session_stats: any;
+      message_stats: any;
+      provider_usage: any;
+      conversation_topics: any[];
+      time_patterns: any;
+      generated_at: string;
+    }>(`/api/chat/analytics/?${params.toString()}`);
     return response.data;
   }
 
@@ -185,7 +216,11 @@ export class DevChatService {
     const params = new URLSearchParams();
     params.append('days', days.toString());
     
-    const response = await apiClient.get(`/api/chat/analytics/provider-comparison/?${params.toString()}`);
+    const response = await apiClient.get<{
+      period: { start: string; end: string };
+      provider_comparison: Record<string, any>;
+      generated_at: string;
+    }>(`/api/chat/analytics/provider-comparison/?${params.toString()}`);
     return response.data;
   }
 
@@ -199,7 +234,13 @@ export class DevChatService {
     quality_metrics: any;
     generated_at: string;
   }> {
-    const response = await apiClient.get(`/api/chat/sessions/${sessionId}/insights/`);
+    const response = await apiClient.get<{
+      session_info: any;
+      message_analysis: any;
+      flow_analysis: any;
+      quality_metrics: any;
+      generated_at: string;
+    }>(`/api/chat/sessions/${sessionId}/insights/`);
     return response.data;
   }
 

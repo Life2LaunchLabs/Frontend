@@ -1,11 +1,10 @@
 import { apiClient } from '../../../lib/api';
 import { authManager } from '../../../lib/api/auth';
-import type { 
-  SendMessageRequest, 
-  SendMessageResponse, 
-  GetHistoryRequest, 
-  GetHistoryResponse, 
-  GetSessionsResponse,
+import type {
+  SendMessageRequest,
+  SendMessageResponse,
+  GetHistoryRequest,
+  GetHistoryResponse,
   ChatSession,
   SessionConfig,
   PresetInfo
@@ -145,7 +144,7 @@ export class ChatService {
     session_id: string;
     session: any;
   }> {
-    const response = await apiClient.post('/api/chat/sessions/create/', config);
+    const response = await apiClient.post<{ session_id: string; session: any }>('/api/chat/sessions/create/', config);
     return response.data;
   }
 
@@ -170,7 +169,14 @@ export class ChatService {
       params.append('limit', limit.toString());
     }
     
-    const response = await apiClient.get(`/api/chat/sessions/${sessionId}/history/?${params.toString()}`);
+    const response = await apiClient.get<{
+      messages: any[];
+      session_id: string;
+      total_count: number;
+      has_more: boolean;
+      offset: number;
+      limit: number | null;
+    }>(`/api/chat/sessions/${sessionId}/history/?${params.toString()}`);
     return response.data;
   }
 
@@ -187,7 +193,11 @@ export class ChatService {
       params.append('active_only', 'false');
     }
     
-    const response = await apiClient.get(`/api/chat/sessions/?${params.toString()}`);
+    const response = await apiClient.get<{
+      sessions: ChatSession[];
+      total_count: number;
+      has_more: boolean;
+    }>(`/api/chat/sessions/?${params.toString()}`);
     return response.data;
   }
 
@@ -212,7 +222,7 @@ export class ChatService {
    * Delete/deactivate session
    */
   static async deleteSession(sessionId: string): Promise<{ message: string }> {
-    const response = await apiClient.delete(`/api/chat/sessions/${sessionId}/`);
+    const response = await apiClient.delete<{ message: string }>(`/api/chat/sessions/${sessionId}/`);
     return response.data;
   }
 

@@ -25,7 +25,7 @@ export const DevAuth: React.FC<DevAuthProps> = ({ onAuthSuccess }) => {
         password
       });
 
-      const { tokens: authTokens } = response.data;
+      const { tokens: authTokens } = response.data as { tokens: { access: string; refresh: string } };
       authManager.setTokens(authTokens.access, authTokens.refresh);
       onAuthSuccess();
     } catch (error: any) {

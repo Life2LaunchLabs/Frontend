@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../styles';
-import { Button, IconButton } from '../../../shared/components';
+import { IconButton } from '../../../shared/components';
 import { DevChatService } from '../api';
 import { ChatService } from '../../chat/api';
-import type { ConfigPreset, PresetInfo } from '../types';
+import type { ConfigPreset } from '../types';
 
 // System prompt presets
 const SYSTEM_PROMPT_PRESETS = [
@@ -95,7 +95,7 @@ const QUICK_INPUT_INSTRUCTION_PRESETS = [
 export const ChatSettingsPage: React.FC = () => {
   const { theme, tokens } = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   // Navigation state
   const [activeSection, setActiveSection] = useState<'general' | 'system_prompt' | 'quick_inputs'>('general');
@@ -142,8 +142,8 @@ export const ChatSettingsPage: React.FC = () => {
                         const sessionData = await ChatService.getSession(currentSessionId);
 
             // Restore model preset
-            const modelConfig = sessionData.model_config || {};
-            const contextConfig = sessionData.context_config || {};
+            const modelConfig = (sessionData as any).model_config || {};
+            const contextConfig = (sessionData as any).context_config || {};
 
 
             if (modelConfig.preset_key) {
