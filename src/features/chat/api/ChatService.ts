@@ -12,7 +12,7 @@ import type {
 } from './types';
 
 export interface StreamMessage {
-  type: 'stream_chunk' | 'stream_start' | 'stream_complete' | 'user_message_stored' | 'typing_indicator' | 'error' | 'connection_established' | 'message_received';
+  type: 'stream_chunk' | 'stream_start' | 'stream_complete' | 'user_message_stored' | 'typing_indicator' | 'error' | 'connection_established' | 'message_received' | 'emote' | 'quick_responses';
   chunk?: string;
   chunk_index?: number;
   message_id?: string;
@@ -25,6 +25,10 @@ export interface StreamMessage {
   message?: string;
   error_code?: string;
   timestamp?: number;
+  // New fields for control features
+  emote?: string;
+  emote_glyph?: string;
+  quick_replies?: string[];
 }
 
 export class ChatWebSocketService {
@@ -79,11 +83,16 @@ export class ChatWebSocketService {
     });
   }
 
-  sendMessage(message: string): void {
+  sendMessage(message: string, options?: {
+    request_emote?: boolean;
+    request_quick_responses?: boolean;
+  }): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({
         type: 'send_message',
-        message: message
+        message: message,
+        request_emote: options?.request_emote || false,
+        request_quick_responses: options?.request_quick_responses || false
       }));
     } else {
       console.error('WebSocket not connected');
@@ -263,6 +272,24 @@ export class ChatService {
   static async getSession(sessionId: string): Promise<ChatSession> {
     const response = await apiClient.get<ChatSession>(
       `/api/chat/sessions/${sessionId}/`
+    );
+    return response.data;
+  }
+
+  /**
+   * Update session configuration
+   */
+  static async updateSession(sessionId: string, updates: {
+    preset_key?: string;
+    title?: string;
+    custom_system_prompt?: string;
+    custom_control_instructions?: string[];
+    quick_input_generation_instructions?: string;
+    context_id?: string;
+  }): Promise<ChatSession> {
+    const response = await apiClient.patch<ChatSession>(
+      `/api/chat/sessions/${sessionId}/`,
+      updates
     );
     return response.data;
   }

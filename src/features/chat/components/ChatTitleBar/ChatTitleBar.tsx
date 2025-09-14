@@ -15,8 +15,10 @@ export interface ChatTitleBarProps {
   items?: AgendaItem[];
   onResultsClick?: () => void;
   onBackClick?: () => void;
+  onSettingsClick?: () => void;
   showBackButton?: boolean;
   showResultsButton?: boolean;
+  showSettingsButton?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -26,8 +28,10 @@ export const ChatTitleBar: React.FC<ChatTitleBarProps> = ({
   items = [],
   onResultsClick,
   onBackClick,
+  onSettingsClick,
   showBackButton = true,
   showResultsButton = true,
+  showSettingsButton = true,
   className,
   style,
 }) => {
@@ -204,15 +208,30 @@ export const ChatTitleBar: React.FC<ChatTitleBarProps> = ({
                 <p style={currentItemStyles}>{currentItem}</p>
               )}
             </div>
-            {showBackButton && (
-              <IconButton
-                icon="arrow_back"
-                onClick={handleBackClick}
-                variant="standard"
-                aria-label="Back"
-                data-testid="back-button"
-              />
-            )}
+            <div style={{ display: 'flex', gap: tokens.spacing[2], alignItems: 'center' }}>
+              {showSettingsButton && onSettingsClick && (
+                <IconButton
+                  icon="settings"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSettingsClick();
+                  }}
+                  variant="standard"
+                  aria-label="Chat Settings"
+                  data-testid="settings-button"
+                />
+              )}
+              {showBackButton && (
+                <IconButton
+                  icon="arrow_back"
+                  onClick={handleBackClick}
+                  variant="standard"
+                  aria-label="Back"
+                  data-testid="back-button"
+                />
+              )}
+            </div>
           </div>
 
           {hasAgenda && (

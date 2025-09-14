@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage } from '../features/dashboard';
 import { ChatPage } from '../features/chat';
-import { DevPage } from '../features/dev';
+import { DevPage, ChatSettingsPage } from '../features/dev';
 import { AuthPage, AuthGuard, useAuth } from '../features/auth';
 import './App.css';
 
@@ -57,13 +57,21 @@ function App() {
         />
         
         {/* Dev route - also protected */}
-        <Route 
-          path="/dev" 
+        <Route
+          path="/dev"
           element={
             <AuthGuard fallback={<Navigate to="/login" replace />}>
               <DevPage />
             </AuthGuard>
-          } 
+          }
+        />
+        <Route
+          path="/dev/chat_settings"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ChatSettingsPage />
+            </AuthGuard>
+          }
         />
         
         {/* Catch-all redirect to login */}

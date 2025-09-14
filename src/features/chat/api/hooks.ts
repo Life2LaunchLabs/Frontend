@@ -3,10 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatService, ChatWebSocketService } from './ChatService';
 import { formatApiError } from '../../../lib/api/utils';
 import { useToast } from '../../../shared/components';
-import type { 
-  SendMessageRequest, 
-  GetHistoryRequest, 
-  ChatSession 
+import type {
+  SendMessageRequest,
+  ChatSession
 } from './types';
 
 // Query keys for React Query caching
@@ -73,10 +72,11 @@ export const useSendMessage = () => {
 /**
  * Hook to get chat history
  */
-export const useChatHistory = (request: GetHistoryRequest = {}) => {
+export const useChatHistory = (sessionId: string, limit: number = 50) => {
   return useQuery({
-    queryKey: chatQueryKeys.history(request.session_id),
-    queryFn: () => ChatService.getHistory(request),
+    queryKey: chatQueryKeys.history(sessionId),
+    queryFn: () => ChatService.getMessageHistory(sessionId, limit),
+    enabled: !!sessionId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -182,14 +182,77 @@ export const useSession = (sessionId: string) => {
 };
 
 /**
- * Hook for streaming chat functionality
+ * Hook for streaming chat functionality with emote and quick response support
  */
 export const useStreamingChat = (sessionId?: string) => {
   const [messages, setMessages] = useState<string[]>([]);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [currentEmote, setCurrentEmote] = useState<string | null>('😊 friendly');
+  const [currentQuickResponses, setCurrentQuickResponses] = useState<string[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const wsRef = useRef<ChatWebSocketService | null>(null);
+
+  // Debug logging removed for cleaner console
+
+  // Load message history when session ID changes
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const loadHistory = async () => {
+      try {
+        setIsLoadingHistory(true);
+        console.log('📜 Loading history for session:', sessionId);
+
+        const historyResponse = await ChatService.getMessageHistory(
+          sessionId,
+          50 // Load last 50 messages
+        );
+
+        console.log('📜 Loaded message history:', historyResponse);
+
+        if (historyResponse.messages && historyResponse.messages.length > 0) {
+          // Extract message contents in order
+          const messageContents = historyResponse.messages.map((msg: any) => msg.content);
+          setMessages(messageContents);
+
+          // Try to restore the last emote from the most recent assistant message
+          const lastAssistantMessage = historyResponse.messages
+            .reverse()
+            .find((msg: any) => msg.role === 'assistant');
+
+          if (lastAssistantMessage?.emote_data) {
+            const { emote, emote_glyph } = lastAssistantMessage.emote_data;
+            if (emote_glyph && emote) {
+              const formattedEmote = `${emote_glyph} ${emote}`;
+              console.log('🎭 Restoring emote from history:', formattedEmote);
+              setCurrentEmote(formattedEmote);
+            } else if (emote_glyph) {
+              console.log('🎭 Restoring emote glyph from history:', emote_glyph);
+              setCurrentEmote(emote_glyph);
+            }
+          }
+
+          console.log('📜 Restored', messageContents.length, 'messages');
+        } else {
+          console.log('📜 No message history found, starting fresh');
+          // Reset to initial state for empty sessions
+          setMessages([]);
+          setCurrentEmote('😊 friendly');
+        }
+      } catch (error) {
+        console.error('📜 Failed to load message history:', error);
+        // Don't show error to user, just start fresh
+        setMessages([]);
+        setCurrentEmote('😊 friendly');
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+  }, [sessionId]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -200,28 +263,54 @@ export const useStreamingChat = (sessionId?: string) => {
           sessionId,
           (message) => {
             switch (message.type) {
+              case 'emote':
+                // Handle emote display (stage 1 of response pipeline)
+                console.log('🎭 Received emote message:', message);
+                if (message.emote_glyph && message.emote) {
+                  const formattedEmote = `${message.emote_glyph} ${message.emote}`;
+                  console.log('🎭 Setting emote to:', formattedEmote);
+                  setCurrentEmote(formattedEmote);
+                } else if (message.emote_glyph) {
+                  console.log('🎭 Setting emote to glyph only:', message.emote_glyph);
+                  setCurrentEmote(message.emote_glyph);
+                }
+                break;
+
               case 'stream_start':
+                // Clear previous quick responses and start streaming (stage 2)
+                setCurrentQuickResponses([]);
                 setCurrentStreamingMessage('');
                 setIsStreaming(true);
                 break;
-              
+
               case 'stream_chunk':
                 if (message.chunk) {
                   setCurrentStreamingMessage(prev => prev + message.chunk);
                 }
                 break;
-              
+
               case 'stream_complete':
+                // Complete streaming response (end of stage 2)
                 if (message.assistant_message?.content) {
                   setMessages(prev => [...prev, message.assistant_message.content]);
                 }
                 setCurrentStreamingMessage('');
                 setIsStreaming(false);
+                // Keep emote persistent - don't clear it
                 break;
-              
+
+              case 'quick_responses':
+                // Handle quick response options (stage 3 of response pipeline)
+                if (message.quick_replies) {
+                  setCurrentQuickResponses(message.quick_replies);
+                }
+                break;
+
               case 'error':
                 console.error('WebSocket error:', message.message);
                 setIsStreaming(false);
+                setCurrentQuickResponses([]);
+                // Don't clear emote on error - let it persist
                 break;
             }
           },
@@ -254,18 +343,26 @@ export const useStreamingChat = (sessionId?: string) => {
     };
   }, [sessionId]);
 
-  const sendMessage = useCallback((message: string) => {
+  const sendMessage = useCallback((message: string, options?: {
+    request_emote?: boolean;
+    request_quick_responses?: boolean;
+  }) => {
     if (wsRef.current && isConnected) {
       setMessages(prev => [...prev, message]);
-      wsRef.current.sendMessage(message);
+      wsRef.current.sendMessage(message, options);
     }
   }, [isConnected]);
+
+  // Debug logging removed for cleaner console
 
   return {
     messages,
     currentStreamingMessage,
     isConnected,
     isStreaming,
+    isLoadingHistory,
+    currentEmote,
+    currentQuickResponses,
     sendMessage
   };
 };

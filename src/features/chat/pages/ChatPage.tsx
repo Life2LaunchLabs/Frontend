@@ -20,15 +20,17 @@ function ChatPage() {
   // Chat state
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const [currentEmote, setCurrentEmote] = useState('😊 friendly');
   const [isInitializing, setIsInitializing] = useState(true);
   
-  // Streaming chat hook
+  // Streaming chat hook with enhanced features
   const {
     messages,
     currentStreamingMessage,
     isConnected,
     isStreaming,
+    isLoadingHistory,
+    currentEmote,
+    currentQuickResponses,
     sendMessage: sendStreamingMessage
   } = useStreamingChat(sessionId);
   
@@ -37,14 +39,37 @@ function ChatPage() {
     const initializeSession = async () => {
       try {
         setIsInitializing(true);
+
+        // Try to use existing session first
+        const existingSessionId = localStorage.getItem('currentChatSessionId');
+        if (existingSessionId) {
+          // Verify the session is still valid by trying to get its config
+          try {
+            const sessionData = await ChatService.getSession(existingSessionId);
+            console.log('Found existing session:', sessionData);
+
+            // Set session ID - the useStreamingChat hook will load history automatically
+            setSessionId(existingSessionId);
+            setIsInitializing(false);
+            return; // Use existing session
+          } catch (error) {
+            console.log('Existing session invalid, creating new one');
+            // Clear invalid session ID
+            localStorage.removeItem('currentChatSessionId');
+          }
+        }
+
+        // Create new session if no valid existing session
         const response = await ChatService.createSession({
           preset_key: 'claude_balanced',
           title: 'Chat Session'
         });
         setSessionId(response.session_id);
+        // Store session ID for settings page access
+        localStorage.setItem('currentChatSessionId', response.session_id);
       } catch (error) {
         console.error('Failed to initialize session:', error);
-        setCurrentEmote('😔 error');
+        // Error handling - emote will persist from streaming hook
       } finally {
         setIsInitializing(false);
       }
@@ -66,22 +91,21 @@ function ChatPage() {
     { id: '4', text: 'Schedule follow-up', status: 'not_started' },
   ];
   
-  const quickInputs = [
-    "Tell me more",
-    "I understand",
-    "What's next?",
-    "Can you help with that?"
-  ];
+  // No default quick inputs - they should only come from the API
 
   const handleSendMessage = async () => {
     if (message.trim() && sessionId && isConnected && !isStreaming) {
       try {
-        sendStreamingMessage(message.trim());
+        // Request both emote and quick responses for enhanced chat experience
+        sendStreamingMessage(message.trim(), {
+          request_emote: true,
+          request_quick_responses: true
+        });
         setMessage('');
-        setCurrentEmote('😊 friendly');
+        // Don't override streaming emote - let it persist
       } catch (error) {
         console.error('Failed to send message:', error);
-        setCurrentEmote('😔 error');
+        // Error handling - emote will persist from streaming hook
       }
     }
   };
@@ -89,11 +113,15 @@ function ChatPage() {
   const handleQuickInput = async (input: string) => {
     if (sessionId && isConnected && !isStreaming) {
       try {
-        sendStreamingMessage(input);
-        setCurrentEmote('😊 helpful');
+        // Also request emote and quick responses for quick inputs
+        sendStreamingMessage(input, {
+          request_emote: true,
+          request_quick_responses: true
+        });
+        // Don't override streaming emote - let it persist
       } catch (error) {
         console.error('Failed to send quick input:', error);
-        setCurrentEmote('😔 error');
+        // Error handling - emote will persist from streaming hook
       }
     }
   };
@@ -104,6 +132,10 @@ function ChatPage() {
 
   const handleBackClick = () => {
     navigate(-1);
+  };
+
+  const handleSettingsClick = () => {
+    navigate('/dev/chat_settings');
   };
 
   const styles = {
@@ -220,6 +252,7 @@ function ChatPage() {
             items={agendaItems}
             onResultsClick={handleResultsClick}
             onBackClick={handleBackClick}
+            onSettingsClick={handleSettingsClick}
           />
         </div>
 
@@ -227,8 +260,8 @@ function ChatPage() {
         <div style={styles.middleSection}>
           {/* Emote Bubble Area */}
           <div style={styles.emoteBubbleContainer}>
-            <EmoteBubble 
-              emote={currentEmote}
+            <EmoteBubble
+              emote={currentEmote || '😊 friendly'}
               position="top-right"
             />
           </div>
@@ -238,21 +271,23 @@ function ChatPage() {
             <MessageArea
               message={latestAssistantMessage}
               streamingMessage={currentStreamingMessage}
-              isLoading={isInitializing || !isConnected}
+              isLoading={isInitializing || isLoadingHistory || !isConnected}
               isStreaming={isStreaming}
               characterName="Assistant"
             />
           </div>
 
-          {/* Quick Input Chips */}
-          <div style={styles.quickInputSection}>
-            <QuickInputChips
-              inputs={quickInputs}
-              onInputClick={handleQuickInput}
-              disabled={!sessionId || !isConnected || isStreaming}
-              variant="filled"
-            />
-          </div>
+          {/* Quick Input Chips - Only show when available from API */}
+          {currentQuickResponses.length > 0 && (
+            <div style={styles.quickInputSection}>
+              <QuickInputChips
+                inputs={currentQuickResponses}
+                onInputClick={handleQuickInput}
+                disabled={!sessionId || !isConnected || isStreaming}
+                variant="filled"
+              />
+            </div>
+          )}
 
           {/* Text Input */}
           <div style={styles.inputSection}>
