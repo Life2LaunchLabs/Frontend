@@ -8,8 +8,8 @@ export interface AnalyticsWidgetProps {
 
 export const AnalyticsWidget: React.FC<AnalyticsWidgetProps> = ({ className }) => {
   const { theme, tokens } = useTheme();
-  const [analytics, setAnalytics] = useState<any>(null);
-  const [providerComparison, setProviderComparison] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<Record<string, unknown> | null>(null);
+  const [providerComparison, setProviderComparison] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,8 +147,8 @@ export const AnalyticsWidget: React.FC<AnalyticsWidgetProps> = ({ className }) =
       
       setAnalytics(analyticsData);
       setProviderComparison(comparisonData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load analytics');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load analytics');
     } finally {
       setIsLoading(false);
     }
@@ -222,11 +222,11 @@ export const AnalyticsWidget: React.FC<AnalyticsWidgetProps> = ({ className }) =
     );
   }
 
-  const totalSessions = analytics.session_stats?.total_sessions || 0;
-  const totalMessages = analytics.message_stats?.total_messages || 0;
-  const userMessages = analytics.message_stats?.user_messages || 0;
-  const assistantMessages = analytics.message_stats?.assistant_messages || 0;
-  const providerCount = Object.keys(providerComparison.provider_comparison || {}).length;
+  const totalSessions = (analytics.session_stats as Record<string, unknown>)?.total_sessions as number || 0;
+  const totalMessages = (analytics.message_stats as Record<string, unknown>)?.total_messages as number || 0;
+  const userMessages = (analytics.message_stats as Record<string, unknown>)?.user_messages as number || 0;
+  const assistantMessages = (analytics.message_stats as Record<string, unknown>)?.assistant_messages as number || 0;
+  const providerCount = Object.keys((providerComparison.provider_comparison as Record<string, unknown>) || {}).length;
 
   return (
     <div className={className} style={styles.container}>
@@ -263,13 +263,13 @@ export const AnalyticsWidget: React.FC<AnalyticsWidgetProps> = ({ className }) =
           <div style={styles.section}>
             <h4 style={styles.sectionTitle}>Provider Usage</h4>
             <div style={styles.providerList}>
-              {Object.entries(providerComparison.provider_comparison).map(([provider, stats]: [string, any]) => (
+              {Object.entries(providerComparison.provider_comparison).map(([provider, stats]: [string, Record<string, unknown>]) => (
                 <div key={provider} style={styles.providerItem}>
                   <span style={styles.providerName}>
                     {provider.charAt(0).toUpperCase() + provider.slice(1)}
                   </span>
                   <span style={styles.providerStats}>
-                    {stats.sessions} sessions • {stats.messages} msgs
+                    {stats.sessions as number} sessions • {stats.messages as number} msgs
                   </span>
                 </div>
               ))}
@@ -278,17 +278,17 @@ export const AnalyticsWidget: React.FC<AnalyticsWidgetProps> = ({ className }) =
         )}
 
         {/* Top Topics */}
-        {analytics.conversation_topics?.length > 0 && (
+        {Array.isArray(analytics.conversation_topics) && analytics.conversation_topics.length > 0 && (
           <div style={styles.section}>
             <h4 style={styles.sectionTitle}>Top Topics</h4>
             <div style={styles.providerList}>
-              {analytics.conversation_topics.slice(0, 3).map((topic: any) => (
-                <div key={topic.topic} style={styles.providerItem}>
+              {analytics.conversation_topics.slice(0, 3).map((topic: Record<string, unknown>) => (
+                <div key={String(topic.topic)} style={styles.providerItem}>
                   <span style={styles.providerName}>
-                    {topic.topic.charAt(0).toUpperCase() + topic.topic.slice(1)}
+                    {String(topic.topic).charAt(0).toUpperCase() + String(topic.topic).slice(1)}
                   </span>
                   <span style={styles.providerStats}>
-                    {topic.mentions} mentions • {topic.percentage}%
+                    {topic.mentions as number} mentions • {topic.percentage as number}%
                   </span>
                 </div>
               ))}

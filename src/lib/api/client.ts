@@ -111,14 +111,14 @@ export class ApiClient {
   /**
    * POST request
    */
-  async post<T>(endpoint: string, body?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, body?: unknown, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...config, method: 'POST', body });
   }
 
   /**
    * PUT request
    */
-  async put<T>(endpoint: string, body?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, body?: unknown, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...config, method: 'PUT', body });
   }
 
@@ -132,7 +132,7 @@ export class ApiClient {
   /**
    * PATCH request
    */
-  async patch<T>(endpoint: string, body?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, body?: unknown, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...config, method: 'PATCH', body });
   }
 }

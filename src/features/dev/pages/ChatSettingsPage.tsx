@@ -171,7 +171,8 @@ export const ChatSettingsPage: React.FC = () => {
                 uiStateRestored = true;
                 console.log('📋 UI state successfully restored from localStorage');
               }
-            } catch (error) {
+            } catch {
+              // Ignore localStorage parsing errors
             }
 
             // If no localStorage state, restore from server data
@@ -206,7 +207,7 @@ export const ChatSettingsPage: React.FC = () => {
             }
 
 
-          } catch (sessionError) {
+          } catch {
             setSelectedModelPreset(info.default_preset_key);
           }
         } else {
@@ -278,7 +279,7 @@ export const ChatSettingsPage: React.FC = () => {
         // Update the existing session via API using ChatService
         try {
           await ChatService.updateSession(currentSessionId, settings);
-        } catch (error) {
+        } catch {
           // Fallback to localStorage for settings
           localStorage.setItem('chatSettings', JSON.stringify(settings));
         }

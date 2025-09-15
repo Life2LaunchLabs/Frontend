@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode } from 'react';
 import { Toast } from './Toast';
 
 interface ToastData {
@@ -9,7 +9,7 @@ interface ToastData {
   duration?: number;
 }
 
-interface ToastContextType {
+export interface ToastContextType {
   showToast: (toast: Omit<ToastData, 'id'>) => void;
   showSuccess: (title: string, message?: string, duration?: number) => void;
   showError: (title: string, message?: string, duration?: number) => void;
@@ -19,15 +19,7 @@ interface ToastContextType {
   dismissAll: () => void;
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-export const useToast = (): ToastContextType => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-};
+export const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 interface ToastProviderProps {
   children: ReactNode;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTheme } from '../../../styles'
 
 interface ConnectionLog {
@@ -39,9 +39,9 @@ const ConnectionStatus = () => {
     setLogs(prev => [log, ...prev.slice(0, 9)]) // Keep last 10 logs
   }
 
-  const checkConnection = async () => {
+  const checkConnection = useCallback(async () => {
     const startTime = Date.now()
-    
+
     try {
       const response = await fetch(`${API_URL}/api/health/`, {
         method: 'GET',
@@ -49,9 +49,9 @@ const ConnectionStatus = () => {
           'Content-Type': 'application/json',
         },
       })
-      
+
       const responseTime = Date.now() - startTime
-      
+
       if (response.ok) {
         const data: HealthResponse = await response.json()
         setConnectionStatus('connected')
@@ -72,7 +72,7 @@ const ConnectionStatus = () => {
         message: `❌ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       })
     }
-  }
+  }, [API_URL])
 
   useEffect(() => {
     // Initial check
@@ -87,7 +87,7 @@ const ConnectionStatus = () => {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [isPolling])
+  }, [isPolling, checkConnection])
 
   const getStatusColor = () => {
     switch (connectionStatus) {

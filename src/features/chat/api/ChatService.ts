@@ -7,7 +7,10 @@ import type {
   GetHistoryResponse,
   ChatSession,
   SessionConfig,
-  PresetInfo
+  PresetInfo,
+  ChatMessage,
+  UsageStats,
+  ProcessingInfo
 } from './types';
 
 export interface StreamMessage {
@@ -15,11 +18,11 @@ export interface StreamMessage {
   chunk?: string;
   chunk_index?: number;
   message_id?: string;
-  assistant_message?: any;
-  user_message?: any;
+  assistant_message?: ChatMessage;
+  user_message?: ChatMessage;
   session_id?: string;
-  usage_stats?: any;
-  processing_info?: any;
+  usage_stats?: UsageStats;
+  processing_info?: ProcessingInfo;
   status?: string;
   message?: string;
   error_code?: string;
@@ -142,9 +145,9 @@ export class ChatService {
    */
   static async createSession(config: SessionConfig): Promise<{
     session_id: string;
-    session: any;
+    session: ChatSession;
   }> {
-    const response = await apiClient.post<{ session_id: string; session: any }>('/api/chat/sessions/create/', config);
+    const response = await apiClient.post<{ session_id: string; session: ChatSession }>('/api/chat/sessions/create/', config);
     return response.data;
   }
 
@@ -156,7 +159,7 @@ export class ChatService {
     limit?: number,
     offset: number = 0
   ): Promise<{
-    messages: any[];
+    messages: ChatMessage[];
     session_id: string;
     total_count: number;
     has_more: boolean;
@@ -170,7 +173,7 @@ export class ChatService {
     }
     
     const response = await apiClient.get<{
-      messages: any[];
+      messages: ChatMessage[];
       session_id: string;
       total_count: number;
       has_more: boolean;

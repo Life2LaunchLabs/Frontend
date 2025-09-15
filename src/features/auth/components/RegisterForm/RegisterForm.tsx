@@ -75,7 +75,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       await registerMutation.mutateAsync(credentials);
       // Redirect to home after successful registration
       navigate('/home');
-    } catch (error) {
+    } catch {
       // Error handled by the hook
     }
   };

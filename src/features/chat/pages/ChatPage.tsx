@@ -52,7 +52,7 @@ function ChatPage() {
             setSessionId(existingSessionId);
             setIsInitializing(false);
             return; // Use existing session
-          } catch (error) {
+          } catch {
             console.log('Existing session invalid, creating new one');
             // Clear invalid session ID
             localStorage.removeItem('currentChatSessionId');

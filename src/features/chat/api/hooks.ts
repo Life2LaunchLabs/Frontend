@@ -5,7 +5,10 @@ import { formatApiError } from '../../../lib/api/utils';
 import { useToast } from '../../../shared/components';
 import type {
   SendMessageRequest,
-  ChatSession
+  ChatSession,
+  GetHistoryResponse,
+  GetSessionsResponse,
+  ChatMessage
 } from './types';
 
 // Query keys for React Query caching
@@ -39,7 +42,7 @@ export const useSendMessage = () => {
       console.log('🎉 onSuccess called with:', data);
       // Update history cache with new messages
       const historyKey = chatQueryKeys.history(data.session_id);
-      queryClient.setQueryData(historyKey, (old: any) => {
+      queryClient.setQueryData(historyKey, (old: GetHistoryResponse | undefined) => {
         if (!old) return { messages: [data.message, data.response], session_id: data.session_id };
         return {
           ...old,
@@ -105,7 +108,7 @@ export const useCreateSession = () => {
       ChatService.createSession({ preset_key: config.preset_key || 'claude_balanced', title: config.title }),
     onSuccess: (newSession) => {
       // Add new session to sessions cache
-      queryClient.setQueryData(chatQueryKeys.sessions(), (old: any) => {
+      queryClient.setQueryData(chatQueryKeys.sessions(), (old: GetSessionsResponse | undefined) => {
         if (!old) return { sessions: [newSession], total_count: 1, has_more: false };
         return {
           ...old,
@@ -127,7 +130,7 @@ export const useDeleteSession = () => {
     mutationFn: (sessionId: string) => ChatService.deleteSession(sessionId),
     onSuccess: (_, sessionId) => {
       // Remove session from cache
-      queryClient.setQueryData(chatQueryKeys.sessions(), (old: any) => {
+      queryClient.setQueryData(chatQueryKeys.sessions(), (old: GetSessionsResponse | undefined) => {
         if (!old) return old;
         return {
           ...old,
@@ -154,7 +157,7 @@ export const useUpdateSessionTitle = () => {
       ChatService.updateSessionTitle(sessionId, title),
     onSuccess: (updatedSession) => {
       // Update session in sessions cache
-      queryClient.setQueryData(chatQueryKeys.sessions(), (old: any) => {
+      queryClient.setQueryData(chatQueryKeys.sessions(), (old: GetSessionsResponse | undefined) => {
         if (!old) return old;
         return {
           ...old,
@@ -215,13 +218,13 @@ export const useStreamingChat = (sessionId?: string) => {
 
         if (historyResponse.messages && historyResponse.messages.length > 0) {
           // Extract message contents in order
-          const messageContents = historyResponse.messages.map((msg: any) => msg.content);
+          const messageContents = historyResponse.messages.map((msg: ChatMessage) => msg.content);
           setMessages(messageContents);
 
           // Try to restore the last emote from the most recent assistant message
           const lastAssistantMessage = historyResponse.messages
             .reverse()
-            .find((msg: any) => msg.role === 'assistant');
+            .find((msg: ChatMessage) => msg.role === 'assistant');
 
           if (lastAssistantMessage?.emote_data) {
             const { emote, emote_glyph } = lastAssistantMessage.emote_data;

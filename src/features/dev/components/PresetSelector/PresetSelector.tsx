@@ -42,7 +42,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
     };
 
     loadPresetInfo();
-  }, []);
+  }, [onPresetSelected]);
 
   const handlePresetChange = (presetKey: string) => {
     setSelectedPresetKey(presetKey);
@@ -65,10 +65,10 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       const result = await DevChatService.validatePreset(selectedPresetKey);
       setValidationResult(result);
       onValidationResult?.(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorResult: ValidationResult = {
         valid: false,
-        errors: [error.message || 'Validation failed'],
+        errors: [error instanceof Error ? error.message : 'Validation failed'],
         warnings: []
       };
       setValidationResult(errorResult);

@@ -8,11 +8,11 @@ export interface StreamMessage {
   chunk?: string;
   chunk_index?: number;
   message_id?: string;
-  assistant_message?: any;
-  user_message?: any;
+  assistant_message?: Record<string, unknown>;
+  user_message?: Record<string, unknown>;
   session_id?: string;
-  usage_stats?: any;
-  processing_info?: any;
+  usage_stats?: Record<string, unknown>;
+  processing_info?: Record<string, unknown>;
   status?: string;
   message?: string;
   error_code?: string;

@@ -12,7 +12,7 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export const LiveChatInterface: React.FC<LiveChatInterfaceProps> = ({ 
@@ -59,8 +59,8 @@ export const LiveChatInterface: React.FC<LiveChatInterfaceProps> = ({
         content: `Started new chat session with ${selectedPresetKey} preset (WebSocket streaming enabled)`,
         timestamp: new Date().toISOString(),
       }]);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -126,8 +126,8 @@ export const LiveChatInterface: React.FC<LiveChatInterfaceProps> = ({
     try {
       await ws.connect();
       setWsService(ws);
-    } catch (error: any) {
-      setError(`Failed to connect WebSocket: ${error.message}`);
+    } catch (error: unknown) {
+      setError(`Failed to connect WebSocket: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   };
@@ -173,11 +173,12 @@ export const LiveChatInterface: React.FC<LiveChatInterfaceProps> = ({
         // Streaming finished, add final message to messages
         setIsStreaming(false);
         if (message.assistant_message) {
+          const assistantMsg = message.assistant_message as Record<string, unknown>;
           const assistantMessage: Message = {
-            id: message.assistant_message.id,
+            id: String(assistantMsg.id),
             role: 'assistant',
-            content: message.assistant_message.content,
-            timestamp: message.assistant_message.timestamp,
+            content: String(assistantMsg.content),
+            timestamp: String(assistantMsg.timestamp),
             metadata: message.usage_stats
           };
           setMessages(prev => [...prev, assistantMessage]);
@@ -445,7 +446,7 @@ export const LiveChatInterface: React.FC<LiveChatInterfaceProps> = ({
                 </div>
                 {message.metadata && (
                   <div style={styles.messageMetadata}>
-                    {message.metadata.provider} • {message.metadata.model} • 
+                    {String(message.metadata.provider)} • {String(message.metadata.model)} •
                     {message.metadata.input_tokens}→{message.metadata.output_tokens} tokens
                   </div>
                 )}

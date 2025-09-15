@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTheme } from '../../../styles';
 import { Icon } from '../Icon';
 
@@ -39,14 +39,14 @@ export const Toast: React.FC<ToastProps> = ({
       }, duration);
       return () => clearTimeout(timer);
     }
-  }, [duration]);
+  }, [duration, handleClose]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       onClose(id);
     }, 300); // Match exit animation duration
-  };
+  }, [id, onClose]);
 
   const getToastStyles = () => {
     const baseStyles = {

@@ -7,18 +7,18 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000, // 1 minute
       gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry on auth errors
-        if (error?.status === 401 || error?.status === 403) {
+        if ((error as any)?.status === 401 || (error as any)?.status === 403) {
           return false;
         }
         return failureCount < 3;
       },
     },
     mutations: {
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry mutations on client errors
-        if (error?.status >= 400 && error?.status < 500) {
+        if ((error as any)?.status >= 400 && (error as any)?.status < 500) {
           return false;
         }
         return failureCount < 2;

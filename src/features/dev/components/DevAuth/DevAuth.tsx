@@ -28,8 +28,11 @@ export const DevAuth: React.FC<DevAuthProps> = ({ onAuthSuccess }) => {
       const { tokens: authTokens } = response.data as { tokens: { access: string; refresh: string } };
       authManager.setTokens(authTokens.access, authTokens.refresh);
       onAuthSuccess();
-    } catch (error: any) {
-      setError(error.response?.data?.detail || 'Login failed');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : undefined;
+      setError(errorMessage || 'Login failed');
     } finally {
       setIsLoading(false);
     }

@@ -18,7 +18,7 @@ export class DevChatService {
   /**
    * Test basic chat endpoint connectivity (Phase 1 - no session required)
    */
-  static async testChatEndpoint(): Promise<any> {
+  static async testChatEndpoint(): Promise<Record<string, unknown>> {
     const response = await apiClient.post('/api/chat/send/', {
       message: 'Test message from dev interface'
     });
@@ -29,16 +29,16 @@ export class DevChatService {
    * Send a real message to LLM (Phase 2)
    */
   static async sendMessage(sessionId: string, message: string): Promise<{
-    user_message: any;
-    assistant_message: any;
+    user_message: Record<string, unknown>;
+    assistant_message: Record<string, unknown>;
     session_id: string;
-    usage_stats: any;
+    usage_stats: Record<string, unknown>;
   }> {
     const response = await apiClient.post<{
-      user_message: any;
-      assistant_message: any;
+      user_message: Record<string, unknown>;
+      assistant_message: Record<string, unknown>;
       session_id: string;
-      usage_stats: any;
+      usage_stats: Record<string, unknown>;
     }>('/api/chat/send/', {
       message,
       session_id: sessionId
@@ -85,11 +85,11 @@ export class DevChatService {
    */
   static async createSession(config: SessionConfig): Promise<{
     session_id: string;
-    session: any;
+    session: ChatSession;
   }> {
     const response = await apiClient.post<{
       session_id: string;
-      session: any;
+      session: ChatSession;
     }>('/api/chat/sessions/create/', config);
     return response.data;
   }
@@ -150,7 +150,7 @@ export class DevChatService {
     limit?: number,
     offset: number = 0
   ): Promise<{
-    messages: any[];
+    messages: Record<string, unknown>[];
     session_id: string;
     total_count: number;
     has_more: boolean;
@@ -162,9 +162,9 @@ export class DevChatService {
     if (limit) {
       params.append('limit', limit.toString());
     }
-    
+
     const response = await apiClient.get<{
-      messages: any[];
+      messages: Record<string, unknown>[];
       session_id: string;
       total_count: number;
       has_more: boolean;
@@ -183,23 +183,23 @@ export class DevChatService {
    */
   static async getAnalytics(days: number = 30): Promise<{
     period: { start: string; end: string; days: number };
-    session_stats: any;
-    message_stats: any;
-    provider_usage: any;
-    conversation_topics: any[];
-    time_patterns: any;
+    session_stats: Record<string, unknown>;
+    message_stats: Record<string, unknown>;
+    provider_usage: Record<string, unknown>;
+    conversation_topics: Record<string, unknown>[];
+    time_patterns: Record<string, unknown>;
     generated_at: string;
   }> {
     const params = new URLSearchParams();
     params.append('days', days.toString());
-    
+
     const response = await apiClient.get<{
       period: { start: string; end: string; days: number };
-      session_stats: any;
-      message_stats: any;
-      provider_usage: any;
-      conversation_topics: any[];
-      time_patterns: any;
+      session_stats: Record<string, unknown>;
+      message_stats: Record<string, unknown>;
+      provider_usage: Record<string, unknown>;
+      conversation_topics: Record<string, unknown>[];
+      time_patterns: Record<string, unknown>;
       generated_at: string;
     }>(`/api/chat/analytics/?${params.toString()}`);
     return response.data;
@@ -210,15 +210,15 @@ export class DevChatService {
    */
   static async getProviderComparison(days: number = 30): Promise<{
     period: { start: string; end: string };
-    provider_comparison: Record<string, any>;
+    provider_comparison: Record<string, Record<string, unknown>>;
     generated_at: string;
   }> {
     const params = new URLSearchParams();
     params.append('days', days.toString());
-    
+
     const response = await apiClient.get<{
       period: { start: string; end: string };
-      provider_comparison: Record<string, any>;
+      provider_comparison: Record<string, Record<string, unknown>>;
       generated_at: string;
     }>(`/api/chat/analytics/provider-comparison/?${params.toString()}`);
     return response.data;
@@ -228,17 +228,17 @@ export class DevChatService {
    * Get session insights for a specific session
    */
   static async getSessionInsights(sessionId: string): Promise<{
-    session_info: any;
-    message_analysis: any;
-    flow_analysis: any;
-    quality_metrics: any;
+    session_info: Record<string, unknown>;
+    message_analysis: Record<string, unknown>;
+    flow_analysis: Record<string, unknown>;
+    quality_metrics: Record<string, unknown>;
     generated_at: string;
   }> {
     const response = await apiClient.get<{
-      session_info: any;
-      message_analysis: any;
-      flow_analysis: any;
-      quality_metrics: any;
+      session_info: Record<string, unknown>;
+      message_analysis: Record<string, unknown>;
+      flow_analysis: Record<string, unknown>;
+      quality_metrics: Record<string, unknown>;
       generated_at: string;
     }>(`/api/chat/sessions/${sessionId}/insights/`);
     return response.data;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../../../../styles';
 import { DevChatService } from '../../api';
 
@@ -10,11 +10,15 @@ export const ProviderStatusMonitor: React.FC<ProviderStatusMonitorProps> = ({
   onRefresh 
 }) => {
   const { theme, tokens } = useTheme();
-  const [status, setStatus] = useState<any>(null);
+  const [status, setStatus] = useState<{
+    providers: Record<string, { available: boolean; api_key_configured: boolean }>;
+    available_count: number;
+    total_count: number;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProviderStatus = async () => {
+  const loadProviderStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -26,11 +30,11 @@ export const ProviderStatusMonitor: React.FC<ProviderStatusMonitorProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [onRefresh]);
 
   useEffect(() => {
     loadProviderStatus();
-  }, []);
+  }, [loadProviderStatus]);
 
   const getStyles = () => ({
     container: {

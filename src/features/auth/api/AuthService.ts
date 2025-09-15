@@ -23,7 +23,7 @@ export class AuthService {
    * Register new user account
    */
   static async register(credentials: RegisterCredentials): Promise<RegisterResponse> {
-    const { confirmPassword, ...registrationData } = credentials;
+    const { confirmPassword: _, ...registrationData } = credentials;
     const response = await apiClient.post<RegisterResponse>('/api/auth/register/', registrationData);
     return response.data;
   }

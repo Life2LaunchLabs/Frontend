@@ -1,3 +1,5 @@
 export { Toast } from './Toast';
-export { ToastProvider, useToast } from './ToastProvider';
+export { ToastProvider } from './ToastProvider';
+export { useToast } from './hooks';
 export type { ToastProps } from './Toast';
+export type { ToastContextType } from './ToastProvider';

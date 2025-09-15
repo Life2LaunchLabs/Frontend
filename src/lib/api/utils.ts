@@ -33,7 +33,7 @@ export function delay(ms: number): Promise<void> {
 /**
  * Build query string from object
  */
-export function buildQueryString(params: Record<string, any>): string {
+export function buildQueryString(params: Record<string, unknown>): string {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
@@ -53,14 +53,14 @@ export function buildQueryString(params: Record<string, any>): string {
 /**
  * Check if error is network error
  */
-export function isNetworkError(error: any): boolean {
+export function isNetworkError(error: unknown): boolean {
   return error instanceof TypeError && error.message === 'Failed to fetch';
 }
 
 /**
  * Format API error for user display
  */
-export function formatApiError(error: any, context?: string): { title: string; message: string; type: 'error' | 'warning' } {
+export function formatApiError(error: unknown, context?: string): { title: string; message: string; type: 'error' | 'warning' } {
   if (error instanceof ApiError) {
     // Handle authentication-specific errors
     if (context === 'auth') {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode } from 'react';
 import { lightTheme, darkTheme } from '../tokens/colors';
 import { spacing } from '../tokens/spacing';
 import { borderRadius } from '../tokens/borderRadius';
@@ -8,7 +8,7 @@ import { shadows } from '../tokens/shadows';
 export type Theme = typeof lightTheme | typeof darkTheme;
 export type ThemeMode = 'light' | 'dark';
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: Theme;
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
@@ -21,7 +21,7 @@ interface ThemeContextType {
   };
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -60,10 +60,3 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   );
 };
 
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};

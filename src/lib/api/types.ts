@@ -11,7 +11,7 @@ export interface ApiResponse<T> {
  */
 export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  body?: any;
+  body?: unknown;
   headers?: HeadersInit;
   timeout?: number;
   retries?: number;
@@ -25,7 +25,7 @@ export class ApiError extends Error {
     message: string,
     public status: number,
     public code?: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
@@ -66,7 +66,7 @@ export class ApiError extends Error {
 export interface ErrorResponse {
   message: string;
   code?: string;
-  details?: any;
+  details?: unknown;
   timestamp?: string;
 }
 

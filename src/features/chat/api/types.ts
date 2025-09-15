@@ -78,7 +78,27 @@ export type ChatLoadingState = 'idle' | 'sending' | 'loading' | 'error';
 export interface ChatError {
   message: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Usage statistics for messages
+ */
+export interface UsageStats {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  cost?: number;
+}
+
+/**
+ * Processing information for messages
+ */
+export interface ProcessingInfo {
+  provider?: string;
+  model?: string;
+  processing_time?: number;
+  status?: string;
 }
 
 /**

@@ -49,7 +49,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       await loginMutation.mutateAsync(credentials);
       // Redirect to home after successful login
       navigate('/home');
-    } catch (error) {
+    } catch {
       // Error handled by the hook
     }
   };
