@@ -9,6 +9,11 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   timestamp: string;
   session_id?: string;
+  emote_data?: {
+    emote: string;
+    emote_glyph: string;
+  };
+  assistant_message?: unknown;
 }
 
 /**

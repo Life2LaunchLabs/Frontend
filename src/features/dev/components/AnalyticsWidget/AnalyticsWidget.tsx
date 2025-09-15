@@ -263,7 +263,7 @@ export const AnalyticsWidget: React.FC<AnalyticsWidgetProps> = ({ className }) =
           <div style={styles.section}>
             <h4 style={styles.sectionTitle}>Provider Usage</h4>
             <div style={styles.providerList}>
-              {Object.entries(providerComparison.provider_comparison).map(([provider, stats]: [string, Record<string, unknown>]) => (
+              {Object.entries(providerComparison.provider_comparison as Record<string, Record<string, unknown>>).map(([provider, stats]: [string, Record<string, unknown>]) => (
                 <div key={provider} style={styles.providerItem}>
                   <span style={styles.providerName}>
                     {provider.charAt(0).toUpperCase() + provider.slice(1)}

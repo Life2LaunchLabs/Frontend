@@ -48,7 +48,7 @@ export const SessionHistoryViewer: React.FC<SessionHistoryViewerProps> = ({
     setSelectedSession(session);
     try {
       const result = await DevChatService.getMessageHistory(session.session_id);
-      setMessages(result.messages);
+      setMessages(result.messages as unknown as Message[]);
     } catch (err: any) {
       setError(err.message);
       setMessages([]);

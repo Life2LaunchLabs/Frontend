@@ -22,7 +22,7 @@ export class DevChatService {
     const response = await apiClient.post('/api/chat/send/', {
       message: 'Test message from dev interface'
     });
-    return response.data;
+    return response.data as Record<string, unknown>;
   }
 
   /**

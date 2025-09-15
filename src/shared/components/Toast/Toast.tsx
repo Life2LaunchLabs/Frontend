@@ -31,6 +31,13 @@ export const Toast: React.FC<ToastProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onClose(id);
+    }, 300); // Match exit animation duration
+  }, [id, onClose]);
+
   useEffect(() => {
     // Auto-dismiss after duration
     if (duration > 0) {
@@ -40,13 +47,6 @@ export const Toast: React.FC<ToastProps> = ({
       return () => clearTimeout(timer);
     }
   }, [duration, handleClose]);
-
-  const handleClose = useCallback(() => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose(id);
-    }, 300); // Match exit animation duration
-  }, [id, onClose]);
 
   const getToastStyles = () => {
     const baseStyles = {

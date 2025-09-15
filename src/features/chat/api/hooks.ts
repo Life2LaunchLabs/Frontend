@@ -296,7 +296,7 @@ export const useStreamingChat = (sessionId?: string) => {
               case 'stream_complete':
                 // Complete streaming response (end of stage 2)
                 if (message.assistant_message?.content) {
-                  setMessages(prev => [...prev, message.assistant_message.content]);
+                  setMessages(prev => [...prev, message.assistant_message!.content]);
                 }
                 setCurrentStreamingMessage('');
                 setIsStreaming(false);

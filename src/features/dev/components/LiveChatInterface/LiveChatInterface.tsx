@@ -447,7 +447,7 @@ export const LiveChatInterface: React.FC<LiveChatInterfaceProps> = ({
                 {message.metadata && (
                   <div style={styles.messageMetadata}>
                     {String(message.metadata.provider)} • {String(message.metadata.model)} •
-                    {message.metadata.input_tokens}→{message.metadata.output_tokens} tokens
+                    {String(message.metadata.input_tokens)}→{String(message.metadata.output_tokens)} tokens
                   </div>
                 )}
               </div>

@@ -172,7 +172,7 @@ export const useDevTests = () => {
     updateTestResult('Real LLM Message', 'pending');
     try {
       const result = await DevChatService.sendMessage(sessionId, message);
-      const assistantResponse = result.assistant_message.content.substring(0, 50) + '...';
+      const assistantResponse = String(result.assistant_message.content).substring(0, 50) + '...';
       updateTestResult('Real LLM Message', 'success', 
         `LLM Response: "${assistantResponse}"`, 
         result
@@ -193,7 +193,7 @@ export const useDevTests = () => {
       // Send second message to test memory
       const result = await DevChatService.sendMessage(sessionId, "What is my favorite color?");
       
-      const response = result.assistant_message.content.toLowerCase();
+      const response = String(result.assistant_message.content).toLowerCase();
       const remembersColor = response.includes('blue');
       
       updateTestResult('Conversation Context', remembersColor ? 'success' : 'error',
