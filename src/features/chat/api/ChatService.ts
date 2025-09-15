@@ -110,7 +110,16 @@ export class ChatWebSocketService {
 
   private getWebSocketUrl(): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = import.meta.env.DEV ? 'localhost:8001' : window.location.host;
+
+    // Use the same backend URL logic as the REST API
+    let host: string;
+    if (import.meta.env.DEV) {
+      host = 'localhost:8001';
+    } else {
+      // In production, use the configured API URL (without protocol)
+      host = import.meta.env.VITE_API_URL || 'localhost:8000';
+    }
+
     return `${protocol}//${host}/ws/chat/stream-chunked/${this.sessionId}/?token=${this.token}`;
   }
 

@@ -258,9 +258,15 @@ export class DevChatService {
     return new Promise((resolve) => {
       setTimeout(() => {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.host.includes('localhost') 
-          ? 'localhost:8001' 
-          : window.location.host;
+
+        // Use the same backend URL logic as the REST API
+        let host: string;
+        if (import.meta.env.DEV) {
+          host = 'localhost:8001';
+        } else {
+          // In production, use the configured API URL (without protocol)
+          host = import.meta.env.VITE_API_URL || 'localhost:8000';
+        }
         
         resolve({
           connection_test: true,
