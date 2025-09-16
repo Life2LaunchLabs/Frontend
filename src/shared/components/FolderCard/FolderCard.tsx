@@ -60,7 +60,8 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     },
     content: {
       flex: 1,
-      overflow: 'auto',
+      overflow: 'visible',
+      minHeight: 0,
     },
   });
 
