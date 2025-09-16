@@ -262,7 +262,7 @@ export class DevChatService {
         // Use the same backend URL logic as the REST API
         let host: string;
         if (import.meta.env.DEV) {
-          host = 'localhost:8001';
+          host = import.meta.env.VITE_API_URL || 'localhost:8000';
         } else {
           // In production, use the configured API URL (without protocol)
           host = import.meta.env.VITE_API_URL || 'localhost:8000';

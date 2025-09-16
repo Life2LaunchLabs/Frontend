@@ -51,35 +51,41 @@ export class ChatWebSocketService {
     return new Promise((resolve, reject) => {
       try {
         const wsUrl = this.getWebSocketUrl();
+        console.log('🚀 Attempting WebSocket connection...');
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
+          console.log('✅ WebSocket connection opened successfully');
           this.reconnectAttempts = 0;
           resolve();
         };
 
         this.ws.onmessage = (event) => {
+          console.log('📨 WebSocket message received:', event.data);
           try {
             const data = JSON.parse(event.data);
             this.onMessage(data);
           } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
+            console.error('❌ Failed to parse WebSocket message:', error);
           }
         };
 
         this.ws.onerror = (error) => {
-          console.error('WebSocket error:', error);
+          console.error('❌ WebSocket error:', error);
+          console.error('❌ WebSocket state:', this.ws?.readyState);
           this.onError?.(error);
           reject(error);
         };
 
         this.ws.onclose = (event) => {
-          console.log('WebSocket closed:', event.code, event.reason);
+          console.log('🔌 WebSocket closed:', event.code, event.reason);
+          console.log('🔌 Close event detail:', event);
           this.handleDisconnection();
           this.onClose?.();
         };
 
       } catch (error) {
+        console.error('❌ WebSocket connection failed:', error);
         reject(error);
       }
     });
@@ -114,13 +120,20 @@ export class ChatWebSocketService {
     // Use the same backend URL logic as the REST API
     let host: string;
     if (import.meta.env.DEV) {
-      host = 'localhost:8001';
+      host = import.meta.env.VITE_API_URL || 'localhost:8000';
     } else {
       // In production, use the configured API URL (without protocol)
       host = import.meta.env.VITE_API_URL || 'localhost:8000';
     }
 
-    return `${protocol}//${host}/ws/chat/stream-chunked/${this.sessionId}/?token=${this.token}`;
+    const wsUrl = `${protocol}//${host}/ws/chat/stream-chunked/${this.sessionId}/?token=${this.token}`;
+    console.log('🔗 WebSocket URL constructed:', wsUrl);
+    console.log('🔗 Environment:', import.meta.env.DEV ? 'DEV' : 'PROD');
+    console.log('🔗 Host:', host);
+    console.log('🔗 Session ID:', this.sessionId);
+    console.log('🔗 Token (first 20 chars):', this.token.substring(0, 20) + '...');
+
+    return wsUrl;
   }
 
   private handleDisconnection(): void {

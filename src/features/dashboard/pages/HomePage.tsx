@@ -4,10 +4,10 @@ import trainCarImage from '../../../shared/assets/images/train_car.png'
 import character1Image from '../assets/images/character_1.png'
 import character1IdleImage from '../assets/images/character_1_idle.png'
 import { useTheme } from '../../../styles'
-import { BottomNavigation } from '../../../shared/components'
+import { DailyUpdate } from '../../../shared/components'
 
 function HomePage() {
-  const { theme, tokens } = useTheme()
+  const { tokens } = useTheme()
   const navigate = useNavigate()
   const [isGlowing, setIsGlowing] = useState(false)
 
@@ -39,20 +39,15 @@ function HomePage() {
       margin: 0,
       pointerEvents: 'none' as const,
     },
-    titleSection: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: tokens.spacing[8],
-      paddingTop: tokens.spacing[12],
+    dailyUpdateSection: {
+      position: 'fixed' as const,
+      bottom: tokens.spacing[8],
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 20,
       pointerEvents: 'auto' as const,
-    },
-    title: {
-      ...tokens.typography.headline.large,
-      color: theme.onSurface,
-      textAlign: 'center' as const,
-      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
-      margin: 0,
+      width: '90%',
+      maxWidth: '600px',
     },
     contentArea: {
       flex: 1,
@@ -60,14 +55,6 @@ function HomePage() {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    navSection: {
-      position: 'fixed' as const,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      zIndex: 20,
-      pointerEvents: 'auto' as const,
-    }
   }
 
   return (
@@ -160,18 +147,14 @@ function HomePage() {
           />
         </g>
       </svg>
-      
+
       <div style={styles.contentOverlay}>
-        <div style={styles.titleSection}>
-          <h1 style={styles.title}>Welcome Back</h1>
-        </div>
-        
         <div style={styles.contentArea}>
           {/* Empty content area that fills the center */}
         </div>
-        
-        <div style={styles.navSection}>
-          <BottomNavigation />
+
+        <div style={styles.dailyUpdateSection}>
+          <DailyUpdate />
         </div>
       </div>
     </div>

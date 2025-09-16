@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { HomePage } from '../features/dashboard';
+import { HomePage, DashboardPage } from '../features/dashboard';
+import { ProfilePage } from '../features/profile';
+import { MapPage, ExplorePage } from '../features/quests';
 import { ChatPage } from '../features/chat';
 import { DevPage, ChatSettingsPage } from '../features/dev';
 import { AuthPage, AuthGuard, useAuth } from '../features/auth';
@@ -47,15 +49,49 @@ function App() {
             </AuthGuard>
           } 
         />
-        <Route 
-          path="/chat" 
+        <Route
+          path="/chat"
           element={
             <AuthGuard fallback={<Navigate to="/login" replace />}>
               <ChatPage />
             </AuthGuard>
-          } 
+          }
         />
-        
+
+        {/* Folder page routes - also protected */}
+        <Route
+          path="/dashboard"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <DashboardPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ProfilePage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/map"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <MapPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/explore"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ExplorePage />
+            </AuthGuard>
+          }
+        />
+
         {/* Dev route - also protected */}
         <Route
           path="/dev"

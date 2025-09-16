@@ -1,0 +1,861 @@
+import React, { useState, useEffect } from 'react';
+import { designTokens } from '../design/tokens';
+import { getApiUrl } from '../config/api';
+import defaultProfilePhoto from '../assets/profile_photo.png';
+
+function UserProfile() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+  const [expandedExperience, setExpandedExperience] = useState(null);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Mock portfolio data
+  const portfolioProjects = [
+    {
+      id: 1,
+      title: "AI-Powered Chat Platform",
+      description: "Full-stack web application with React frontend and Django backend, featuring multiple AI personalities and conversation management.",
+      image: "https://picsum.photos/seed/ai-chat/400/300",
+      technologies: ["React", "Django", "PostgreSQL", "OpenAI API"],
+      link: "#"
+    },
+    {
+      id: 2,
+      title: "Interactive Skill Tree System",
+      description: "SVG-based constellation interface for course progress tracking with real-time updates and dynamic connections.",
+      image: "https://picsum.photos/seed/skill-tree/400/300",
+      technologies: ["React", "SVG", "CSS Animations", "JWT"],
+      link: "#"
+    },
+    {
+      id: 3,
+      title: "Virtual Portfolio Platform",
+      description: "Modern resume builder with carousel galleries, verified experience badges, and responsive design.",
+      image: "https://picsum.photos/seed/portfolio/400/300",
+      technologies: ["React", "Tailwind CSS", "REST API", "Authentication"],
+      link: "#"
+    },
+    {
+      id: 4,
+      title: "Educational Quest Manager",
+      description: "Gamified learning platform with milestone tracking, calendar integration, and progress visualization.",
+      image: "https://picsum.photos/seed/quest-manager/400/300",
+      technologies: ["React Router", "Calendar API", "Dynamic Routing", "JSON Data"],
+      link: "#"
+    }
+  ];
+
+  const experiences = [
+    {
+      id: 1,
+      type: "work",
+      title: "Frontend Developer",
+      company: "TechStart Inc.",
+      location: "San Francisco, CA",
+      duration: "Jun 2024 - Present",
+      description: "Developing responsive web applications using React and modern CSS frameworks. Led the redesign of the user dashboard, improving user engagement by 35%.",
+      verified: true,
+      responsibilities: [
+        "Built reusable React components for the design system",
+        "Implemented responsive layouts with Tailwind CSS",
+        "Collaborated with designers on UI/UX improvements",
+        "Optimized application performance and accessibility"
+      ]
+    },
+    {
+      id: 2,
+      type: "volunteer",
+      title: "Coding Mentor",
+      company: "Code for Good",
+      location: "Remote",
+      duration: "Jan 2024 - Present",
+      description: "Mentoring high school students in web development fundamentals, helping them build their first projects and prepare for coding bootcamps.",
+      verified: true,
+      responsibilities: [
+        "Taught HTML, CSS, and JavaScript fundamentals",
+        "Guided students through project-based learning",
+        "Organized weekly coding workshops",
+        "Provided career guidance and portfolio reviews"
+      ]
+    },
+    {
+      id: 3,
+      type: "work",
+      title: "Junior Web Developer",
+      company: "Creative Solutions LLC",
+      location: "Austin, TX",
+      duration: "Aug 2023 - May 2024",
+      description: "Worked on client websites and internal tools, gaining experience with full-stack development and project management.",
+      verified: false,
+      responsibilities: [
+        "Maintained WordPress sites for 20+ clients",
+        "Developed custom plugins and themes",
+        "Performed SEO optimization and analytics setup",
+        "Collaborated with design team on client projects"
+      ]
+    },
+    {
+      id: 4,
+      type: "volunteer",
+      title: "Web Developer",
+      company: "Local Animal Shelter",
+      location: "Austin, TX",
+      duration: "Mar 2023 - Jul 2023",
+      description: "Redesigned the shelter's website to improve pet adoption rates and volunteer recruitment.",
+      verified: true,
+      responsibilities: [
+        "Built responsive adoption gallery with search filters",
+        "Integrated with pet management database",
+        "Improved site speed by 60% through optimization",
+        "Trained staff on content management system"
+      ]
+    }
+  ];
+
+  const skillBadges = [
+    { name: "React Expert", color: "#61DAFB", earned: "2024" },
+    { name: "JavaScript Master", color: "#F7DF1E", earned: "2024" },
+    { name: "CSS Wizard", color: "#1572B6", earned: "2023" },
+    { name: "Git Guru", color: "#F05032", earned: "2023" },
+    { name: "API Integration", color: "#FF6B6B", earned: "2024" },
+    { name: "UI/UX Design", color: "#4ECDC4", earned: "2024" },
+    { name: "Database Design", color: "#336791", earned: "2023" },
+    { name: "Agile Methodology", color: "#96CEB4", earned: "2024" }
+  ];
+
+  const education = [
+    {
+      degree: "Bachelor of Science in Computer Science",
+      school: "University of Texas at Austin",
+      duration: "2020 - 2024",
+      gpa: "3.8/4.0",
+      relevant: ["Data Structures", "Web Development", "Software Engineering", "Database Systems"]
+    }
+  ];
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          throw new Error('No access token found');
+        }
+
+        const response = await fetch(getApiUrl('/api/auth/profile/'), {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+
+        const responseData = await response.json();
+        setUser(responseData.user);
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching user profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  // Preload all portfolio images when component mounts
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagePromises = portfolioProjects.map((project) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = project.image;
+        });
+      });
+
+      try {
+        await Promise.all(imagePromises);
+        setImagesLoaded(true);
+      } catch (error) {
+        console.warn('Some portfolio images failed to preload:', error);
+        setImagesLoaded(true); // Still show the component even if some images fail
+      }
+    };
+
+    preloadImages();
+  }, []);
+
+  const nextProject = () => {
+    setCurrentProjectIndex((prev) => (prev + 1) % portfolioProjects.length);
+  };
+
+  const prevProject = () => {
+    setCurrentProjectIndex((prev) => (prev - 1 + portfolioProjects.length) % portfolioProjects.length);
+  };
+
+  const toggleExperience = (id) => {
+    setExpandedExperience(expandedExperience === id ? null : id);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" 
+               style={{ borderColor: designTokens.colors.primary.main }}></div>
+          <p style={{ color: designTokens.colors.onSurface.secondary }}>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p style={{ color: designTokens.colors.onSurface.secondary }}>
+            Error loading profile: {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p style={{ color: designTokens.colors.onSurface.secondary }}>
+            No profile data available
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const fullName = user.full_name || user.username;
+  const currentProject = portfolioProjects[currentProjectIndex];
+
+  return (
+    <div className="max-h-full overflow-y-auto p-6 space-y-8">
+      {/* Header Section */}
+      <div 
+        className="rounded-2xl p-8 shadow-lg border"
+        style={{ 
+          backgroundColor: designTokens.colors.surface.container,
+          borderColor: designTokens.colors.border.secondary,
+          boxShadow: designTokens.shadows.lg,
+        }}
+      >
+        <div className="flex items-start gap-6">
+          {/* Profile Photo */}
+          <div className="flex-shrink-0">
+            <div 
+              className="w-32 h-32 rounded-2xl overflow-hidden border-4 shadow-lg transition-transform hover:scale-105"
+              style={{ 
+                borderColor: designTokens.colors.primary.main,
+                boxShadow: designTokens.shadows.lg,
+              }}
+            >
+              <img
+                src={user.profile_photo_url || defaultProfilePhoto}
+                alt={`${fullName}'s profile`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = defaultProfilePhoto;
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Name and Contact */}
+          <div className="flex-1">
+            <h1 
+              className="text-4xl font-bold mb-2"
+              style={{ 
+                color: designTokens.colors.onSurface.primary,
+                fontSize: designTokens.typography.fontSize['4xl'],
+                fontWeight: designTokens.typography.fontWeight.bold,
+              }}
+            >
+              {fullName}
+            </h1>
+            <p 
+              className="text-xl mb-4"
+              style={{ 
+                color: designTokens.colors.primary.main,
+                fontSize: designTokens.typography.fontSize.xl,
+                fontWeight: designTokens.typography.fontWeight.medium,
+              }}
+            >
+              Full-Stack Developer & Creative Problem Solver
+            </p>
+            
+            {user.bio && (
+              <p 
+                className="leading-relaxed mb-6"
+                style={{ 
+                  color: designTokens.colors.onSurface.secondary,
+                  fontSize: designTokens.typography.fontSize.lg,
+                  lineHeight: '1.6',
+                }}
+              >
+                {user.bio}
+              </p>
+            )}
+
+            {/* Contact Info */}
+            <div className="flex flex-wrap gap-6">
+              {user.email && (
+                <div className="flex items-center gap-2">
+                  <span style={{ color: designTokens.colors.primary.main }}>✉</span>
+                  <span style={{ color: designTokens.colors.onSurface.secondary }}>
+                    {user.email}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span style={{ color: designTokens.colors.primary.main }}>📍</span>
+                <span style={{ color: designTokens.colors.onSurface.secondary }}>
+                  Austin, TX
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span style={{ color: designTokens.colors.primary.main }}>🔗</span>
+                <a 
+                  href="#" 
+                  className="hover:underline"
+                  style={{ color: designTokens.colors.primary.main }}
+                >
+                  linkedin.com/in/{user.username}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Portfolio Section */}
+      <div 
+        className="rounded-2xl p-8 shadow-lg border"
+        style={{ 
+          backgroundColor: designTokens.colors.surface.container,
+          borderColor: designTokens.colors.border.secondary,
+          boxShadow: designTokens.shadows.lg,
+        }}
+      >
+        <h2 
+          className="text-2xl font-bold mb-6"
+          style={{ 
+            color: designTokens.colors.onSurface.primary,
+            fontSize: designTokens.typography.fontSize['2xl'],
+            fontWeight: designTokens.typography.fontWeight.bold,
+          }}
+        >
+          Featured Projects
+        </h2>
+        
+        <div className="relative">
+          {/* Project Card */}
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="relative overflow-hidden rounded-xl shadow-lg group">
+              {!imagesLoaded && (
+                <div 
+                  className="w-full h-64 flex items-center justify-center"
+                  style={{ backgroundColor: designTokens.colors.surface.variant }}
+                >
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2" 
+                       style={{ borderColor: designTokens.colors.primary.main }}></div>
+                </div>
+              )}
+              <img
+                src={currentProject.image}
+                alt={currentProject.title}
+                className={`w-full h-64 object-cover transition-transform group-hover:scale-110 ${
+                  imagesLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            
+            <div>
+              <h3 
+                className="text-xl font-semibold mb-3"
+                style={{ 
+                  color: designTokens.colors.onSurface.primary,
+                  fontSize: designTokens.typography.fontSize.xl,
+                  fontWeight: designTokens.typography.fontWeight.semibold,
+                }}
+              >
+                {currentProject.title}
+              </h3>
+              <p 
+                className="mb-4 leading-relaxed"
+                style={{ 
+                  color: designTokens.colors.onSurface.secondary,
+                  fontSize: designTokens.typography.fontSize.base,
+                  lineHeight: '1.6',
+                }}
+              >
+                {currentProject.description}
+              </p>
+              
+              {/* Technologies */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {currentProject.technologies.map((tech, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 rounded-full text-sm font-medium"
+                    style={{
+                      backgroundColor: `${designTokens.colors.primary.main}20`,
+                      color: designTokens.colors.primary.main,
+                      fontSize: designTokens.typography.fontSize.sm,
+                    }}
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+              
+              <button
+                className="px-6 py-2 rounded-lg font-medium transition-all hover:shadow-lg"
+                style={{
+                  backgroundColor: designTokens.colors.primary.main,
+                  color: 'white',
+                  fontSize: designTokens.typography.fontSize.sm,
+                }}
+              >
+                View Project
+              </button>
+            </div>
+          </div>
+          
+          {/* Carousel Controls */}
+          <div className="flex justify-between mt-6">
+            <button
+              onClick={prevProject}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:shadow-md"
+              style={{
+                backgroundColor: designTokens.colors.surface.variant,
+                color: designTokens.colors.onSurface.primary,
+                border: `1px solid ${designTokens.colors.border.secondary}`,
+              }}
+            >
+              ← Previous
+            </button>
+            
+            {/* Dots Indicator */}
+            <div className="flex gap-2 items-center">
+              {portfolioProjects.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentProjectIndex(index)}
+                  className="w-3 h-3 rounded-full transition-all"
+                  style={{
+                    backgroundColor: index === currentProjectIndex 
+                      ? designTokens.colors.primary.main 
+                      : designTokens.colors.border.secondary,
+                  }}
+                />
+              ))}
+            </div>
+            
+            <button
+              onClick={nextProject}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:shadow-md"
+              style={{
+                backgroundColor: designTokens.colors.surface.variant,
+                color: designTokens.colors.onSurface.primary,
+                border: `1px solid ${designTokens.colors.border.secondary}`,
+              }}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Experience Section */}
+      <div 
+        className="rounded-2xl p-8 shadow-lg border"
+        style={{ 
+          backgroundColor: designTokens.colors.surface.container,
+          borderColor: designTokens.colors.border.secondary,
+          boxShadow: designTokens.shadows.lg,
+        }}
+      >
+        <h2 
+          className="text-2xl font-bold mb-6"
+          style={{ 
+            color: designTokens.colors.onSurface.primary,
+            fontSize: designTokens.typography.fontSize['2xl'],
+            fontWeight: designTokens.typography.fontWeight.bold,
+          }}
+        >
+          Experience
+        </h2>
+        
+        <div className="space-y-4">
+          {experiences.map((exp) => (
+            <div
+              key={exp.id}
+              className="p-6 rounded-xl border transition-all hover:shadow-md cursor-pointer"
+              style={{
+                backgroundColor: designTokens.colors.surface.variant,
+                borderColor: designTokens.colors.border.secondary,
+              }}
+              onClick={() => toggleExperience(exp.id)}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 
+                      className="text-lg font-semibold"
+                      style={{ 
+                        color: designTokens.colors.onSurface.primary,
+                        fontSize: designTokens.typography.fontSize.lg,
+                        fontWeight: designTokens.typography.fontWeight.semibold,
+                      }}
+                    >
+                      {exp.title}
+                    </h3>
+                    {exp.verified && (
+                      <div
+                        className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: '#10B981',
+                          color: 'white',
+                        }}
+                      >
+                        ✓ Verified
+                      </div>
+                    )}
+                    <div
+                      className="px-2 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: exp.type === 'work' ? '#3B82F6' : '#8B5CF6',
+                        color: 'white',
+                      }}
+                    >
+                      {exp.type === 'work' ? 'Work' : 'Volunteer'}
+                    </div>
+                  </div>
+                  <p 
+                    className="font-medium mb-1"
+                    style={{ 
+                      color: designTokens.colors.primary.main,
+                      fontSize: designTokens.typography.fontSize.base,
+                    }}
+                  >
+                    {exp.company} • {exp.location}
+                  </p>
+                  <p 
+                    className="text-sm mb-3"
+                    style={{ 
+                      color: designTokens.colors.onSurface.secondary,
+                      fontSize: designTokens.typography.fontSize.sm,
+                    }}
+                  >
+                    {exp.duration}
+                  </p>
+                  <p 
+                    className="leading-relaxed"
+                    style={{ 
+                      color: designTokens.colors.onSurface.secondary,
+                      fontSize: designTokens.typography.fontSize.sm,
+                      lineHeight: '1.5',
+                    }}
+                  >
+                    {exp.description}
+                  </p>
+                </div>
+                <div className="ml-4">
+                  <span
+                    className="text-lg"
+                    style={{ color: designTokens.colors.onSurface.secondary }}
+                  >
+                    {expandedExperience === exp.id ? '−' : '+'}
+                  </span>
+                </div>
+              </div>
+              
+              {expandedExperience === exp.id && (
+                <div className="mt-4 pt-4 border-t" style={{ borderColor: designTokens.colors.border.secondary }}>
+                  <h4 
+                    className="font-medium mb-3"
+                    style={{ 
+                      color: designTokens.colors.onSurface.primary,
+                      fontSize: designTokens.typography.fontSize.sm,
+                    }}
+                  >
+                    Key Responsibilities:
+                  </h4>
+                  <ul className="space-y-2">
+                    {exp.responsibilities.map((resp, index) => (
+                      <li 
+                        key={index}
+                        className="flex items-start gap-2"
+                        style={{ 
+                          color: designTokens.colors.onSurface.secondary,
+                          fontSize: designTokens.typography.fontSize.sm,
+                        }}
+                      >
+                        <span style={{ color: designTokens.colors.primary.main }}>•</span>
+                        {resp}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Featured Badges Section */}
+      <div 
+        className="rounded-2xl p-8 shadow-lg border"
+        style={{ 
+          backgroundColor: designTokens.colors.surface.container,
+          borderColor: designTokens.colors.border.secondary,
+          boxShadow: designTokens.shadows.lg,
+        }}
+      >
+        <h2 
+          className="text-2xl font-bold mb-6"
+          style={{ 
+            color: designTokens.colors.onSurface.primary,
+            fontSize: designTokens.typography.fontSize['2xl'],
+            fontWeight: designTokens.typography.fontWeight.bold,
+          }}
+        >
+          Featured Badges
+        </h2>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {skillBadges.map((badge, index) => (
+            <div
+              key={index}
+              className="p-4 rounded-xl text-center transition-all hover:scale-105 hover:shadow-lg cursor-pointer"
+              style={{
+                backgroundColor: `${badge.color}15`,
+                border: `2px solid ${badge.color}30`,
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-bold"
+                style={{ backgroundColor: badge.color }}
+              >
+                ⭐
+              </div>
+              <h3 
+                className="font-medium text-sm mb-1"
+                style={{ 
+                  color: designTokens.colors.onSurface.primary,
+                  fontSize: designTokens.typography.fontSize.sm,
+                }}
+              >
+                {badge.name}
+              </h3>
+              <p 
+                className="text-xs"
+                style={{ 
+                  color: designTokens.colors.onSurface.secondary,
+                  fontSize: designTokens.typography.fontSize.xs,
+                }}
+              >
+                Earned {badge.earned}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Education Section */}
+      <div 
+        className="rounded-2xl p-8 shadow-lg border"
+        style={{ 
+          backgroundColor: designTokens.colors.surface.container,
+          borderColor: designTokens.colors.border.secondary,
+          boxShadow: designTokens.shadows.lg,
+        }}
+      >
+        <h2 
+          className="text-2xl font-bold mb-6"
+          style={{ 
+            color: designTokens.colors.onSurface.primary,
+            fontSize: designTokens.typography.fontSize['2xl'],
+            fontWeight: designTokens.typography.fontWeight.bold,
+          }}
+        >
+          Education
+        </h2>
+        
+        {education.map((edu, index) => (
+          <div
+            key={index}
+            className="p-6 rounded-xl border"
+            style={{
+              backgroundColor: designTokens.colors.surface.variant,
+              borderColor: designTokens.colors.border.secondary,
+            }}
+          >
+            <h3 
+              className="text-lg font-semibold mb-2"
+              style={{ 
+                color: designTokens.colors.onSurface.primary,
+                fontSize: designTokens.typography.fontSize.lg,
+                fontWeight: designTokens.typography.fontWeight.semibold,
+              }}
+            >
+              {edu.degree}
+            </h3>
+            <p 
+              className="font-medium mb-1"
+              style={{ 
+                color: designTokens.colors.primary.main,
+                fontSize: designTokens.typography.fontSize.base,
+              }}
+            >
+              {edu.school}
+            </p>
+            <p 
+              className="text-sm mb-4"
+              style={{ 
+                color: designTokens.colors.onSurface.secondary,
+                fontSize: designTokens.typography.fontSize.sm,
+              }}
+            >
+              {edu.duration} • GPA: {edu.gpa}
+            </p>
+            
+            <div>
+              <h4 
+                className="font-medium mb-2"
+                style={{ 
+                  color: designTokens.colors.onSurface.primary,
+                  fontSize: designTokens.typography.fontSize.sm,
+                }}
+              >
+                Relevant Coursework:
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {edu.relevant.map((course, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 rounded-full text-sm"
+                    style={{
+                      backgroundColor: `${designTokens.colors.primary.main}15`,
+                      color: designTokens.colors.onSurface.secondary,
+                      fontSize: designTokens.typography.fontSize.xs,
+                    }}
+                  >
+                    {course}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Skills & Technologies Section */}
+      <div 
+        className="rounded-2xl p-8 shadow-lg border"
+        style={{ 
+          backgroundColor: designTokens.colors.surface.container,
+          borderColor: designTokens.colors.border.secondary,
+          boxShadow: designTokens.shadows.lg,
+        }}
+      >
+        <h2 
+          className="text-2xl font-bold mb-6"
+          style={{ 
+            color: designTokens.colors.onSurface.primary,
+            fontSize: designTokens.typography.fontSize['2xl'],
+            fontWeight: designTokens.typography.fontWeight.bold,
+          }}
+        >
+          Skills & Technologies
+        </h2>
+        
+        <div className="grid md:grid-cols-3 gap-6">
+          <div>
+            <h3 
+              className="font-semibold mb-3"
+              style={{ 
+                color: designTokens.colors.onSurface.primary,
+                fontSize: designTokens.typography.fontSize.base,
+              }}
+            >
+              Frontend
+            </h3>
+            <div className="space-y-2">
+              {['React', 'JavaScript (ES6+)', 'TypeScript', 'CSS3/Sass', 'Tailwind CSS', 'HTML5'].map((skill, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: designTokens.colors.primary.main }} />
+                  <span style={{ color: designTokens.colors.onSurface.secondary, fontSize: designTokens.typography.fontSize.sm }}>
+                    {skill}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h3 
+              className="font-semibold mb-3"
+              style={{ 
+                color: designTokens.colors.onSurface.primary,
+                fontSize: designTokens.typography.fontSize.base,
+              }}
+            >
+              Backend
+            </h3>
+            <div className="space-y-2">
+              {['Python', 'Django', 'Node.js', 'PostgreSQL', 'REST APIs', 'JWT Auth'].map((skill, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: designTokens.colors.secondary.main }} />
+                  <span style={{ color: designTokens.colors.onSurface.secondary, fontSize: designTokens.typography.fontSize.sm }}>
+                    {skill}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h3 
+              className="font-semibold mb-3"
+              style={{ 
+                color: designTokens.colors.onSurface.primary,
+                fontSize: designTokens.typography.fontSize.base,
+              }}
+            >
+              Tools & Others
+            </h3>
+            <div className="space-y-2">
+              {['Git/GitHub', 'Docker', 'AWS', 'Figma', 'Agile/Scrum', 'CI/CD'].map((skill, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#6B7280' }} />
+                  <span style={{ color: designTokens.colors.onSurface.secondary, fontSize: designTokens.typography.fontSize.sm }}>
+                    {skill}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default UserProfile;
