@@ -156,7 +156,7 @@ function AccountPage() {
       await updateProfileMutation.mutateAsync(updateData);
       setOriginalData(formData);
       setIsEditMode(false);
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation hook
     }
   };
@@ -165,7 +165,7 @@ function AccountPage() {
     try {
       await logoutMutation.mutateAsync();
       navigate('/login');
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation hook
     }
   };

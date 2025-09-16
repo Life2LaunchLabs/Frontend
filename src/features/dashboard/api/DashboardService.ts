@@ -1,7 +1,6 @@
 import { apiClient } from '../../../lib/api';
 import type {
   DashboardData,
-  UpcomingMilestonesResponse,
   Milestone,
   Quest,
   UserProfile

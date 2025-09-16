@@ -54,7 +54,6 @@ export const useAuth = () => {
  */
 export const useLogin = () => {
   const { login } = useAuth();
-  const queryClient = useQueryClient();
   const toast = useToast();
 
   return useMutation({
@@ -82,7 +81,6 @@ export const useLogin = () => {
  */
 export const useRegister = () => {
   const { login } = useAuth();
-  const queryClient = useQueryClient();
   const toast = useToast();
 
   return useMutation({
