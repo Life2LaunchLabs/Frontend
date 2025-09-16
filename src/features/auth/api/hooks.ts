@@ -6,7 +6,8 @@ import { formatApiError } from '../../../lib/api/utils';
 import { useToast } from '../../../shared/components';
 import type {
   LoginCredentials,
-  RegisterCredentials
+  RegisterCredentials,
+  User
 } from '../types';
 
 // Query keys for React Query caching
@@ -63,10 +64,10 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       login(data.tokens.access, data.tokens.refresh);
-      
-      // Cache user data
-      queryClient.setQueryData(authQueryKeys.profile(), data.user);
-      
+
+      // Don't cache login user data as profile data - they use different serializers
+      // Profile data will be fetched fresh when needed
+
       toast.showSuccess('Welcome back!', `Logged in as ${data.user.username}`);
     },
     onError: (error) => {
@@ -91,10 +92,10 @@ export const useRegister = () => {
     },
     onSuccess: (data) => {
       login(data.tokens.access, data.tokens.refresh);
-      
-      // Cache user data
-      queryClient.setQueryData(authQueryKeys.profile(), data.user);
-      
+
+      // Don't cache registration user data as profile data - they use different serializers
+      // Profile data will be fetched fresh when needed
+
       toast.showSuccess('Account created!', `Welcome ${data.user.username}!`);
     },
     onError: (error) => {
@@ -155,6 +156,31 @@ export const useProfile = () => {
         return false;
       }
       return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * Hook to update user profile
+ */
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: async (profileData: Partial<User>) => {
+      const result = await AuthService.updateProfile(profileData);
+      return result;
+    },
+    onSuccess: (updatedUser) => {
+      // Update cached user data
+      queryClient.setQueryData(authQueryKeys.profile(), updatedUser);
+
+      toast.showSuccess('Profile updated!', 'Your profile has been updated successfully');
+    },
+    onError: (error) => {
+      const errorInfo = formatApiError(error, 'profile');
+      toast.showError(errorInfo.title, errorInfo.message);
     },
   });
 };

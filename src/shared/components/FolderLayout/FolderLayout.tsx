@@ -102,6 +102,18 @@ export const FolderLayout: React.FC<FolderLayoutProps> = ({
               variant="outlined"
             />
           </div>
+          <div>
+            <IconButton
+              icon="person"
+              variant="filled"
+              onClick={() => navigate('/account')}
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: 'white',
+              }}
+            />
+          </div>
         </div>
 
         <div style={styles.mainContainer}>

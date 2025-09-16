@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage, DashboardPage } from '../features/dashboard';
-import { ProfilePage } from '../features/profile';
+import { ProfilePage, AccountPage } from '../features/profile';
 import { MapPage, ExplorePage } from '../features/quests';
 import { ChatPage } from '../features/chat';
 import { DevPage, ChatSettingsPage } from '../features/dev';
@@ -72,6 +72,14 @@ function App() {
           element={
             <AuthGuard fallback={<Navigate to="/login" replace />}>
               <ProfilePage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AccountPage />
             </AuthGuard>
           }
         />

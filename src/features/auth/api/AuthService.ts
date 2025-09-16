@@ -23,8 +23,12 @@ export class AuthService {
    * Register new user account
    */
   static async register(credentials: RegisterCredentials): Promise<RegisterResponse> {
-    const { confirmPassword: _, ...registrationData } = credentials;
-    const response = await apiClient.post<RegisterResponse>('/api/auth/register/', registrationData);
+    const { confirmPassword, ...registrationData } = credentials;
+    const backendData = {
+      ...registrationData,
+      password_confirm: confirmPassword
+    };
+    const response = await apiClient.post<RegisterResponse>('/api/auth/register/', backendData);
     return response.data;
   }
 
@@ -53,6 +57,14 @@ export class AuthService {
     const response = await apiClient.post<{ access: string }>('/api/auth/token/refresh/', {
       refresh: refreshToken
     });
+    return response.data;
+  }
+
+  /**
+   * Update user profile
+   */
+  static async updateProfile(profileData: Partial<User>): Promise<User> {
+    const response = await apiClient.patch<User>('/api/auth/profile/', profileData);
     return response.data;
   }
 

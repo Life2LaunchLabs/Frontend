@@ -20,6 +20,7 @@ export interface User {
   email: string;
   first_name?: string;
   last_name?: string;
+  bio?: string;
   profile_photo?: string;
 }
 

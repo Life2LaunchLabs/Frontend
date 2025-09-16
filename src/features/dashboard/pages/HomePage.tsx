@@ -4,7 +4,7 @@ import trainCarImage from '../../../shared/assets/images/train_car.png'
 import character1Image from '../assets/images/character_1.png'
 import character1IdleImage from '../assets/images/character_1_idle.png'
 import { useTheme } from '../../../styles'
-import { DailyUpdate } from '../../../shared/components'
+import { DailyUpdate, IconButton } from '../../../shared/components'
 
 function HomePage() {
   const { tokens } = useTheme()
@@ -54,6 +54,13 @@ function HomePage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    userIconButton: {
+      position: 'fixed' as const,
+      top: tokens.spacing[8],
+      right: tokens.spacing[8],
+      zIndex: 30,
+      pointerEvents: 'auto' as const,
     },
   }
 
@@ -156,6 +163,19 @@ function HomePage() {
         <div style={styles.dailyUpdateSection}>
           <DailyUpdate />
         </div>
+      </div>
+
+      <div style={styles.userIconButton}>
+        <IconButton
+          icon="person"
+          variant="filled"
+          onClick={() => navigate('/account')}
+          style={{
+            width: '56px',
+            height: '56px',
+            backgroundColor: 'white',
+          }}
+        />
       </div>
     </div>
   )
