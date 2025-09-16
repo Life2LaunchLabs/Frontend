@@ -6,7 +6,8 @@ import checker from 'vite-plugin-checker'
 export default defineConfig({
   plugins: [
     react(),
-    checker({
+    // Only enable checker in development, not in build
+    process.env.NODE_ENV !== 'production' && checker({
       typescript: true,
       eslint: {
         lintCommand: 'eslint . --max-warnings 50',
@@ -18,7 +19,7 @@ export default defineConfig({
         initialIsOpen: false,
       }
     }),
-  ],
+  ].filter(Boolean),
   server: {
     proxy: {
       '/api': {
