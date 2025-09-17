@@ -70,6 +70,10 @@ export class ApiClient {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
+          // Emit auth error event for 401 responses to trigger global logout
+          if (response.status === 401) {
+            window.dispatchEvent(new CustomEvent('auth-error'));
+          }
           throw await handleApiError(response);
         }
 

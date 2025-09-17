@@ -29,6 +29,19 @@ export const useAuth = () => {
     authManager.initialize();
     setIsAuthenticated(authManager.isAuthenticated());
     setIsInitialized(true);
+
+    // Set up global auth error handler to automatically logout on 401
+    const handleAuthError = () => {
+      authManager.clearTokens();
+      setIsAuthenticated(false);
+    };
+
+    // Listen for auth errors from the API client
+    window.addEventListener('auth-error', handleAuthError);
+
+    return () => {
+      window.removeEventListener('auth-error', handleAuthError);
+    };
   }, []);
 
   const login = (accessToken: string, refreshToken: string) => {
