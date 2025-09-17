@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage, DashboardPage } from '../features/dashboard';
 import { ProfilePage, AccountPage } from '../features/profile';
-import { MapPage, ExplorePage } from '../features/quests';
+import { ExplorePage } from '../features/quests';
+import { MapPage } from '../features/map';
 import { ChatPage } from '../features/chat';
 import { DevPage, ChatSettingsPage } from '../features/dev';
 import { AuthPage, AuthGuard, useAuth } from '../features/auth';

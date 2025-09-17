@@ -5,7 +5,6 @@ import { useTheme } from '../../../styles';
 const tabs: TabItem[] = [
   { id: 'dashboard', label: 'Dashboard', path: '/dashboard' },
   { id: 'profile', label: 'Profile', path: '/profile' },
-  { id: 'map', label: 'Map', path: '/map' },
   { id: 'explore', label: 'Explore', path: '/explore' },
 ];
 

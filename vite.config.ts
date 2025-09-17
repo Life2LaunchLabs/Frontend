@@ -9,12 +9,8 @@ export default defineConfig({
     // Only enable checker in development, not in build
     process.env.NODE_ENV !== 'production' && checker({
       typescript: true,
-      eslint: {
-        lintCommand: 'eslint . --max-warnings 50',
-        dev: {
-          logLevel: ['error']
-        }
-      },
+      // Disable ESLint in vite-plugin-checker due to ESLint 9 compatibility issues
+      // You can still run ESLint manually with: npm run lint
       overlay: {
         initialIsOpen: false,
       }

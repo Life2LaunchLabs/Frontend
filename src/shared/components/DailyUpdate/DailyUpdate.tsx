@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../styles';
 import { Button } from '../Button';
 import folderImage from '../../assets/images/folder.png';
+import mapIcon from '../../assets/images/map_icon.png';
 
 export interface DailyUpdateProps {
   className?: string;
@@ -43,8 +44,9 @@ export const DailyUpdate: React.FC<DailyUpdateProps> = () => {
       top: '-60px', // Position above the main component
       right: tokens.spacing[6],
       display: 'flex',
-      flexDirection: 'column' as const,
+      flexDirection: 'row' as const,
       alignItems: 'center',
+      gap: tokens.spacing[3],
     },
     folderButton: {
       backgroundColor: '#ffffff', // White background
@@ -75,6 +77,35 @@ export const DailyUpdate: React.FC<DailyUpdateProps> = () => {
       margin: 0,
       fontWeight: 600,
     },
+    mapButton: {
+      backgroundColor: '#ffffff', // White background
+      border: `2px solid ${theme.outline}`,
+      borderRadius: tokens.borderRadius.medium,
+      padding: tokens.spacing[6], // Larger padding
+      cursor: 'pointer',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'center',
+      gap: tokens.spacing[2],
+      transition: 'all 0.2s ease',
+      position: 'relative' as const,
+      boxShadow: tokens.shadows.medium,
+    },
+    mapButtonHover: {
+      backgroundColor: '#f5f5f5',
+      transform: 'translateY(-2px)',
+    },
+    mapImage: {
+      width: '96px', // Larger image
+      height: '96px',
+      objectFit: 'contain' as const,
+    },
+    mapTitle: {
+      ...tokens.typography.label.medium,
+      color: theme.onSurface,
+      margin: 0,
+      fontWeight: 600,
+    },
   });
 
   const styles = getStyles();
@@ -85,6 +116,10 @@ export const DailyUpdate: React.FC<DailyUpdateProps> = () => {
 
   const handleFolderClick = () => {
     navigate('/dashboard');
+  };
+
+  const handleMapClick = () => {
+    navigate('/map');
   };
 
   return (
@@ -100,6 +135,26 @@ export const DailyUpdate: React.FC<DailyUpdateProps> = () => {
       </div>
 
       <div style={styles.rightContent}>
+        <button
+          style={styles.mapButton}
+          onClick={handleMapClick}
+          onMouseEnter={(e) => {
+            Object.assign(e.currentTarget.style, styles.mapButtonHover);
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = styles.mapButton.backgroundColor;
+            e.currentTarget.style.transform = 'none';
+          }}
+          data-testid="map-button"
+        >
+          <img
+            src={mapIcon}
+            alt="Map"
+            style={styles.mapImage}
+          />
+          <span style={styles.mapTitle}>Map</span>
+        </button>
+
         <button
           style={styles.folderButton}
           onClick={handleFolderClick}
