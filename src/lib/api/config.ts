@@ -26,10 +26,12 @@ export const getBaseApiUrl = (): string => {
     const apiUrl = import.meta.env.VITE_API_URL || 'localhost:8000';
     return formatApiUrl(apiUrl);
   }
-  
-  // In production, use the configured API URL
-  const apiUrl = import.meta.env.VITE_API_URL || 'localhost:8000';
-  return formatApiUrl(apiUrl);
+
+  // In production, use Railway backend domain if available, otherwise fallback to VITE_API_URL
+  const backendUrl = import.meta.env.VITE_BACKEND_RAILWAY_PUBLIC_DOMAIN ||
+                     import.meta.env.VITE_API_URL ||
+                     'localhost:8000';
+  return formatApiUrl(backendUrl);
 };
 
 /**
