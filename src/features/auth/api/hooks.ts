@@ -36,11 +36,25 @@ export const useAuth = () => {
       setIsAuthenticated(false);
     };
 
+    // Check token validity when page becomes visible (user returns to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const stillAuthenticated = authManager.isAuthenticated();
+        setIsAuthenticated(stillAuthenticated);
+
+        if (!stillAuthenticated) {
+          authManager.clearTokens();
+        }
+      }
+    };
+
     // Listen for auth errors from the API client
     window.addEventListener('auth-error', handleAuthError);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('auth-error', handleAuthError);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
