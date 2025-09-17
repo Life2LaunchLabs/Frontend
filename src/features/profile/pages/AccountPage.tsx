@@ -10,7 +10,6 @@ function AccountPage() {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     first_name: '',
     last_name: '',
@@ -27,7 +26,6 @@ function AccountPage() {
   useEffect(() => {
     if (user) {
       const userData = {
-        username: user.username || '',
         email: user.email || '',
         first_name: user.first_name || '',
         last_name: user.last_name || '',
@@ -146,7 +144,6 @@ function AccountPage() {
   const handleSave = async () => {
     try {
       const updateData: Partial<User> = {
-        username: formData.username,
         email: formData.email,
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -226,23 +223,6 @@ function AccountPage() {
             )}
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="username">Username</label>
-            <input
-              style={{
-                ...styles.input,
-                backgroundColor: isEditMode ? theme.surface : theme.surfaceContainer,
-                cursor: isEditMode ? 'text' : 'default',
-              }}
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="Enter your username"
-              readOnly={!isEditMode}
-            />
-          </div>
 
           <div style={styles.formGroup}>
             <label style={styles.label} htmlFor="email">Email</label>

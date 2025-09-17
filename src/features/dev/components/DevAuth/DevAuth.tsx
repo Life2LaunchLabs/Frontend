@@ -9,8 +9,8 @@ export interface DevAuthProps {
 
 export const DevAuth: React.FC<DevAuthProps> = ({ onAuthSuccess }) => {
   const { theme, tokens } = useTheme();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('sam@fake.com');
+  const [password, setPassword] = useState('samgarcia');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,7 +21,7 @@ export const DevAuth: React.FC<DevAuthProps> = ({ onAuthSuccess }) => {
 
     try {
       const response = await apiClient.post('/api/auth/login/', {
-        username,
+        email,
         password
       });
 
@@ -140,17 +140,17 @@ export const DevAuth: React.FC<DevAuthProps> = ({ onAuthSuccess }) => {
         </p>
 
         <div style={styles.hint}>
-          💡 Default credentials: admin / admin
+          💡 Default credentials: sam@fake.com / samgarcia
         </div>
 
         <form onSubmit={handleLogin} style={styles.form}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Username</label>
+            <label style={styles.label}>Email</label>
             <input
               style={styles.input}
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>

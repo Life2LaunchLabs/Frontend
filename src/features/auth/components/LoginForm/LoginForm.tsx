@@ -18,7 +18,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const { theme, tokens } = useTheme();
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState<LoginCredentials>({
-    username: '',
+    email: '',
     password: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -28,8 +28,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!credentials.username.trim()) {
-      newErrors.username = 'Username is required';
+    if (!credentials.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!credentials.password) {
@@ -56,10 +58,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleInputChange = (field: keyof LoginCredentials, value: string) => {
     setCredentials(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    const demoCredentials = {
+      email: 'sam@fake.com',
+      password: 'samgarcia'
+    };
+
+    try {
+      await loginMutation.mutateAsync(demoCredentials);
+      navigate('/home');
+    } catch {
+      // Error handled by the hook
     }
   };
 
@@ -114,6 +130,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       transition: 'all 0.2s ease',
       marginTop: tokens.spacing[2] || '0.5rem',
     },
+    demoButton: {
+      backgroundColor: theme.surfaceContainerHighest,
+      color: theme.onSurface,
+      border: `1px solid ${theme.outline}`,
+      borderRadius: tokens.borderRadius.medium,
+      padding: `${tokens.spacing[3] || '0.75rem'} ${tokens.spacing[5] || '1.25rem'}`,
+      fontSize: tokens.typography.body.small.fontSize,
+      fontWeight: 500,
+      cursor: loginMutation.isPending ? 'not-allowed' : 'pointer',
+      opacity: loginMutation.isPending ? 0.6 : 1,
+      transition: 'all 0.2s ease',
+      marginTop: tokens.spacing[1] || '0.25rem',
+    },
     switchText: {
       ...tokens.typography.body.medium,
       color: theme.onSurfaceVariant,
@@ -149,31 +178,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       data-testid="login-form"
     >
       <div style={styles.demoHint}>
-        💡 Demo credentials: <strong>admin</strong> / <strong>admin123</strong>
+        💡 Demo credentials: <strong>sam@fake.com</strong> / <strong>samgarcia</strong>
       </div>
 
       <div style={styles.formGroup}>
-        <label style={styles.label} htmlFor="username">
-          Username
+        <label style={styles.label} htmlFor="email">
+          Email
         </label>
         <input
-          id="username"
+          id="email"
           style={{
             ...styles.input,
-            ...(errors.username ? styles.inputError : {}),
+            ...(errors.email ? styles.inputError : {}),
           }}
-          type="text"
-          value={credentials.username}
-          onChange={(e) => handleInputChange('username', e.target.value)}
+          type="email"
+          value={credentials.email}
+          onChange={(e) => handleInputChange('email', e.target.value)}
           onFocus={(e) => e.target.style.borderColor = theme.primary}
-          onBlur={(e) => e.target.style.borderColor = errors.username ? theme.error : theme.outline}
-          placeholder="Enter your username"
-          autoComplete="username"
-          data-testid="username-input"
+          onBlur={(e) => e.target.style.borderColor = errors.email ? theme.error : theme.outline}
+          placeholder="Enter your email"
+          autoComplete="email"
+          data-testid="email-input"
         />
-        {errors.username && (
-          <div style={styles.error} data-testid="username-error">
-            {errors.username}
+        {errors.email && (
+          <div style={styles.error} data-testid="email-error">
+            {errors.email}
           </div>
         )}
       </div>
@@ -211,6 +240,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         data-testid="login-button"
       >
         {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
+      </button>
+
+      <button
+        style={styles.demoButton}
+        type="button"
+        onClick={handleDemoLogin}
+        disabled={loginMutation.isPending}
+        data-testid="demo-login-button"
+      >
+        🚀 Try Demo Account
       </button>
 
       <div style={styles.switchText}>

@@ -94,7 +94,7 @@ export const useLogin = () => {
       // Don't cache login user data as profile data - they use different serializers
       // Profile data will be fetched fresh when needed
 
-      toast.showSuccess('Welcome back!', `Logged in as ${data.user.username}`);
+      toast.showSuccess('Welcome back!', `Logged in as ${data.user.email}`);
     },
     onError: (error) => {
       const errorInfo = formatApiError(error, 'auth');
@@ -121,7 +121,7 @@ export const useRegister = () => {
       // Don't cache registration user data as profile data - they use different serializers
       // Profile data will be fetched fresh when needed
 
-      toast.showSuccess('Account created!', `Welcome ${data.user.username}!`);
+      toast.showSuccess('Account created!', `Welcome ${data.user.full_name || data.user.email}!`);
     },
     onError: (error) => {
       const errorInfo = formatApiError(error, 'auth');
@@ -210,11 +210,3 @@ export const useUpdateProfile = () => {
   });
 };
 
-/**
- * Hook to check username availability
- */
-export const useCheckUsername = () => {
-  return useMutation({
-    mutationFn: (username: string) => AuthService.checkUsername(username),
-  });
-};

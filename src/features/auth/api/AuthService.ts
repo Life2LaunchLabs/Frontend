@@ -40,15 +40,6 @@ export class AuthService {
     return response.data;
   }
 
-  /**
-   * Check if username is available
-   */
-  static async checkUsername(username: string): Promise<{ available: boolean }> {
-    const response = await apiClient.post<{ available: boolean }>('/api/auth/check-username/', {
-      username
-    });
-    return response.data;
-  }
 
   /**
    * Refresh authentication token

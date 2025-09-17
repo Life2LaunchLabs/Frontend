@@ -14,7 +14,6 @@ export interface ProfileData extends User {
 }
 
 export interface ProfileUpdateData {
-  username?: string;
   first_name?: string;
   last_name?: string;
   email?: string;

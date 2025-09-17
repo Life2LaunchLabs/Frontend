@@ -18,7 +18,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const { theme, tokens } = useTheme();
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState<RegisterCredentials>({
-    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -31,15 +30,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
-    // Username validation
-    if (!credentials.username.trim()) {
-      newErrors.username = 'Username is required';
-    } else if (credentials.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-    } else if (!/^[a-zA-Z0-9_]+$/.test(credentials.username)) {
-      newErrors.username = 'Username can only contain letters, numbers, and underscores';
-    }
 
     // Email validation
     if (!credentials.email.trim()) {
@@ -204,32 +194,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       </div>
 
-      {/* Username field */}
-      <div style={styles.formGroup}>
-        <label style={styles.label} htmlFor="username">
-          Username *
-        </label>
-        <input
-          id="username"
-          style={{
-            ...styles.input,
-            ...(errors.username ? styles.inputError : {}),
-          }}
-          type="text"
-          value={credentials.username}
-          onChange={(e) => handleInputChange('username', e.target.value)}
-          onFocus={(e) => e.target.style.borderColor = theme.primary}
-          onBlur={(e) => e.target.style.borderColor = errors.username ? theme.error : theme.outline}
-          placeholder="Choose a username"
-          autoComplete="username"
-          data-testid="username-input"
-        />
-        {errors.username && (
-          <div style={styles.error} data-testid="username-error">
-            {errors.username}
-          </div>
-        )}
-      </div>
 
       {/* Email field */}
       <div style={styles.formGroup}>

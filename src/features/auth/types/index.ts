@@ -1,12 +1,11 @@
 // Authentication types and interfaces
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterCredentials {
-  username: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -16,10 +15,10 @@ export interface RegisterCredentials {
 
 export interface User {
   id: string;
-  username: string;
   email: string;
   first_name?: string;
   last_name?: string;
+  full_name?: string;
   bio?: string;
   profile_photo?: string;
 }
