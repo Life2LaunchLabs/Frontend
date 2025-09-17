@@ -103,8 +103,10 @@ export class ChatWebSocketService {
     if (import.meta.env.DEV) {
       host = import.meta.env.VITE_API_URL || 'localhost:8000';
     } else {
-      // In production, use the configured API URL (without protocol)
-      host = import.meta.env.VITE_API_URL || 'localhost:8000';
+      // In production, use Railway backend domain if available, otherwise fallback to VITE_API_URL
+      host = import.meta.env.VITE_BACKEND_RAILWAY_PUBLIC_DOMAIN ||
+             import.meta.env.VITE_API_URL ||
+             'localhost:8000';
     }
 
     // Use the chunked streaming endpoint for better UX

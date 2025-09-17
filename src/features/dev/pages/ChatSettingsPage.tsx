@@ -105,7 +105,7 @@ export const ChatSettingsPage: React.FC = () => {
   const [isLoadingPresets, setIsLoadingPresets] = useState(true);
 
   // Form state
-  const [selectedModelPreset, setSelectedModelPreset] = useState<string>('claude_balanced');
+  const [selectedModelPreset, setSelectedModelPreset] = useState<string>('');
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string>('general');
   const [customSystemPrompt, setCustomSystemPrompt] = useState<string>('');
   const [selectedQuickInputInstructions, setSelectedQuickInputInstructions] = useState<string>('balanced');
@@ -251,6 +251,8 @@ export const ChatSettingsPage: React.FC = () => {
         preset_key: selectedModelPreset,
       };
 
+      console.log('🔧 Applying settings immediately:', settings);
+
       // Handle system prompt selection
       if (selectedSystemPrompt === 'custom') {
         // Send custom system prompt text
@@ -278,12 +280,16 @@ export const ChatSettingsPage: React.FC = () => {
       if (currentSessionId) {
         // Update the existing session via API using ChatService
         try {
-          await ChatService.updateSession(currentSessionId, settings);
-        } catch {
+          console.log('🔧 Updating session', currentSessionId, 'with settings:', settings);
+          const result = await ChatService.updateSession(currentSessionId, settings);
+          console.log('🔧 Session update result:', result);
+        } catch (error) {
+          console.error('🔧 Session update failed:', error);
           // Fallback to localStorage for settings
           localStorage.setItem('chatSettings', JSON.stringify(settings));
         }
       } else {
+        console.log('🔧 No current session ID, using localStorage fallback');
         // Fallback to localStorage for settings
         localStorage.setItem('chatSettings', JSON.stringify(settings));
       }
@@ -293,6 +299,7 @@ export const ChatSettingsPage: React.FC = () => {
   };
 
   const handleModelPresetChange = (presetKey: string) => {
+    console.log('🔧 Model preset changed to:', presetKey);
     setSelectedModelPreset(presetKey);
     // Apply immediately when selection changes
     setTimeout(applySettingsImmediately, 100);

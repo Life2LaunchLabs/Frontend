@@ -13,7 +13,7 @@ import {
 
 export const DevPage: React.FC = () => {
   const { theme, tokens } = useTheme();
-  const [selectedPresetKey, setSelectedPresetKey] = useState<string>('claude_balanced');
+  const [selectedPresetKey, setSelectedPresetKey] = useState<string>('');
   const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
   const logoutMutation = useLogout();
   

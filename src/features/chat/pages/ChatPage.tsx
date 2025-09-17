@@ -61,7 +61,6 @@ function ChatPage() {
 
         // Create new session if no valid existing session
         const response = await ChatService.createSession({
-          preset_key: 'claude_balanced',
           title: 'Chat Session'
         });
         setSessionId(response.session_id);
