@@ -1,0 +1,153 @@
+import React from 'react';
+import { useTheme } from '../../../../styles';
+import type { Quest } from '../../api/types';
+
+export interface QuestCardProps {
+  quest: Quest;
+  onClick?: (quest: Quest) => void;
+}
+
+export const QuestCard: React.FC<QuestCardProps> = ({
+  quest,
+  onClick,
+}) => {
+  const { theme, tokens } = useTheme();
+
+  const getStyles = () => ({
+    card: {
+      backgroundColor: theme.surface,
+      border: `1px solid ${theme.outline}`,
+      borderRadius: tokens.borderRadius.large,
+      padding: tokens.spacing[5],
+      cursor: onClick ? 'pointer' : 'default',
+      transition: 'all 0.2s ease',
+      position: 'relative' as const,
+      minWidth: '280px',
+      maxWidth: '320px',
+      height: '160px',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      justifyContent: 'space-between',
+      flexShrink: 0,
+      ':hover': onClick ? {
+        backgroundColor: theme.surfaceVariant,
+        borderColor: quest.color,
+        transform: 'translateY(-2px)',
+        boxShadow: tokens.shadows.large,
+      } : {},
+    },
+    header: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      marginBottom: tokens.spacing[3],
+    },
+    title: {
+      ...tokens.typography.headline.small,
+      color: theme.onSurface,
+      fontWeight: '600',
+      lineHeight: 1.3,
+      flex: 1,
+      marginRight: tokens.spacing[3],
+    },
+    colorDot: {
+      width: '12px',
+      height: '12px',
+      borderRadius: '50%',
+      backgroundColor: quest.color,
+      flexShrink: 0,
+      marginTop: tokens.spacing[1],
+    },
+    description: {
+      ...tokens.typography.body.small,
+      color: theme.onSurfaceVariant,
+      lineHeight: 1.4,
+      marginBottom: tokens.spacing[4],
+      height: '2.8em', // Fixed height for 2 lines
+      overflow: 'hidden',
+    },
+    footer: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    category: {
+      ...tokens.typography.label.small,
+      color: theme.onSurfaceVariant,
+      backgroundColor: theme.surfaceVariant,
+      padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+      borderRadius: tokens.borderRadius.small,
+      fontWeight: '500',
+    },
+    progress: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: tokens.spacing[2],
+    },
+    progressText: {
+      ...tokens.typography.body.small,
+      color: theme.onSurfaceVariant,
+      fontWeight: '500',
+    },
+    progressBar: {
+      width: '60px',
+      height: '4px',
+      backgroundColor: theme.surfaceVariant,
+      borderRadius: '2px',
+      overflow: 'hidden' as const,
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: quest.color,
+      borderRadius: '2px',
+      transition: 'width 0.3s ease',
+    },
+  });
+
+  const styles = getStyles();
+
+  const progressPercentage = quest.milestones_count > 0
+    ? (quest.completed_milestones_count / quest.milestones_count) * 100
+    : 0;
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick(quest);
+    }
+  };
+
+  return (
+    <div
+      style={styles.card}
+      onClick={handleClick}
+      data-testid="quest-card"
+    >
+      <div>
+        <div style={styles.header}>
+          <h3 style={styles.title}>{quest.title}</h3>
+          <div style={styles.colorDot} />
+        </div>
+        <p style={styles.description}>{quest.description}</p>
+      </div>
+
+      <div style={styles.footer}>
+        <div style={styles.category}>
+          {quest.category}
+        </div>
+        <div style={styles.progress}>
+          <span style={styles.progressText}>
+            {quest.completed_milestones_count}/{quest.milestones_count}
+          </span>
+          <div style={styles.progressBar}>
+            <div
+              style={{
+                ...styles.progressFill,
+                width: `${progressPercentage}%`
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
