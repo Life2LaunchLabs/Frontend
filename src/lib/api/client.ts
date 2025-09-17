@@ -23,10 +23,13 @@ export class ApiClient {
   /**
    * Get authentication headers
    */
-  private getAuthHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+  private getAuthHeaders(isFormData = false): HeadersInit {
+    const headers: HeadersInit = {};
+
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
@@ -51,7 +54,10 @@ export class ApiClient {
     } = options;
 
     const url = `${this.baseURL}${endpoint}`;
-    const requestHeaders = { ...this.getAuthHeaders(), ...headers };
+
+    // Check if body is FormData
+    const isFormData = body instanceof FormData;
+    const requestHeaders = { ...this.getAuthHeaders(isFormData), ...headers };
 
     let lastError: Error | null = null;
 
@@ -63,7 +69,7 @@ export class ApiClient {
         const response = await fetch(url, {
           method,
           headers: requestHeaders,
-          body: body ? JSON.stringify(body) : undefined,
+          body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
           signal: controller.signal,
         });
 
