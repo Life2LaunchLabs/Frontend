@@ -40,8 +40,8 @@ function ChatPage() {
       try {
         setIsInitializing(true);
 
-        // Try to use existing session first
-        const existingSessionId = localStorage.getItem('currentChatSessionId');
+        // Try to use existing session first (only within same browser session)
+        const existingSessionId = sessionStorage.getItem('currentChatSessionId');
         if (existingSessionId) {
           // Verify the session is still valid by trying to get its config
           try {
@@ -55,7 +55,7 @@ function ChatPage() {
           } catch {
             console.log('Existing session invalid, creating new one');
             // Clear invalid session ID
-            localStorage.removeItem('currentChatSessionId');
+            sessionStorage.removeItem('currentChatSessionId');
           }
         }
 
@@ -64,8 +64,8 @@ function ChatPage() {
           title: 'Chat Session'
         });
         setSessionId(response.session_id);
-        // Store session ID for settings page access
-        localStorage.setItem('currentChatSessionId', response.session_id);
+        // Store session ID for settings page access (only for current browser session)
+        sessionStorage.setItem('currentChatSessionId', response.session_id);
       } catch (error) {
         console.error('Failed to initialize session:', error);
         // Error handling - emote will persist from streaming hook
