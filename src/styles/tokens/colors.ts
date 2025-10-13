@@ -1,4 +1,8 @@
-// Color Primitives
+/**
+ * Color tokens for Launchpad design system
+ * Supports two modes: Launchpad (dark, aurora) and Admin (light, clean)
+ */
+
 export const colorPrimitives = {
   primary: {
     50: '#f0f4f2',
@@ -49,16 +53,16 @@ export const colorPrimitives = {
     900: '#7f1d1d',
   },
   neutral: {
-    50: '#e6dbc3',
-    100: '#d9cba6',
-    200: '#ccba89',
-    300: '#bfa96c',
-    400: '#b2984f',
-    500: '#a58732',
-    600: '#8a7029',
-    700: '#6f5920',
-    800: '#544217',
-    900: '#392b0e',
+    50: '#f9fafb',
+    100: '#f3f4f6',
+    200: '#e5e7eb',
+    300: '#d1d5db',
+    400: '#9ca3af',
+    500: '#6b7280',
+    600: '#4b5563',
+    700: '#374151',
+    800: '#1f2937',
+    900: '#111827',
   },
   neutralVariant: {
     50: '#f9fafb',
@@ -74,52 +78,12 @@ export const colorPrimitives = {
   },
 } as const;
 
-// Light Theme
-export const lightTheme = {
-  primary: colorPrimitives.primary[500],
-  onPrimary: '#ffffff',
-  primaryContainer: colorPrimitives.primary[100],
-  onPrimaryContainer: colorPrimitives.primary[900],
-  
-  secondary: colorPrimitives.secondary[500],
-  onSecondary: '#ffffff',
-  secondaryContainer: colorPrimitives.secondary[100],
-  onSecondaryContainer: colorPrimitives.secondary[900],
-  
-  tertiary: colorPrimitives.tertiary[500],
-  onTertiary: '#ffffff',
-  tertiaryContainer: colorPrimitives.tertiary[100],
-  onTertiaryContainer: colorPrimitives.tertiary[900],
-  
-  error: colorPrimitives.error[500],
-  onError: '#ffffff',
-  errorContainer: colorPrimitives.error[100],
-  onErrorContainer: colorPrimitives.error[900],
-  
-  surface: colorPrimitives.neutral[50],
-  onSurface: colorPrimitives.neutral[900],
-  surfaceVariant: colorPrimitives.neutralVariant[200],
-  onSurfaceVariant: colorPrimitives.neutralVariant[600],
 
-  outline: colorPrimitives.neutralVariant[400],
-  outlineVariant: colorPrimitives.neutralVariant[300],
-  
-  surfaceContainerLowest: '#ffffff',
-  surfaceContainerLow: colorPrimitives.neutral[100],
-  surfaceContainer: colorPrimitives.neutral[200],
-  surfaceContainerHigh: colorPrimitives.neutral[300],
-  surfaceContainerHighest: colorPrimitives.neutral[400],
-  
-  inverseSurface: colorPrimitives.neutral[800],
-  inverseOnSurface: colorPrimitives.neutral[100],
-  inversePrimary: colorPrimitives.primary[200],
-  
-  scrim: colorPrimitives.neutralVariant[900],
-  shadow: colorPrimitives.neutralVariant[900],
-} as const;
+// ============================================================================
+// LAUNCHPAD MODE COLORS (Dark, Cold Aurora)
+// ============================================================================
 
-// Dark Theme
-export const darkTheme = {
+export const launchpadColors = {
   primary: colorPrimitives.primary[300],
   onPrimary: colorPrimitives.primary[900],
   primaryContainer: colorPrimitives.primary[800],
@@ -160,13 +124,117 @@ export const darkTheme = {
   
   scrim: colorPrimitives.neutralVariant[900],
   shadow: colorPrimitives.neutralVariant[900],
+  glass: withOpacity(colorPrimitives.neutral[800], 0.4)
 } as const;
 
-// Legacy colors for backward compatibility
-export const colors = {
-  primary: colorPrimitives.primary,
-  secondary: colorPrimitives.secondary,
-  success: colorPrimitives.tertiary,
-  danger: colorPrimitives.error,
-  warning: colorPrimitives.tertiary,
+// ============================================================================
+// ADMIN MODE COLORS (Light, Clean)
+// ============================================================================
+// Light Theme
+export const adminColors = {
+  primary: colorPrimitives.primary[500],
+  onPrimary: '#ffffff',
+  primaryContainer: colorPrimitives.primary[100],
+  onPrimaryContainer: colorPrimitives.primary[900],
+  
+  secondary: colorPrimitives.secondary[500],
+  onSecondary: '#ffffff',
+  secondaryContainer: colorPrimitives.secondary[100],
+  onSecondaryContainer: colorPrimitives.secondary[900],
+  
+  tertiary: colorPrimitives.tertiary[500],
+  onTertiary: '#ffffff',
+  tertiaryContainer: colorPrimitives.tertiary[100],
+  onTertiaryContainer: colorPrimitives.tertiary[900],
+  
+  error: colorPrimitives.error[500],
+  onError: '#ffffff',
+  errorContainer: colorPrimitives.error[100],
+  onErrorContainer: colorPrimitives.error[900],
+  
+  surface: colorPrimitives.neutral[50],
+  onSurface: colorPrimitives.neutral[900],
+  surfaceVariant: colorPrimitives.neutralVariant[200],
+  onSurfaceVariant: colorPrimitives.neutralVariant[600],
+
+  outline: colorPrimitives.neutralVariant[400],
+  outlineVariant: colorPrimitives.neutralVariant[300],
+  
+  surfaceContainerLowest: '#ffffff',
+  surfaceContainerLow: colorPrimitives.neutral[100],
+  surfaceContainer: colorPrimitives.neutral[200],
+  surfaceContainerHigh: colorPrimitives.neutral[300],
+  surfaceContainerHighest: colorPrimitives.neutral[400],
+  
+  inverseSurface: colorPrimitives.neutral[800],
+  inverseOnSurface: colorPrimitives.neutral[100],
+  inversePrimary: colorPrimitives.primary[200],
+  
+  scrim: colorPrimitives.neutralVariant[900],
+  shadow: colorPrimitives.neutralVariant[900],
+  glass: withOpacity(colorPrimitives.neutral[50], 0.4)
 } as const;
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Add opacity to a color
+ * Works with hex, rgb, or rgba values
+ */
+export function withOpacity(color: string, opacity: number): string {
+  // Handle hex colors
+  if (color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+
+  // Handle rgb/rgba colors
+  if (color.startsWith('rgb')) {
+    // Extract RGB values
+    const match = color.match(/\d+/g);
+    if (match && match.length >= 3) {
+      return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${opacity})`;
+    }
+  }
+
+  // Handle named rgba colors (return as-is or modify)
+  if (color.startsWith('rgba')) {
+    const parts = color.match(/rgba\(([^)]+)\)/);
+    if (parts && parts[1]) {
+      const values = parts[1].split(',').map(v => v.trim());
+      return `rgba(${values[0]}, ${values[1]}, ${values[2]}, ${opacity})`;
+    }
+  }
+
+  return color;
+}
+
+/**
+ * Create state layer color (for hover, focus, etc.)
+ * Material Design 3 state layer system
+ */
+export function stateLayer(baseColor: string, opacity: number): string {
+  return withOpacity(baseColor, opacity);
+}
+
+// State layer opacity values (Material Design 3)
+export const stateOpacity = {
+  hover: 0.08,
+  focus: 0.12,
+  pressed: 0.12,
+  dragged: 0.16,
+} as const;
+
+// ============================================================================
+// TYPE EXPORTS
+// ============================================================================
+
+export type LaunchpadColors = typeof launchpadColors;
+export type AdminColors = typeof adminColors;
+export type DesignMode = 'launchpad' | 'admin';
+

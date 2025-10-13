@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
+/** @jsxImportSource @emotion/react */
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../../styles';
+import { Button } from '@shared/components';
 import { useRegister } from '../../api';
 import type { RegisterCredentials } from '../../types';
 
 export interface RegisterFormProps {
   onSwitchToLogin: () => void;
   className?: string;
-  style?: React.CSSProperties;
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
-  onSwitchToLogin,
   className,
-  style,
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState<RegisterCredentials>({
     email: '',
@@ -79,114 +78,65 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     }
   };
 
-  const getStyles = () => ({
-    form: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[4],
-      ...style,
-    },
-    formRow: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: tokens.spacing[4],
-    },
-    formGroup: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[2],
-    },
-    label: {
-      ...tokens.typography.body.medium,
-      color: theme.onSurface,
-      fontWeight: 600,
-    },
-    input: {
-      backgroundColor: theme.surfaceContainer,
-      color: theme.onSurface,
-      border: `1px solid ${theme.outline}`,
-      borderRadius: tokens.borderRadius.medium,
-      padding: tokens.spacing[3],
-      fontSize: tokens.typography.body.medium.fontSize,
-      outline: 'none',
-      transition: 'border-color 0.2s ease',
-    },
-    inputError: {
-      borderColor: theme.error,
-    },
-    error: {
-      ...tokens.typography.body.small,
-      color: theme.error,
-      marginTop: tokens.spacing[1],
-    },
-    button: {
-      backgroundColor: theme.primary,
-      color: theme.onPrimary,
-      border: 'none',
-      borderRadius: tokens.borderRadius.medium,
-      padding: `${tokens.spacing[4]}px ${tokens.spacing[6]}px`,
-      fontSize: tokens.typography.body.medium.fontSize,
-      fontWeight: 600,
-      cursor: registerMutation.isPending ? 'not-allowed' : 'pointer',
-      opacity: registerMutation.isPending ? 0.6 : 1,
-      transition: 'all 0.2s ease',
-      marginTop: tokens.spacing[2],
-    },
-    switchText: {
-      ...tokens.typography.body.medium,
-      color: theme.onSurfaceVariant,
-      textAlign: 'center' as const,
-      marginTop: tokens.spacing[4],
-    },
-    switchLink: {
-      color: theme.primary,
-      textDecoration: 'none',
-      cursor: 'pointer',
-      fontWeight: 600,
-    },
-  });
-
-  const styles = getStyles();
-
   return (
-    <form 
+    <form
       className={className}
-      style={styles.form}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacing[4],
+      }}
       onSubmit={handleSubmit}
       data-testid="register-form"
     >
       {/* Name fields row */}
-      <div style={styles.formRow}>
-        <div style={styles.formGroup}>
-          <label style={styles.label} htmlFor="first_name">
+      <div css={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[4] }}>
+        <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+          <label css={{ ...tokens.typography.body.medium, color: colors.textPrimary, fontWeight: 600 }} htmlFor="first_name">
             First Name
           </label>
           <input
             id="first_name"
-            style={styles.input}
+            css={{
+              backgroundColor: colors.surfaceContainer,
+              color: colors.textPrimary,
+              border: `1px solid ${colors.outline}`,
+              borderRadius: tokens.borderRadius.medium,
+              padding: tokens.spacing[3],
+              fontSize: tokens.typography.body.medium.fontSize,
+              outline: 'none',
+              transition: tokens.transitions.normal,
+              '&:focus': { borderColor: colors.accentPrimary },
+            }}
             type="text"
             value={credentials.first_name}
             onChange={(e) => handleInputChange('first_name', e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = theme.primary}
-            onBlur={(e) => e.target.style.borderColor = theme.outline}
             placeholder="John"
             autoComplete="given-name"
             data-testid="first-name-input"
           />
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label} htmlFor="last_name">
+        <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+          <label css={{ ...tokens.typography.body.medium, color: colors.textPrimary, fontWeight: 600 }} htmlFor="last_name">
             Last Name
           </label>
           <input
             id="last_name"
-            style={styles.input}
+            css={{
+              backgroundColor: colors.surfaceContainer,
+              color: colors.textPrimary,
+              border: `1px solid ${colors.outline}`,
+              borderRadius: tokens.borderRadius.medium,
+              padding: tokens.spacing[3],
+              fontSize: tokens.typography.body.medium.fontSize,
+              outline: 'none',
+              transition: tokens.transitions.normal,
+              '&:focus': { borderColor: colors.accentPrimary },
+            }}
             type="text"
             value={credentials.last_name}
             onChange={(e) => handleInputChange('last_name', e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = theme.primary}
-            onBlur={(e) => e.target.style.borderColor = theme.outline}
             placeholder="Doe"
             autoComplete="family-name"
             data-testid="last-name-input"
@@ -194,108 +144,112 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       </div>
 
-
       {/* Email field */}
-      <div style={styles.formGroup}>
-        <label style={styles.label} htmlFor="email">
+      <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+        <label css={{ ...tokens.typography.body.medium, color: colors.textPrimary, fontWeight: 600 }} htmlFor="email">
           Email *
         </label>
         <input
           id="email"
-          style={{
-            ...styles.input,
-            ...(errors.email ? styles.inputError : {}),
+          css={{
+            backgroundColor: colors.surfaceContainer,
+            color: colors.textPrimary,
+            border: `1px solid ${errors.email ? colors.error : colors.outline}`,
+            borderRadius: tokens.borderRadius.medium,
+            padding: tokens.spacing[3],
+            fontSize: tokens.typography.body.medium.fontSize,
+            outline: 'none',
+            transition: tokens.transitions.normal,
+            '&:focus': { borderColor: colors.accentPrimary },
           }}
           type="email"
           value={credentials.email}
           onChange={(e) => handleInputChange('email', e.target.value)}
-          onFocus={(e) => e.target.style.borderColor = theme.primary}
-          onBlur={(e) => e.target.style.borderColor = errors.email ? theme.error : theme.outline}
           placeholder="your@email.com"
           autoComplete="email"
           data-testid="email-input"
         />
         {errors.email && (
-          <div style={styles.error} data-testid="email-error">
+          <div css={{ ...tokens.typography.body.small, color: colors.error }} data-testid="email-error">
             {errors.email}
           </div>
         )}
       </div>
 
       {/* Password fields row */}
-      <div style={styles.formRow}>
-        <div style={styles.formGroup}>
-          <label style={styles.label} htmlFor="password">
+      <div css={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[4] }}>
+        <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+          <label css={{ ...tokens.typography.body.medium, color: colors.textPrimary, fontWeight: 600 }} htmlFor="password">
             Password *
           </label>
           <input
             id="password"
-            style={{
-              ...styles.input,
-              ...(errors.password ? styles.inputError : {}),
+            css={{
+              backgroundColor: colors.surfaceContainer,
+              color: colors.textPrimary,
+              border: `1px solid ${errors.password ? colors.error : colors.outline}`,
+              borderRadius: tokens.borderRadius.medium,
+              padding: tokens.spacing[3],
+              fontSize: tokens.typography.body.medium.fontSize,
+              outline: 'none',
+              transition: tokens.transitions.normal,
+              '&:focus': { borderColor: colors.accentPrimary },
             }}
             type="password"
             value={credentials.password}
             onChange={(e) => handleInputChange('password', e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = theme.primary}
-            onBlur={(e) => e.target.style.borderColor = errors.password ? theme.error : theme.outline}
             placeholder="Create a password"
             autoComplete="new-password"
             data-testid="password-input"
           />
           {errors.password && (
-            <div style={styles.error} data-testid="password-error">
+            <div css={{ ...tokens.typography.body.small, color: colors.error }} data-testid="password-error">
               {errors.password}
             </div>
           )}
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label} htmlFor="confirmPassword">
+        <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+          <label css={{ ...tokens.typography.body.medium, color: colors.textPrimary, fontWeight: 600 }} htmlFor="confirmPassword">
             Confirm Password *
           </label>
           <input
             id="confirmPassword"
-            style={{
-              ...styles.input,
-              ...(errors.confirmPassword ? styles.inputError : {}),
+            css={{
+              backgroundColor: colors.surfaceContainer,
+              color: colors.textPrimary,
+              border: `1px solid ${errors.confirmPassword ? colors.error : colors.outline}`,
+              borderRadius: tokens.borderRadius.medium,
+              padding: tokens.spacing[3],
+              fontSize: tokens.typography.body.medium.fontSize,
+              outline: 'none',
+              transition: tokens.transitions.normal,
+              '&:focus': { borderColor: colors.accentPrimary },
             }}
             type="password"
             value={credentials.confirmPassword}
             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = theme.primary}
-            onBlur={(e) => e.target.style.borderColor = errors.confirmPassword ? theme.error : theme.outline}
             placeholder="Confirm your password"
             autoComplete="new-password"
             data-testid="confirm-password-input"
           />
           {errors.confirmPassword && (
-            <div style={styles.error} data-testid="confirm-password-error">
+            <div css={{ ...tokens.typography.body.small, color: colors.error }} data-testid="confirm-password-error">
               {errors.confirmPassword}
             </div>
           )}
         </div>
       </div>
 
-      <button
-        style={styles.button}
+      <Button
+        variant="filled"
         type="submit"
         disabled={registerMutation.isPending}
         data-testid="register-button"
+        css={{ width: '100%', marginTop: tokens.spacing[2] }}
       >
         {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
-      </button>
-
-      <div style={styles.switchText}>
-        Already have an account?{' '}
-        <span
-          style={styles.switchLink}
-          onClick={onSwitchToLogin}
-          data-testid="switch-to-login"
-        >
-          Sign in here
-        </span>
-      </div>
+      </Button>
     </form>
   );
 };

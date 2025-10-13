@@ -22,7 +22,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   onClick,
   ...props
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -42,7 +42,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       justifyContent: 'center',
       border: 'none',
       cursor: disabled ? 'default' : 'pointer',
-      fontFamily: tokens.typography.fontFamily.default.join(', '),
+      fontFamily: tokens.typography.fontFamily.default,
       transition: 'all 0.15s ease-in-out',
       position: 'relative' as const,
       overflow: 'hidden' as const,
@@ -59,14 +59,14 @@ export const IconButton: React.FC<IconButtonProps> = ({
     const getStateLayerColor = () => {
       switch (variant) {
         case 'filled':
-          return theme.onPrimary;
+          return colors.onPrimary;
         case 'tonal':
-          return theme.onSecondary;
+          return colors.onSecondary;
         case 'outlined':
         case 'standard':
         case 'elevated':
         default:
-          return theme.primary;
+          return colors.primary;
       }
     };
 
@@ -79,7 +79,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
           return {
             ...baseStyle,
             backgroundColor: 'transparent',
-            color: theme.onSurface,
+            color: colors.onSurface,
             opacity: 0.4,
             boxShadow: 'none',
           };
@@ -87,9 +87,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
           return {
             ...baseStyle,
             backgroundColor: 'transparent',
-            color: theme.onSurface,
+            color: colors.onSurface,
             opacity: 0.4,
-            border: `1px solid ${theme.onSurface}`,
+            border: `1px solid ${colors.onSurface}`,
             borderOpacity: 0.15,
           };
         case 'standard':
@@ -97,7 +97,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
           return {
             ...baseStyle,
             backgroundColor: 'transparent',
-            color: theme.onSurface,
+            color: colors.onSurface,
             opacity: 0.4,
           };
       }
@@ -113,17 +113,17 @@ export const IconButton: React.FC<IconButtonProps> = ({
       if (isToggled) {
         switch (variant) {
           case 'filled':
-            return theme.primary;
+            return colors.primary;
           case 'tonal':
-            return theme.secondaryContainer;
+            return colors.secondaryContainer;
           case 'outlined':
-            return theme.primaryContainer;
+            return colors.primaryContainer;
           case 'standard':
-            return theme.primaryContainer;
+            return colors.primaryContainer;
           case 'elevated':
-            return theme.primaryContainer;
+            return colors.primaryContainer;
           default:
-            return theme.primaryContainer;
+            return colors.primaryContainer;
         }
       }
       return null;
@@ -135,23 +135,23 @@ export const IconButton: React.FC<IconButtonProps> = ({
       case 'filled':
         return {
           ...baseStyle,
-          backgroundColor: toggleBg || theme.primary,
-          color: theme.onPrimary,
+          backgroundColor: toggleBg || colors.primary,
+          color: colors.onPrimary,
           boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
         };
       case 'outlined':
         return {
           ...baseStyle,
           backgroundColor: toggleBg || 'transparent',
-          color: isToggled ? theme.onPrimaryContainer : theme.primary,
-          border: `1px solid ${theme.primary}`,
+          color: isToggled ? colors.onPrimaryContainer : colors.primary,
+          border: `1px solid ${colors.primary}`,
           boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
         };
       case 'standard':
         return {
           ...baseStyle,
           backgroundColor: toggleBg || 'transparent',
-          color: isToggled ? theme.onPrimaryContainer : theme.primary,
+          color: isToggled ? colors.onPrimaryContainer : colors.primary,
           border: 'none',
           boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
         };
@@ -159,7 +159,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
         return {
           ...baseStyle,
           backgroundColor: toggleBg || 'transparent',
-          color: isToggled ? theme.onPrimaryContainer : theme.primary,
+          color: isToggled ? colors.onPrimaryContainer : colors.primary,
           border: 'none',
           boxShadow: stateLayerOpacity > 0 
             ? `0 2px 4px rgba(0, 0, 0, 0.1), inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})`
@@ -168,8 +168,8 @@ export const IconButton: React.FC<IconButtonProps> = ({
       case 'tonal':
         return {
           ...baseStyle,
-          backgroundColor: toggleBg || theme.secondaryContainer,
-          color: theme.onSecondaryContainer,
+          backgroundColor: toggleBg || colors.secondaryContainer,
+          color: colors.onSecondaryContainer,
           boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
         };
       default:

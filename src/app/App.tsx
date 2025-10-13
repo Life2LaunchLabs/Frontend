@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage, DashboardPage } from '../features/dashboard';
 import { ProfilePage, AccountPage } from '../features/profile';
-import { ExplorePage } from '../features/quests';
+import { ExplorePage, QuestsListPage, QuestDetailPage } from '../features/quests';
 import { MapPage } from '../features/map';
 import { ChatPage } from '../features/chat';
-import { DevPage, ChatSettingsPage } from '../features/dev';
+import { DevPage, ChatSettingsPage, ActivityDemoPage } from '../features/dev';
 import { AuthPage, AuthGuard, useAuth } from '../features/auth';
+import { OrgSelectPage, AdminDashboard, AdminActivityDetailPage, AdminActivityEditPage, AdminQuestsPage, AdminQuestDetailPage, AdminAccountPage } from '../features/admin';
+import { ActivityDetailPage, ActivitySessionPage, ActivityResultsPage } from '../features/activities';
 import './App.css';
 
 // Component to handle root route redirects
@@ -100,6 +102,22 @@ function App() {
             </AuthGuard>
           }
         />
+        <Route
+          path="/quests"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <QuestsListPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/quests/:questId"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <QuestDetailPage />
+            </AuthGuard>
+          }
+        />
 
         {/* Dev route - also protected */}
         <Route
@@ -118,7 +136,107 @@ function App() {
             </AuthGuard>
           }
         />
-        
+        <Route
+          path="/dev/activities"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ActivityDemoPage />
+            </AuthGuard>
+          }
+        />
+
+        {/* Activity routes - also protected */}
+        <Route
+          path="/activities/:activityId"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ActivityDetailPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/activities/active/:activityId/:pageIndex"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ActivitySessionPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/activities/active/:activityId"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ActivitySessionPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/activities/results/:activityId"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <ActivityResultsPage />
+            </AuthGuard>
+          }
+        />
+
+        {/* Admin routes - also protected */}
+        <Route
+          path="/admin/select-org"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <OrgSelectPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AdminDashboard />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/activities/:id"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AdminActivityDetailPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/activities/:id/edit"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AdminActivityEditPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/quests"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AdminQuestsPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/quests/:questId"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AdminQuestDetailPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/account"
+          element={
+            <AuthGuard fallback={<Navigate to="/login" replace />}>
+              <AdminAccountPage />
+            </AuthGuard>
+          }
+        />
+
         {/* Catch-all redirect to login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

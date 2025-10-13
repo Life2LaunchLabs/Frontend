@@ -20,7 +20,7 @@ export const ChatTextInput: React.FC<ChatTextInputProps> = ({
   className,
   style,
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,7 +33,7 @@ export const ChatTextInput: React.FC<ChatTextInputProps> = ({
   }, [value]);
 
   const containerStyles: React.CSSProperties = {
-    backgroundColor: `${theme.surfaceContainer}E6`, // 90% opacity
+    backgroundColor: `${colors.surfaceContainer}E6`, // 90% opacity
     backdropFilter: 'blur(8px)',
     borderRadius: tokens.borderRadius.large,
     padding: tokens.spacing[4],
@@ -47,26 +47,26 @@ export const ChatTextInput: React.FC<ChatTextInputProps> = ({
     flex: 1,
     resize: 'none' as const,
     borderRadius: tokens.borderRadius.large,
-    border: `1px solid ${isFocused ? theme.primary : theme.onSurfaceVariant}`,
+    border: `1px solid ${isFocused ? colors.primary : colors.onSurfaceVariant}`,
     padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-    backgroundColor: theme.surface,
-    color: theme.onSurface,
+    backgroundColor: colors.surface,
+    color: colors.onSurface,
     ...tokens.typography.body.medium,
     minHeight: '48px',
     maxHeight: '128px',
     outline: 'none',
     transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
-    boxShadow: isFocused ? `0 0 0 2px ${theme.primary}20` : 'none',
+    boxShadow: isFocused ? `0 0 0 2px ${colors.primary}20` : 'none',
     opacity: disabled ? 0.5 : 1,
   };
 
   const buttonStyles: React.CSSProperties = {
-    backgroundColor: (!value.trim() || disabled) 
-      ? theme.onSurfaceVariant 
-      : theme.primary,
-    color: (!value.trim() || disabled) 
-      ? theme.surface 
-      : theme.onPrimary,
+    backgroundColor: (!value.trim() || disabled)
+      ? colors.onSurfaceVariant
+      : colors.primary,
+    color: (!value.trim() || disabled)
+      ? colors.surface
+      : colors.onPrimary,
     borderRadius: tokens.borderRadius.full,
     padding: tokens.spacing[3],
     border: 'none',

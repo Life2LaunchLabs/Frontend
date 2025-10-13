@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../../styles';
+/** @jsxImportSource @emotion/react */
+import { useState } from 'react';
+import { useTheme, stateLayer, stateOpacity, withOpacity } from '../../../styles';
 import { Icon } from '../Icon';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,54 +14,57 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'filled',
-  icon = 'add',
+  icon = false,
   disabled = false,
   onClick,
   ...props
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
-  const getButtonStyles = () => {
-    const baseStyle = {
-      borderRadius: tokens.borderRadius.full,
-      padding: `${tokens.spacing[2]} ${tokens.spacing[6]}`,
-      display: 'flex',
-      alignItems: 'center',
-      gap: tokens.spacing[2],
-      border: 'none',
-      cursor: disabled ? 'default' : 'pointer',
-      ...tokens.typography.title.small,
-      transition: 'all 0.15s ease-in-out',
-      position: 'relative' as const,
-      overflow: 'hidden' as const,
-      // tabIndex will be handled by props
-    };
+  const getStateLayerOpacity = () => {
+    if (disabled) return 0;
+    if (isPressed) return stateOpacity.pressed;
+    if (isFocused) return stateOpacity.focus;
+    if (isHovered) return stateOpacity.hover;
+    return 0;
+  };
 
-    const getStateLayerOpacity = () => {
-      if (disabled) return 0;
-      if (isPressed) return 0.12;
-      if (isFocused) return 0.12;
-      if (isHovered) return 0.10;
-      return 0;
-    };
+  const getStateLayerColor = () => {
+    switch (variant) {
+      case 'filled':
+        return '#ffffff';
+      case 'tonal':
+        return colors.onSurface;
+      case 'outlined':
+      case 'text':
+      case 'elevated':
+      default:
+        return colors.primary;
+    }
+  };
 
-    const getStateLayerColor = () => {
-      switch (variant) {
-        case 'filled':
-          return theme.onPrimary;
-        case 'tonal':
-          return theme.onSecondary;
-        case 'outlined':
-        case 'text':
-        case 'elevated':
-        default:
-          return theme.primary;
-      }
-    };
+  const baseStyles = {
+    borderRadius: tokens.borderRadius.full,
+    padding: `${tokens.spacing[2]} ${tokens.spacing[6]}`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacing[2],
+    border: 'none',
+    cursor: disabled ? 'default' : 'pointer',
+    ...tokens.typography.label.large,
+    transition: tokens.transitions.normal,
+    position: 'relative' as const,
+    overflow: 'hidden' as const,
+  };
 
+  const stateLayerOpacity = getStateLayerOpacity();
+  const stateLayerColorValue = getStateLayerColor();
+
+  // Build variant-specific styles
+  const getVariantStyles = () => {
     if (disabled) {
       // Disabled styles
       switch (variant) {
@@ -68,95 +72,74 @@ export const Button: React.FC<ButtonProps> = ({
         case 'elevated':
         case 'tonal':
           return {
-            ...baseStyle,
-            backgroundColor: 'transparent',
-            color: theme.onSurface,
-            opacity: 0.4,
+            backgroundColor: withOpacity(colors.onSurface, 0.12),
+            color: colors.onSurfaceVariant,
             boxShadow: 'none',
           };
         case 'outlined':
           return {
-            ...baseStyle,
             backgroundColor: 'transparent',
-            color: theme.onSurface,
-            opacity: 0.4,
-            border: `1px solid ${theme.onSurface}`,
-            borderOpacity: 0.15,
+            color: colors.onSurfaceVariant,
+            border: `1px solid ${withOpacity(colors.onSurface, 0.12)}`,
           };
         case 'text':
         default:
           return {
-            ...baseStyle,
             backgroundColor: 'transparent',
-            color: theme.onSurface,
-            opacity: 0.4,
+            color: colors.onSurfaceVariant,
           };
       }
     }
 
-    // Enabled styles
-    const stateLayerOpacity = getStateLayerOpacity();
-    const stateLayerColor = getStateLayerColor();
-    
+    // Enabled styles with state layers
     switch (variant) {
       case 'filled':
         return {
-          ...baseStyle,
-          backgroundColor: theme.primary,
-          color: theme.onPrimary,
-          boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
+          backgroundColor: colors.primary,
+          color: '#ffffff',
+          boxShadow: stateLayerOpacity > 0
+            ? `inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacity)}`
+            : 'none',
         };
       case 'outlined':
         return {
-          ...baseStyle,
           backgroundColor: 'transparent',
-          color: theme.primary,
-          border: `1px solid ${theme.primary}`,
-          boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
+          color: colors.primary,
+          border: `1px solid ${colors.outline}`,
+          boxShadow: stateLayerOpacity > 0
+            ? `inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacity)}`
+            : 'none',
         };
       case 'text':
         return {
-          ...baseStyle,
           backgroundColor: 'transparent',
-          color: theme.primary,
+          color: colors.primary,
           border: 'none',
-          boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
+          boxShadow: stateLayerOpacity > 0
+            ? `inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacity)}`
+            : 'none',
         };
       case 'elevated':
         return {
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          color: theme.primary,
+          backgroundColor: colors.surface,
+          color: colors.primary,
           border: 'none',
-          boxShadow: stateLayerOpacity > 0 
-            ? `0 2px 4px rgba(0, 0, 0, 0.1), inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})`
-            : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          boxShadow: stateLayerOpacity > 0
+            ? `${tokens.shadows.small}, inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacity)}`
+            : tokens.shadows.small,
         };
       case 'tonal':
         return {
-          ...baseStyle,
-          backgroundColor: theme.secondaryContainer,
-          color: theme.onSecondaryContainer,
-          boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
+          backgroundColor: colors.surfaceContainer,
+          color: colors.onSurface,
+          boxShadow: stateLayerOpacity > 0
+            ? `inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacity)}`
+            : 'none',
         };
       default:
-        return baseStyle;
+        return {};
     }
   };
-
-  const hexToRgb = (hex: string): string => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-      : '0, 0, 0';
-  };
-
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
-  const handleMouseDown = () => setIsPressed(true);
-  const handleMouseUp = () => setIsPressed(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (!disabled && onClick) {
@@ -167,25 +150,31 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       {...props}
-      className="l2l-button"
-      style={getButtonStyles()}
+      css={{
+        ...baseStyles,
+        ...getVariantStyles(),
+        '&:focus-visible': {
+          outline: `2px solid ${colors.primary}`,
+          outlineOffset: '2px',
+        },
+      }}
       disabled={disabled}
       tabIndex={disabled ? -1 : 0}
       onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
       data-hovered={isHovered}
       data-focused={isFocused}
       data-pressed={isPressed}
     >
       {icon !== false && (
-        <Icon 
-          name={icon} 
-          typography="title-medium" 
+        <Icon
+          name={icon}
+          typography="title-medium"
           color="inherit"
         />
       )}

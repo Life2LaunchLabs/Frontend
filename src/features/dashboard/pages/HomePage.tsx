@@ -1,184 +1,143 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import trainCarImage from '../../../shared/assets/images/train_car.png'
-import character1Image from '../assets/images/character_1.png'
-import character1IdleImage from '../assets/images/character_1_idle.png'
-import { useTheme } from '../../../styles'
-import { DailyUpdate, IconButton } from '../../../shared/components'
+/** @jsxImportSource @emotion/react */
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../../styles';
+import { PageLayout, Pane } from '@shared/components';
+import { useUpcomingQuestItems, useActiveQuests, useUserProfile } from '../api/hooks';
+import { MilestoneCard, QuestCard, MilestoneCalendar } from '../components';
+import type { QuestEnrollment, QuestItem } from '../api/types';
 
-function HomePage() {
-  const { tokens } = useTheme()
-  const navigate = useNavigate()
-  const [isGlowing, setIsGlowing] = useState(false)
+export const HomePage: React.FC = () => {
+  const { colors, tokens } = useTheme();
+  const navigate = useNavigate();
+  const { data: upcomingItems, isLoading, error } = useUpcomingQuestItems();
+  const { data: quests, isLoading: questsLoading, error: questsError } = useActiveQuests();
+  const { data: userProfile, isLoading: profileLoading, error: profileError } = useUserProfile();
 
-  const styles = {
-    pageContainer: {
-      position: 'fixed' as const,
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      overflow: 'hidden',
-      margin: 0,
-      padding: 0,
-    },
-    backgroundSvg: {
-      position: 'absolute' as const,
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-    },
-    contentOverlay: {
-      position: 'relative' as const,
-      zIndex: 10,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      height: '100vh',
-      padding: 0,
-      margin: 0,
-      pointerEvents: 'none' as const,
-    },
-    dailyUpdateSection: {
-      position: 'fixed' as const,
-      bottom: tokens.spacing[8],
-      left: '50%',
-      transform: 'translateX(-50%)',
-      zIndex: 20,
-      pointerEvents: 'auto' as const,
-      width: '90%',
-      maxWidth: '600px',
-    },
-    contentArea: {
-      flex: 1,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    userIconButton: {
-      position: 'fixed' as const,
-      top: tokens.spacing[8],
-      right: tokens.spacing[8],
-      zIndex: 30,
-      pointerEvents: 'auto' as const,
-    },
-  }
+
+  const handleMilestoneClick = (milestone: QuestItem) => {
+    // Navigate to activity detail if it's an activity, otherwise navigate to quest detail
+    if (milestone.item_definition?.item_type === 'activity' && milestone.item_definition?.activity) {
+      navigate(`/activities/${milestone.item_definition.activity.id}`);
+    }
+    // For milestones, we don't navigate (or you could navigate to quest detail if you have the quest ID)
+  };
+
+  const handleQuestClick = (quest: QuestEnrollment) => {
+    navigate(`/quests/${quest.id}`);
+  };
+  
+  // Get all quest items for calendar markers
+  const allItems = upcomingItems || [];
 
   return (
-    <div style={styles.pageContainer}>
-      <svg
-        style={styles.backgroundSvg}
-        viewBox="0 0 1000 1000"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <pattern
-            id="trainBackground"
-            patternUnits="userSpaceOnUse"
-            width="1000"
-            height="1000"
-          >
-            <image
-              href={trainCarImage}
-              x="0"
-              y="0"
-              width="1000"
-              height="1000"
-              preserveAspectRatio="xMidYMid slice"
-            />
-          </pattern>
-          <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255, 255, 255, 0.8)" />
-            <stop offset="30%" stopColor="rgba(255, 255, 255, 0.4)" />
-            <stop offset="70%" stopColor="rgba(255, 255, 255, 0.1)" />
-            <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
-          </radialGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
-            <feMerge> 
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/> 
-            </feMerge>
-          </filter>
-        </defs>
-        <rect width="1000" height="1000" fill="url(#trainBackground)" />
-        <g>
-          <ellipse
-            cx="555"
-            cy="505"
-            rx="240"
-            ry="200"
-            fill="url(#glowGradient)"
-            filter="url(#glow)"
-            opacity={isGlowing ? 1 : 0}
-            style={{
-              transition: 'opacity 0.15s ease-in-out',
-            }}
-          />
-          <image
-            href={character1IdleImage}
-            x="315"
-            y="375"
-            width="470"
-            height="470"
-            preserveAspectRatio="xMidYMid meet"
-            opacity={isGlowing ? 0 : 1}
-            style={{
-              transition: 'opacity 0.15s ease-in-out',
-            }}
-          />
-          <image
-            href={character1Image}
-            x="330"
-            y="380"
-            width="450"
-            height="450"
-            preserveAspectRatio="xMidYMid meet"
-            opacity={isGlowing ? 1 : 0}
-            style={{
-              transition: 'opacity 0.15s ease-in-out',
-            }}
-          />
-          <rect
-            x="330"
-            y="380"
-            width="450"
-            height="450"
-            fill="transparent"
-            style={{
-              cursor: 'pointer',
-            }}
-            onMouseEnter={() => setIsGlowing(true)}
-            onMouseLeave={() => setIsGlowing(false)}
-            onClick={() => navigate('/chat')}
-          />
-        </g>
-      </svg>
-
-      <div style={styles.contentOverlay}>
-        <div style={styles.contentArea}>
-          {/* Empty content area that fills the center */}
-        </div>
-
-        <div style={styles.dailyUpdateSection}>
-          <DailyUpdate />
-        </div>
-      </div>
-
-      <div style={styles.userIconButton}>
-        <IconButton
-          icon="person"
-          variant="filled"
-          onClick={() => navigate('/account')}
-          style={{
-            width: '56px',
-            height: '56px',
-            backgroundColor: 'white',
-          }}
-        />
-      </div>
-    </div>
-  )
-}
-
-export default HomePage
+    <PageLayout
+      pageName="Home"
+      gridParams={{
+        cols: [
+          { id: 'a', width: 'auto' }, // left column
+          { id: 'b', width: 'minmax(420px, 1fr)'   }, // right column
+        ],
+        stackAt: { base: false },  // side-by-side desktop
+        alignItems: 'stretch',
+        justifyItems: 'stretch',
+      }}
+      // make the second row flexible if you want the bottom to grow:
+      // fillRowIndex={1}  // optional: 0-based (row 0 = top, row 1 = bottom)
+      panes={[
+        {
+          column: 'a',
+          content: (
+            <div css={{ display: 'flex', gap: tokens.spacing[6], minHeight: 0 }}>
+              {profileLoading || questsLoading ? (
+                <p css={{ textAlign: 'center', padding: tokens.spacing[4] }}>Loading...</p>
+              ) : profileError || questsError ? (
+                <p css={{ color: colors.error, textAlign: 'center', padding: tokens.spacing[4] }}>
+                  Failed to load data
+                </p>
+              ) : (
+                <>
+                  <div css={{ flex: 1, display: 'flex', flexDirection: 'column', gap: tokens.spacing[4] }}>
+                    <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+                      <h3 css={{ fontWeight: 600 }}>Your North Star</h3>
+                      <p css={{ color: colors.onSurfaceVariant, lineHeight: 1.5 }}>
+                        {userProfile?.bio || 'No bio set yet. Add your goals and aspirations in your profile.'}
+                      </p>
+                    </div>
+                    <div css={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+                      <h3 css={{ fontWeight: 600 }}>Today</h3>
+                      <p css={{ color: colors.onSurfaceVariant, fontStyle: 'italic' }}>Work in Progress</p>
+                    </div>
+                  </div>
+                  <MilestoneCalendar milestones={allItems} />
+                </>
+              )}
+            </div>
+          ),
+        },
+        {
+          column: 'a',
+          content: (
+            <div css={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <h2 css={{ marginBottom: tokens.spacing[4] }}>Active Quests</h2>
+              {questsLoading ? (
+                <p css={{ textAlign: 'center', padding: tokens.spacing[4] }}>Loading quests...</p>
+              ) : questsError ? (
+                <p css={{ color: colors.error, textAlign: 'center', padding: tokens.spacing[4] }}>Failed to load quests</p>
+              ) : !quests || quests.length === 0 ? (
+                <div css={{ textAlign: 'center', padding: tokens.spacing[8] }}>
+                  No active quests yet.<br />Start your journey by creating your first quest!
+                </div>
+              ) : (
+                <div
+                  css={{
+                    display: 'flex',
+                    gap: tokens.spacing[4],
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    paddingBottom: tokens.spacing[2],
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: `${colors.outline} transparent`,
+                    '&::-webkit-scrollbar': { height: '8px' },
+                    '&::-webkit-scrollbar-track': { background: 'transparent' },
+                    '&::-webkit-scrollbar-thumb': { backgroundColor: colors.outline, borderRadius: '4px' },
+                    '&::-webkit-scrollbar-thumb:hover': { backgroundColor: colors.onSurfaceVariant },
+                  }}
+                >
+                  {quests.map((q) => (
+                    <QuestCard key={q.id} quest={q} onClick={handleQuestClick} />
+                  ))}
+                </div>
+              )}
+            </div>
+          ),
+        },
+        {
+          column: 'b',
+          content: (
+            <div css={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <h2 css={{ marginBottom: tokens.spacing[4] }}>Upcoming Quest Items</h2>
+              {isLoading ? (
+                <p css={{ textAlign: 'center', padding: tokens.spacing[4] }}>Loading upcoming items...</p>
+              ) : error ? (
+                <p css={{ color: colors.error, textAlign: 'center', padding: tokens.spacing[4] }}>
+                  Failed to load quest items
+                </p>
+              ) : !upcomingItems || upcomingItems.length === 0 ? (
+                <div css={{ textAlign: 'center', padding: tokens.spacing[8] }}>
+                  No upcoming items! 🎉<br />You're all caught up or ready to start your first quest.
+                </div>
+              ) : (
+                <div css={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+                  {upcomingItems.map((item) => (
+                    <MilestoneCard key={item.id} milestone={item} onClick={handleMilestoneClick} />
+                  ))}
+                </div>
+              )}
+            </div>
+          ),
+          spanRows: true, css: { minHeight: 0, overflow: 'hidden' } ,
+        },
+      ]}
+    />
+  );
+};

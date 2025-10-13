@@ -1,29 +1,37 @@
 import { apiClient } from '../../../lib/api';
 import type {
   DashboardData,
-  Milestone,
-  Quest,
+  QuestItem,
+  QuestEnrollment,
   UserProfile
 } from './types';
 
 /**
- * Dashboard service for fetching dashboard-specific data
+ * Dashboard service for fetching dashboard-specific data (unified quest system)
  */
 export class DashboardService {
   /**
-   * Get upcoming milestones for the dashboard todo list using V2 bridge API
-   * Returns the 5 earliest non-completed milestones
+   * Get upcoming quest items for the dashboard todo list
+   * Returns the next 5 non-completed items from active quests
    */
-  static async getUpcomingMilestones(): Promise<Milestone[]> {
-    const response = await apiClient.get<Milestone[]>('/api/v2/milestones/upcoming/');
+  static async getUpcomingQuestItems(): Promise<QuestItem[]> {
+    const response = await apiClient.get<QuestItem[]>('/api/quest-items/upcoming/');
     return response.data;
   }
 
   /**
-   * Get user's quests for dashboard overview using V2 bridge API
+   * Get user's active quest enrollments
    */
-  static async getQuests(): Promise<Quest[]> {
-    const response = await apiClient.get<Quest[]>('/api/v2/quests/');
+  static async getActiveQuests(): Promise<QuestEnrollment[]> {
+    const response = await apiClient.get<QuestEnrollment[]>('/api/quests/active/');
+    return response.data;
+  }
+
+  /**
+   * Get all user's quest enrollments
+   */
+  static async getAllQuests(): Promise<QuestEnrollment[]> {
+    const response = await apiClient.get<QuestEnrollment[]>('/api/quests/');
     return response.data;
   }
 
@@ -36,18 +44,17 @@ export class DashboardService {
   }
 
   /**
-   * Get all dashboard data in a single request (future extensibility)
-   * This can be extended to include other dashboard components' data
+   * Get all dashboard data
    */
   static async getDashboardData(): Promise<DashboardData> {
-    // For now, we'll make separate calls but this can be optimized later
-    // with a dedicated dashboard endpoint that returns everything at once
-    const [upcomingMilestones] = await Promise.all([
-      this.getUpcomingMilestones(),
+    const [upcomingItems, activeQuests] = await Promise.all([
+      this.getUpcomingQuestItems(),
+      this.getActiveQuests(),
     ]);
 
     return {
-      upcoming_milestones: upcomingMilestones,
+      upcoming_items: upcomingItems,
+      active_quests: activeQuests,
     };
   }
 }

@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../styles';
 import { IconButton } from '../../../shared/components';
+import { MapMarker, ActivityDetailPane } from '../components';
+import { useMapActivities } from '../api';
 import isoMapImage from '../../../shared/assets/images/iso_map.png';
 
 
@@ -9,9 +11,13 @@ export const MapPage: React.FC = () => {
   const navigate = useNavigate();
   const { tokens } = useTheme();
   const svgRef = useRef<SVGSVGElement>(null);
+  const { data: activities, isLoading, error } = useMapActivities();
 
   // Image dimensions (will be set from actual image)
   const [imageDimensions, setImageDimensions] = useState({ width: 1500, height: 1500 });
+
+  // Selected activity for detail pane
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
 
   // Image scale factor (configurable)
   const IMAGE_SCALE = 2.0; // 1.0 = native resolution, 0.5 = half size, 2.0 = double size
@@ -71,14 +77,23 @@ export const MapPage: React.FC = () => {
     });
   }, [SCROLL_VECTOR_X, SCROLL_VECTOR_Y, MAX_SCROLL_X, MAX_SCROLL_Y]);
 
-  // Map markers in diagonal line (positioned relative to map size)
-  const markers = [
-    { id: 1, x: MAP_WIDTH * 0.2, y: MAP_HEIGHT * 0.2 },
-    { id: 2, x: MAP_WIDTH * 0.35, y: MAP_HEIGHT * 0.35 },
-    { id: 3, x: MAP_WIDTH * 0.5, y: MAP_HEIGHT * 0.5 },
-    { id: 4, x: MAP_WIDTH * 0.65, y: MAP_HEIGHT * 0.65 },
-    { id: 5, x: MAP_WIDTH * 0.8, y: MAP_HEIGHT * 0.8 },
-  ];
+  // Generate markers from activities data (bottom-left to top-right)
+  const markers = React.useMemo(() => {
+    if (!activities || activities.length === 0) return [];
+
+    return activities.slice(0, 5).map((activity, index) => {
+      // Position from bottom-left to top-right
+      const progress = index / Math.max(activities.length - 1, 1);
+      return {
+        id: activity.id,
+        x: MAP_WIDTH * (0.2 + progress * 0.6), // 0.2 to 0.8 horizontally
+        y: MAP_HEIGHT * (0.8 - progress * 0.6), // 0.8 to 0.2 vertically (bottom to top)
+        title: activity.title,
+        description: activity.description,
+        activity: activity,
+      };
+    });
+  }, [activities, MAP_WIDTH, MAP_HEIGHT]);
 
   // Load image and get actual dimensions
   useEffect(() => {
@@ -224,12 +239,6 @@ export const MapPage: React.FC = () => {
       bottom: 0,
       cursor: isDragging ? 'grabbing' : 'grab',
     },
-    mapMarker: {
-      fill: '#DC2626',
-      stroke: 'white',
-      strokeWidth: 2,
-      cursor: 'pointer',
-    },
   });
 
   const styles = getStyles();
@@ -241,6 +250,29 @@ export const MapPage: React.FC = () => {
   const handleUserClick = () => {
     navigate('/account');
   };
+
+  const handleMarkerClick = (activityId: string) => {
+    setSelectedActivityId(activityId);
+  };
+
+  const handleMarkerHover = (_activityId: string, _isHovering: boolean) => {
+    // Could add hover effects here if needed
+  };
+
+  const handleCloseDetailPane = () => {
+    setSelectedActivityId(null);
+  };
+
+  const handleStartActivity = (activityId: string) => {
+    console.log('Starting activity:', activityId);
+    // Navigate to the new activity session page
+    navigate(`/activities/active/${activityId}/0`);
+    // Close the detail pane
+    setSelectedActivityId(null);
+  };
+
+  // Get the selected activity data
+  const selectedActivity = activities?.find(activity => activity.id === selectedActivityId) || null;
 
   return (
     <div style={styles.pageContainer} data-testid="map-page">
@@ -298,17 +330,59 @@ export const MapPage: React.FC = () => {
           fill="url(#mapPattern)"
         />
 
-        {/* Map markers in diagonal line */}
-        {markers.map((marker) => (
-          <circle
+        {/* Map markers */}
+        {!isLoading && !error && markers.map((marker) => (
+          <MapMarker
             key={marker.id}
-            cx={marker.x}
-            cy={marker.y}
-            r="8"
-            style={styles.mapMarker}
+            id={marker.id}
+            x={marker.x}
+            y={marker.y}
+            title={marker.title}
+            description={marker.description}
+            onClick={handleMarkerClick}
+            onHover={handleMarkerHover}
           />
         ))}
+
+        {/* Loading state */}
+        {isLoading && (
+          <text
+            x={MAP_WIDTH / 2}
+            y={MAP_HEIGHT / 2}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="white"
+            fontSize="18"
+            fontWeight="600"
+          >
+            Loading activities...
+          </text>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <text
+            x={MAP_WIDTH / 2}
+            y={MAP_HEIGHT / 2}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#ff6b6b"
+            fontSize="18"
+            fontWeight="600"
+          >
+            Failed to load activities
+          </text>
+        )}
       </svg>
+
+      {/* Activity Detail Pane */}
+      {selectedActivity && (
+        <ActivityDetailPane
+          activity={selectedActivity}
+          onClose={handleCloseDetailPane}
+          onStartActivity={handleStartActivity}
+        />
+      )}
     </div>
   );
 };

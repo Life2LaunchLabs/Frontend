@@ -22,7 +22,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   className,
   style,
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
 
   const getLoadingText = () => {
     if (loadingText) return loadingText;
@@ -33,7 +33,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
   };
 
   const containerStyles: React.CSSProperties = {
-    backgroundColor: `${theme.surface}CC`, // 80% opacity
+    backgroundColor: `${colors.surface}CC`, // 80% opacity
     backdropFilter: 'blur(8px)',
     borderRadius: tokens.borderRadius.large,
     padding: tokens.spacing[4],
@@ -44,7 +44,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   const messageStyles: React.CSSProperties = {
     ...tokens.typography.body.medium,
-    color: theme.onSurface,
+    color: colors.onSurface,
     margin: 0,
     whiteSpace: 'pre-wrap' as const,
     lineHeight: 1.6,
@@ -52,7 +52,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
 
   const loadingStyles: React.CSSProperties = {
     ...tokens.typography.body.medium,
-    color: theme.onSurfaceVariant,
+    color: colors.onSurfaceVariant,
     textAlign: 'center' as const,
     margin: 0,
   };
@@ -61,7 +61,7 @@ export const MessageArea: React.FC<MessageAreaProps> = ({
     display: 'inline-block',
     width: '2px',
     height: '1.2em',
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
     marginLeft: '2px',
     animation: 'blink 1s infinite',
   };

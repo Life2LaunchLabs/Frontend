@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AuthService } from './AuthService';
 import { authManager } from '../../../lib/api/auth';
-import { formatApiError } from '../../../lib/api/utils';
-import { useToast } from '../../../shared/components';
 import type {
   LoginCredentials,
   RegisterCredentials,
@@ -81,7 +79,6 @@ export const useAuth = () => {
  */
 export const useLogin = () => {
   const { login } = useAuth();
-  const toast = useToast();
 
   return useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
@@ -93,12 +90,9 @@ export const useLogin = () => {
 
       // Don't cache login user data as profile data - they use different serializers
       // Profile data will be fetched fresh when needed
-
-      toast.showSuccess('Welcome back!', `Logged in as ${data.user.email}`);
     },
     onError: (error) => {
-      const errorInfo = formatApiError(error, 'auth');
-      toast.showError(errorInfo.title, errorInfo.message);
+      console.error('Login error:', error);
     },
   });
 };
@@ -108,7 +102,6 @@ export const useLogin = () => {
  */
 export const useRegister = () => {
   const { login } = useAuth();
-  const toast = useToast();
 
   return useMutation({
     mutationFn: async (credentials: RegisterCredentials) => {
@@ -120,12 +113,9 @@ export const useRegister = () => {
 
       // Don't cache registration user data as profile data - they use different serializers
       // Profile data will be fetched fresh when needed
-
-      toast.showSuccess('Account created!', `Welcome ${data.user.full_name || data.user.email}!`);
     },
     onError: (error) => {
-      const errorInfo = formatApiError(error, 'auth');
-      toast.showError(errorInfo.title, errorInfo.message);
+      console.error('Registration error:', error);
     },
   });
 };
@@ -136,7 +126,6 @@ export const useRegister = () => {
 export const useLogout = () => {
   const { logout } = useAuth();
   const queryClient = useQueryClient();
-  const toast = useToast();
 
   return useMutation({
     mutationFn: async () => {
@@ -150,15 +139,11 @@ export const useLogout = () => {
     onSuccess: () => {
       logout();
       queryClient.clear(); // Clear all cached data
-      toast.showSuccess('Goodbye!', 'You have been logged out successfully');
     },
     onError: () => {
       // Still logout locally even if API fails
       logout();
       queryClient.clear();
-
-      // const errorInfo = formatApiError(error);
-      toast.showWarning('Logged out locally', 'Server logout failed but you have been logged out locally');
     },
   });
 };
@@ -190,7 +175,6 @@ export const useProfile = () => {
  */
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
-  const toast = useToast();
 
   return useMutation({
     mutationFn: async (profileData: Partial<User>) => {
@@ -200,12 +184,9 @@ export const useUpdateProfile = () => {
     onSuccess: (updatedUser) => {
       // Update cached user data
       queryClient.setQueryData(authQueryKeys.profile(), updatedUser);
-
-      toast.showSuccess('Profile updated!', 'Your profile has been updated successfully');
     },
     onError: (error) => {
-      const errorInfo = formatApiError(error, 'profile');
-      toast.showError(errorInfo.title, errorInfo.message);
+      console.error('Profile update error:', error);
     },
   });
 };
