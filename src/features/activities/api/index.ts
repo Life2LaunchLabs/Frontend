@@ -15,6 +15,11 @@ export class ActivitiesService {
     return response.data;
   }
 
+  static async getActivityForEdit(id: string): Promise<Activity> {
+    const response = await apiClient.get<Activity>(`${this.adminURL}/activities/${id}/`);
+    return response.data;
+  }
+
   static async getActivityPage(activityId: string, pageIndex: number): Promise<any> {
     // Fetch the full activity with nested pages and blocks
     const activity = await this.getActivity(activityId);
@@ -169,7 +174,7 @@ export class ActivitiesService {
 
   // Comprehensive save endpoint that handles activity, pages, and blocks in one transaction
   static async saveActivityEdits(id: string, saveData: {
-    activity: Activity;
+    activity: Partial<Activity>;
     activity_version: any;
     pages: any[];
     total_pages: number;
