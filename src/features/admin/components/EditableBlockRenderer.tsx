@@ -5,7 +5,6 @@ import { EditableTextBlock } from './EditableTextBlock';
 import { EditableMediaBlock } from './EditableMediaBlock';
 import { EditableTextInputBlock } from './EditableTextInputBlock';
 import { EditableMultipleChoiceBlock } from './EditableMultipleChoiceBlock';
-
 export interface EditableBlockRendererProps {
   block: Block;
   media: MediaAsset[];

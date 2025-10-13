@@ -88,9 +88,9 @@ export const EditableMultipleChoiceBlock: React.FC<EditableMultipleChoiceBlockPr
 
   const styles = getStyles();
 
-  const options = ((config.config as any).options || []) as MultipleChoiceOption[];
-  const minSelect = (config.config as any).min_select || 1;
-  const maxSelect = (config.config as any).max_select || 1;
+  const options = ((config as any).options || []) as MultipleChoiceOption[];
+  const minSelect = (config as any).min_select || 1;
+  const maxSelect = (config as any).max_select || 1;
 
   const handleChange = (field: keyof QuestionBlockConfig, value: any) => {
     onChange({
