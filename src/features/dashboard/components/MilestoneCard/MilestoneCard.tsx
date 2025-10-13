@@ -1,22 +1,22 @@
 import React from 'react';
 import { useTheme } from '../../../../styles';
-import type { Milestone } from '../../api/types';
+import type { QuestItem } from '../../api/types';
 
 export interface MilestoneCardProps {
-  milestone: Milestone;
-  onClick?: (milestone: Milestone) => void;
+  milestone: QuestItem;
+  onClick?: (milestone: QuestItem) => void;
 }
 
 export const MilestoneCard: React.FC<MilestoneCardProps> = ({
   milestone,
   onClick,
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
 
   const getStyles = () => ({
     card: {
-      backgroundColor: theme.surface,
-      border: `1px solid ${theme.outline}`,
+      backgroundColor: colors.surface,
+      border: `1px solid ${colors.outline}`,
       borderRadius: tokens.borderRadius.medium,
       padding: tokens.spacing[4],
       cursor: onClick ? 'pointer' : 'default',
@@ -24,8 +24,8 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
       marginBottom: tokens.spacing[3],
       position: 'relative' as const,
       ':hover': onClick ? {
-        backgroundColor: theme.surfaceVariant,
-        borderColor: theme.primary,
+        backgroundColor: colors.surfaceVariant,
+        borderColor: colors.primary,
         transform: 'translateY(-1px)',
         boxShadow: tokens.shadows.medium,
       } : {},
@@ -36,7 +36,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
       left: 0,
       width: '4px',
       height: '100%',
-      backgroundColor: milestone.quest.color,
+      backgroundColor: milestone.quest_color,
       borderRadius: `${tokens.borderRadius.small} 0 0 ${tokens.borderRadius.small}`,
     },
     content: {
@@ -45,19 +45,19 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
     title: {
       ...tokens.typography.body.large,
       fontWeight: '600',
-      color: theme.onSurface,
+      color: colors.onSurface,
       marginBottom: tokens.spacing[2],
       lineHeight: 1.3,
     },
     questTitle: {
       ...tokens.typography.body.small,
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       marginBottom: tokens.spacing[1],
       fontWeight: '500',
     },
     dueDate: {
       ...tokens.typography.body.small,
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       display: 'flex',
       alignItems: 'center',
       gap: tokens.spacing[1],
@@ -66,7 +66,7 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
       width: '8px',
       height: '8px',
       borderRadius: '50%',
-      backgroundColor: milestone.status === 'in_progress' ? theme.primary : theme.outline,
+      backgroundColor: milestone.status === 'in_progress' ? colors.primary : colors.outline,
       flexShrink: 0,
     },
   });
@@ -106,10 +106,10 @@ export const MilestoneCard: React.FC<MilestoneCardProps> = ({
       <div style={styles.questColor} />
       <div style={styles.content}>
         <div style={styles.questTitle}>
-          {milestone.quest.title}
+          {milestone.quest_title}
         </div>
         <div style={styles.title}>
-          {milestone.title}
+          {milestone.item_definition.title}
         </div>
         <div style={styles.dueDate}>
           <div style={styles.statusIndicator} />

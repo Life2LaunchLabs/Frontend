@@ -5,6 +5,8 @@ export { ProviderStatusMonitor } from './ProviderStatusMonitor';
 export { LiveChatInterface } from './LiveChatInterface';
 export { SessionHistoryViewer } from './SessionHistoryViewer';
 export { AnalyticsWidget } from './AnalyticsWidget';
+export { ActivityViewer } from './ActivityViewer';
+export { ActivityViewerWithAttempts } from './ActivityViewerWithAttempts';
 
 export type { TestResultsPanelProps } from './TestResultsPanel';
 export type { PresetSelectorProps } from './PresetSelector';
@@ -13,3 +15,5 @@ export type { ProviderStatusMonitorProps } from './ProviderStatusMonitor';
 export type { LiveChatInterfaceProps } from './LiveChatInterface';
 export type { SessionHistoryViewerProps } from './SessionHistoryViewer';
 export type { AnalyticsWidgetProps } from './AnalyticsWidget';
+export type { ActivityViewerProps } from './ActivityViewer';
+export type { ActivityViewerWithAttemptsProps } from './ActivityViewerWithAttempts';

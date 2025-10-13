@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../../../styles';
-import type { Milestone } from '../../api/types';
+import type { QuestItem } from '../../api/types';
 
 export interface MilestoneCalendarProps {
-  milestones: Milestone[];
+  milestones: QuestItem[];
 }
 
 export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
@@ -23,7 +23,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
 
   // Create milestone lookup by date
-  const milestonesByDate = new Map<string, Milestone[]>();
+  const milestonesByDate = new Map<string, QuestItem[]>();
   milestones.forEach(milestone => {
     const date = new Date(milestone.finish_date);
     if (date.getMonth() === selectedMonth && date.getFullYear() === selectedYear) {
@@ -75,7 +75,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
 
   const getStyles = () => ({
     container: {
-      backgroundColor: theme.surfaceContainer,
+      backgroundColor: colors.surfaceContainer,
       borderRadius: tokens.borderRadius.medium,
       padding: tokens.spacing[4],
       minWidth: '280px',
@@ -94,7 +94,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
     navButton: {
       background: 'none',
       border: 'none',
-      color: theme.onSurface,
+      color: colors.onSurface,
       cursor: 'pointer',
       padding: tokens.spacing[2],
       borderRadius: tokens.borderRadius.small,
@@ -105,12 +105,12 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
       height: '32px',
       transition: 'background-color 0.2s ease',
       ':hover': {
-        backgroundColor: theme.surfaceContainerHighest,
+        backgroundColor: colors.surfaceContainerHighest,
       },
     },
     monthYearButton: {
-      ...tokens.typography.titleMedium,
-      color: theme.onSurface,
+      ...tokens.typography.title.medium,
+      color: colors.onSurface,
       background: 'none',
       border: 'none',
       cursor: 'pointer',
@@ -118,7 +118,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
       borderRadius: tokens.borderRadius.small,
       transition: 'background-color 0.2s ease',
       ':hover': {
-        backgroundColor: theme.surfaceContainerHighest,
+        backgroundColor: colors.surfaceContainerHighest,
       },
     },
     datePicker: {
@@ -126,8 +126,8 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
       top: '60px',
       left: '50%',
       transform: 'translateX(-50%)',
-      backgroundColor: theme.surface,
-      border: `1px solid ${theme.outline}`,
+      backgroundColor: colors.surface,
+      border: `1px solid ${colors.outline}`,
       borderRadius: tokens.borderRadius.medium,
       padding: tokens.spacing[4],
       boxShadow: tokens.shadows.large,
@@ -141,8 +141,8 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
       gap: tokens.spacing[2],
     },
     pickerLabel: {
-      ...tokens.typography.labelMedium,
-      color: theme.onSurface,
+      ...tokens.typography.label.medium,
+      color: colors.onSurface,
       fontWeight: 600,
     },
     pickerGrid: {
@@ -151,49 +151,49 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
       gap: tokens.spacing[1],
     },
     pickerItem: {
-      ...tokens.typography.bodySmall,
+      ...tokens.typography.body.small,
       background: 'none',
       border: 'none',
-      color: theme.onSurface,
+      color: colors.onSurface,
       cursor: 'pointer',
       padding: tokens.spacing[2],
       borderRadius: tokens.borderRadius.small,
       textAlign: 'center' as const,
       transition: 'background-color 0.2s ease',
       ':hover': {
-        backgroundColor: theme.primaryContainer,
+        backgroundColor: colors.primaryContainer,
       },
     },
     selectedPickerItem: {
-      backgroundColor: theme.primary,
-      color: theme.onPrimary,
+      backgroundColor: colors.primary,
+      color: colors.onPrimary,
     },
     dayHeaders: {
       display: 'grid',
       gridTemplateColumns: 'repeat(7, 1fr)',
       gap: '1px',
       marginBottom: '1px',
-      backgroundColor: theme.outline,
+      backgroundColor: colors.outline,
     },
     dayHeader: {
-      ...tokens.typography.labelSmall,
-      color: theme.onSurfaceVariant,
+      ...tokens.typography.label.small,
+      color: colors.onSurfaceVariant,
       textAlign: 'center' as const,
       padding: tokens.spacing[2],
       fontWeight: 500,
-      backgroundColor: theme.surfaceContainer,
+      backgroundColor: colors.surfaceContainer,
     },
     calendar: {
       display: 'grid',
       gridTemplateColumns: 'repeat(7, 1fr)',
       gap: '1px',
-      backgroundColor: theme.outline,
+      backgroundColor: colors.outline,
     },
     day: {
       position: 'relative' as const,
       minHeight: '40px',
       maxHeight: '40px',
-      backgroundColor: theme.surface,
+      backgroundColor: colors.surface,
       padding: tokens.spacing[1],
       display: 'flex',
       flexDirection: 'column' as const,
@@ -202,16 +202,16 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
     },
     dayNumber: {
       ...tokens.typography.body.small,
-      color: theme.onSurface,
+      color: colors.onSurface,
       alignSelf: 'flex-start',
       marginBottom: 'auto',
       fontWeight: 500,
     },
     todayDay: {
-      backgroundColor: theme.primaryContainer,
+      backgroundColor: colors.primaryContainer,
     },
     todayDayNumber: {
-      color: theme.onPrimaryContainer,
+      color: colors.onPrimaryContainer,
       fontWeight: 600,
     },
     emptyDay: {
@@ -236,8 +236,8 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
     },
     badgeTooltip: {
       position: 'fixed' as const,
-      backgroundColor: theme.inverseOnSurface,
-      color: theme.inverseSurface,
+      backgroundColor: colors.inverseOnSurface,
+      color: colors.inverseSurface,
       padding: `${tokens.spacing[1]}px ${tokens.spacing[2]}px`,
       borderRadius: tokens.borderRadius.small,
       ...tokens.typography.body.small,
@@ -251,7 +251,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
 
   const styles = getStyles();
 
-  const MilestoneBadge: React.FC<{ milestone: Milestone }> = ({ milestone }) => {
+  const MilestoneBadge: React.FC<{ milestone: QuestItem }> = ({ milestone }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
@@ -268,7 +268,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
       <div
         style={{
           ...styles.milestoneBadge,
-          backgroundColor: milestone.quest.color,
+          backgroundColor: milestone.quest_color,
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setShowTooltip(false)}
@@ -282,7 +282,7 @@ export const MilestoneCalendar: React.FC<MilestoneCalendarProps> = ({ milestones
               transform: 'translate(-50%, -100%)',
             }}
           >
-            {milestone.title}
+            {milestone.item_definition.title}
           </div>
         )}
       </div>

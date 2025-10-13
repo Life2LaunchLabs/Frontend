@@ -1,40 +1,50 @@
 /**
- * Types for dashboard API data
+ * Types for dashboard API data (unified quest system)
  */
 
-export interface Milestone {
+export interface Activity {
   id: string;
-  title: string;
-  description: string;
-  finish_date: string; // ISO date string
-  status: 'not_started' | 'in_progress' | 'complete';
-  order: number;
-  can_be_started: boolean;
-  quest: {
-    id: string;
-    title: string;
-    color: string;
-  };
-  created_at: string;
-  updated_at: string;
+  slug: string;
+  status: string;
 }
 
-export interface Quest {
+export interface QuestItemDefinition {
+  id: string;
+  item_type: 'activity' | 'milestone';
+  title: string;
+  description: string;
+  estimated_duration_days: number;
+  activity?: Activity;
+}
+
+export interface QuestItem {
+  id: string;
+  quest_title: string;
+  quest_color: string;
+  item_definition: QuestItemDefinition;
+  status: 'not_started' | 'in_progress' | 'completed';
+  started_at?: string;
+  finish_date: string; // ISO date string
+  notes?: string;
+}
+
+export interface QuestTemplate {
   id: string;
   title: string;
   description: string;
   color: string;
-  category: 'Personal' | 'Other';
-  is_personal: boolean;
-  milestones_count: number;
-  completed_milestones_count: number;
-  in_progress_milestones_count: number;
-  created_at: string;
-  updated_at: string;
+  category: string;
 }
 
-export interface UpcomingMilestonesResponse {
-  upcoming_milestones: Milestone[];
+export interface QuestEnrollment {
+  id: string;
+  quest_template: QuestTemplate;
+  status: 'active' | 'completed' | 'paused';
+  enrolled_at: string;
+  completed_at?: string;
+  progress_percentage: number;
+  completed_items?: number;
+  total_items?: number;
 }
 
 export interface UserProfile {
@@ -48,6 +58,6 @@ export interface UserProfile {
 }
 
 export interface DashboardData {
-  upcoming_milestones: Milestone[];
-  // Future dashboard data can be added here
+  upcoming_items: QuestItem[];
+  active_quests: QuestEnrollment[];
 }

@@ -15,27 +15,32 @@ export interface Experience {
 
 export interface ExperienceSectionProps {
   experiences: Experience[];
+  asFragment?: boolean;
 }
 
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
-  experiences
+  experiences,
+  asFragment
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const [expandedExperience, setExpandedExperience] = useState<number | null>(null);
 
+  const Container: React.ElementType = asFragment ? React.Fragment : 'div';
+  
+  
   const getStyles = () => ({
     container: {
-      backgroundColor: theme.surfaceContainer,
-      borderColor: theme.outline,
-      boxShadow: tokens.shadows.lg,
+      backgroundColor: colors.surfaceContainer,
+      borderColor: colors.outline,
+      boxShadow: tokens.shadows.large,
       borderRadius: tokens.borderRadius.large,
       padding: tokens.spacing[8],
-      border: `1px solid ${theme.outline}`,
+      border: `1px solid ${colors.outline}`,
       marginBottom: tokens.spacing[8],
     },
     title: {
       ...tokens.typography.headline.medium,
-      color: theme.onSurface,
+      color: colors.onSurface,
       margin: 0,
       marginBottom: tokens.spacing[6],
       fontWeight: '700',
@@ -46,11 +51,11 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       gap: tokens.spacing[4],
     },
     experienceCard: {
-      backgroundColor: theme.surfaceVariant,
-      borderColor: theme.outline,
+      backgroundColor: colors.surfaceVariant,
+      borderColor: colors.outline,
       borderRadius: tokens.borderRadius.medium,
       padding: tokens.spacing[6],
-      border: `1px solid ${theme.outline}`,
+      border: `1px solid ${colors.outline}`,
       cursor: 'pointer',
       transition: 'all 0.15s ease-in-out',
     },
@@ -70,7 +75,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     },
     experienceTitle: {
       ...tokens.typography.headline.small,
-      color: theme.onSurface,
+      color: colors.onSurface,
       margin: 0,
       fontWeight: '600',
     },
@@ -100,36 +105,36 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     },
     companyInfo: {
       ...tokens.typography.body.large,
-      color: theme.primary,
+      color: colors.primary,
       margin: 0,
       marginBottom: tokens.spacing[1],
       fontWeight: '500',
     },
     duration: {
       ...tokens.typography.body.medium,
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       margin: 0,
       marginBottom: tokens.spacing[3],
     },
     description: {
       ...tokens.typography.body.medium,
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       lineHeight: '1.5',
       margin: 0,
     },
     expandIcon: {
       marginLeft: tokens.spacing[4],
       fontSize: '1.2rem',
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
     },
     expandedContent: {
       marginTop: tokens.spacing[4],
       paddingTop: tokens.spacing[4],
-      borderTop: `1px solid ${theme.outline}`,
+      borderTop: `1px solid ${colors.outline}`,
     },
     responsibilitiesTitle: {
       ...tokens.typography.body.medium,
-      color: theme.onSurface,
+      color: colors.onSurface,
       margin: 0,
       marginBottom: tokens.spacing[3],
       fontWeight: '500',
@@ -146,11 +151,11 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       display: 'flex',
       alignItems: 'flex-start',
       gap: tokens.spacing[2],
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       fontSize: tokens.typography.body.medium.fontSize,
     },
     responsibilityBullet: {
-      color: theme.primary,
+      color: colors.primary,
       fontWeight: '700',
     },
   });
@@ -166,7 +171,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   }
 
   return (
-    <div style={styles.container} data-testid="experience-section">
+    <Container {...(!asFragment ? { style: styles.container, 'data-testid': 'experience-section' } : {})}>
       <h2 style={styles.title}>Experience</h2>
 
       <div style={styles.experiencesList}>
@@ -229,6 +234,6 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           </div>
         ))}
       </div>
-    </div>
+    </Container>
   );
 };

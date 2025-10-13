@@ -1,0 +1,11 @@
+1. Willamete Workforce Partnership
+https://willwp.org/jobseekers/
+image: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrqIuYtv264D8xVTUvYnPHF9eszJYuo9I0og&s
+
+2. Worksource Oregon
+https://worksourceoregon.org/jobseekers
+image: https://mcminnville.org/wp-content/uploads/2020/03/Worksource-Oregon-Yamhill-Center-Logo.jpg
+
+3. City of Salem
+https://www.cityofsalem.net/government/jobs
+image: https://www.fws.gov/sites/default/files/images/2025-02/city-of-salem-2025.png

@@ -1,13 +1,36 @@
-import React, { useState, useEffect } from 'react';
+/** @jsxImportSource @emotion/react */
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../../styles';
+import { css } from '@emotion/react';
+import { PageLayout } from '@shared/components'; 
 import { IconButton, Button } from '../../../shared/components';
+import { useTheme } from '../../../styles';
 import { useProfile, useUpdateProfile, useLogout } from '../../auth/api/hooks';
 import type { User } from '../../auth/types';
 
-function AccountPage() {
-  const { theme, tokens } = useTheme();
+const fieldCss = (tokens: any, colors: any, editable: boolean) => css({
+  width: '100%',
+  padding: tokens.spacing[3],
+  borderRadius: tokens.borderRadius.medium,
+  border: `1px solid ${colors.outline}`,
+  backgroundColor: editable ? colors.surface : colors.surfaceContainer,
+  color: colors.onSurface,
+  fontFamily: tokens.typography.fontFamily.default,
+  fontSize: tokens.typography.body.large.fontSize,
+  lineHeight: tokens.typography.body.large.lineHeight,
+  boxSizing: 'border-box',
+  cursor: editable ? 'text' : 'default',
+  ':focus': {
+    outline: 'none',
+    borderColor: colors.primary,
+    boxShadow: `0 0 0 3px ${colors.primary}22`,
+  },
+});
+
+export default function AccountPage() {
+  const { colors, tokens } = useTheme();
   const navigate = useNavigate();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -17,124 +40,43 @@ function AccountPage() {
   });
   const [originalData, setOriginalData] = useState(formData);
 
-  // Fetch user profile data
   const { data: user, isLoading } = useProfile();
-  const updateProfileMutation = useUpdateProfile();
-  const logoutMutation = useLogout();
+  const updateProfile = useUpdateProfile();
+  const logout = useLogout();
 
-  // Update form data when user data is loaded
+  // populate form
   useEffect(() => {
     if (user) {
-      const userData = {
+      const u = {
         email: user.email || '',
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         bio: user.bio || '',
       };
-      setFormData(userData);
-      setOriginalData(userData);
+      setFormData(u);
+      setOriginalData(u);
     }
   }, [user]);
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      backgroundColor: theme.surface,
-      padding: tokens.spacing[6],
-    },
-    header: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: tokens.spacing[8],
-      paddingBottom: tokens.spacing[4],
-      borderBottom: `1px solid ${theme.outline}`,
-    },
-    backButton: {
-      marginRight: tokens.spacing[4],
-    },
-    title: {
-      ...tokens.typography.headline.large,
-      color: theme.onSurface,
-      margin: 0,
-      flex: 1,
-    },
-    content: {
-      maxWidth: '600px',
-      margin: '0 auto',
-    },
-    section: {
-      backgroundColor: theme.surfaceContainer,
-      borderRadius: tokens.borderRadius.large,
-      padding: tokens.spacing[6],
-      marginBottom: tokens.spacing[6],
-    },
-    sectionTitle: {
-      ...tokens.typography.headline.small,
-      color: theme.onSurface,
-      marginBottom: tokens.spacing[4],
-    },
-    formGroup: {
-      marginBottom: tokens.spacing[5],
-    },
-    label: {
-      ...tokens.typography.body.medium,
-      color: theme.onSurface,
-      display: 'block',
-      marginBottom: tokens.spacing[2],
-    },
-    input: {
-      width: '100%',
-      padding: tokens.spacing[3],
-      borderRadius: tokens.borderRadius.medium,
-      border: `1px solid ${theme.outline}`,
-      backgroundColor: theme.surface,
-      color: theme.onSurface,
-      fontFamily: tokens.typography.fontFamily.default.join(', '),
-      fontSize: tokens.typography.body.large.fontSize,
-      lineHeight: tokens.typography.body.large.lineHeight,
-      boxSizing: 'border-box' as const,
-    },
-    textarea: {
-      resize: 'vertical' as const,
-      minHeight: '80px',
-    },
-    buttonGroup: {
-      display: 'flex',
-      gap: tokens.spacing[3],
-      justifyContent: 'flex-end',
-      marginTop: tokens.spacing[6],
-    },
-    dangerSection: {
-      backgroundColor: theme.errorContainer,
-      borderRadius: tokens.borderRadius.large,
-      padding: tokens.spacing[6],
-    },
-    dangerTitle: {
-      ...tokens.typography.headline.small,
-      color: theme.onErrorContainer,
-      marginBottom: tokens.spacing[4],
-    },
-    dangerText: {
-      ...tokens.typography.body.medium,
-      color: theme.onErrorContainer,
-      marginBottom: tokens.spacing[4],
-    },
-  };
+  const isSaving = !!updateProfile.isPending;
+  const isLoggingOut = !!logout.isPending;
+
+  const hasChanges = useMemo(() => {
+    return (
+      formData.email !== originalData.email ||
+      formData.first_name !== originalData.first_name ||
+      formData.last_name !== originalData.last_name ||
+      formData.bio !== originalData.bio
+    );
+  }, [formData, originalData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isEditMode) return;
-
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleEdit = () => {
-    setIsEditMode(true);
-  };
+  const handleEdit = () => setIsEditMode(true);
 
   const handleCancel = () => {
     setFormData(originalData);
@@ -142,6 +84,7 @@ function AccountPage() {
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
     try {
       const updateData: Partial<User> = {
         email: formData.email,
@@ -149,207 +92,241 @@ function AccountPage() {
         last_name: formData.last_name,
         bio: formData.bio,
       };
-
-      await updateProfileMutation.mutateAsync(updateData);
+      await updateProfile.mutateAsync(updateData);
       setOriginalData(formData);
       setIsEditMode(false);
     } catch {
-      // Error handling is done in the mutation hook
+      // error surfaced by hook
     }
   };
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
     try {
-      await logoutMutation.mutateAsync();
+      await logout.mutateAsync();
       navigate('/login');
     } catch {
-      // Error handling is done in the mutation hook
+      // error surfaced by hook
     }
   };
 
   const handleDeleteAccount = () => {
-    // TODO: Implement account deletion with confirmation
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       console.log('Deleting account');
     }
   };
 
+  // ——— Utility header config ———
+  const utilityHeader = {
+    leftAction: { type: 'back' as const, label: 'Back' },
+    rightAction: {
+      label: isEditMode ? (isSaving ? 'Saving…' : 'Save') : 'Done',
+      onClick: isEditMode ? handleSave : () => navigate(-1),
+    },
+  };
+
   if (isLoading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: theme.surface,
-        ...tokens.typography.body.large,
-        color: theme.onSurface,
-      }}>
-        Loading...
-      </div>
+      <PageLayout
+        pageName="Account Settings"
+        layoutMode="utility"
+        utilityHeader={utilityHeader}
+        panes={[
+          {
+            content: (
+              <div
+                css={{
+                  minHeight: '40vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  ...tokens.typography.body.large,
+                  color: colors.onSurface,
+                }}
+              >
+                Loading…
+              </div>
+            ),
+          },
+        ]}
+      />
     );
   }
 
+  // ——— Section blocks ———
+
+  const sectionTitle = css({
+    ...tokens.typography.headline.small,
+    color: colors.onSurface,
+    marginBottom: tokens.spacing[4],
+  });
+
+  const formGroup = css({
+    marginBottom: tokens.spacing[5],
+  });
+
+  const labelCss = css({
+    ...tokens.typography.body.medium,
+    color: colors.onSurface,
+    display: 'block',
+    marginBottom: tokens.spacing[2],
+  });
+
+  const buttonRow = css({
+    display: 'flex',
+    gap: tokens.spacing[3],
+    justifyContent: 'flex-end',
+    marginTop: tokens.spacing[6],
+  });
+
+  const dangerTitle = css({
+    ...tokens.typography.headline.small,
+    color: colors.onErrorContainer,
+    marginBottom: tokens.spacing[4],
+  });
+
+  const dangerText = css({
+    ...tokens.typography.body.medium,
+    color: colors.onErrorContainer,
+    marginBottom: tokens.spacing[4],
+  });
+
+  // ——— Page content via panes ———
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={styles.backButton}>
-            <IconButton
-              icon="arrow_back"
-              variant="standard"
-              onClick={() => navigate('/home')}
-            />
-          </div>
-          <h1 style={styles.title}>Account Settings</h1>
-        </div>
-      </div>
+    <PageLayout
+      pageName="Account Settings"
+      layoutMode="utility"
+      utilityHeader={utilityHeader}
+      panes={[
+        {
+          content: (
+            <>
+              <div
+                css={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: tokens.spacing[4],
+                }}
+              >
+                <h2 css={sectionTitle}>Profile Information</h2>
+                {!isEditMode && (
+                  <IconButton icon="edit" variant="outlined" onClick={handleEdit} />
+                )}
+              </div>
 
-      <div style={styles.content}>
-        <div style={styles.section}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: tokens.spacing[4],
-          }}>
-            <h2 style={styles.sectionTitle}>Profile Information</h2>
-            {!isEditMode && (
-              <IconButton
-                icon="edit"
-                variant="outlined"
-                onClick={handleEdit}
-              />
-            )}
-          </div>
+              <div css={formGroup}>
+                <label css={labelCss} htmlFor="email">Email</label>
+                <input
+                  css={fieldCss(tokens, colors, isEditMode)}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  readOnly={!isEditMode}
+                />
+              </div>
 
+              <div css={formGroup}>
+                <label css={labelCss} htmlFor="first_name">First Name</label>
+                <input
+                  css={fieldCss(tokens, colors, isEditMode)}
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleInputChange}
+                  placeholder="Enter your first name"
+                  readOnly={!isEditMode}
+                />
+              </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="email">Email</label>
-            <input
-              style={{
-                ...styles.input,
-                backgroundColor: isEditMode ? theme.surface : theme.surfaceContainer,
-                cursor: isEditMode ? 'text' : 'default',
-              }}
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-              readOnly={!isEditMode}
-            />
-          </div>
+              <div css={formGroup}>
+                <label css={labelCss} htmlFor="last_name">Last Name</label>
+                <input
+                  css={fieldCss(tokens, colors, isEditMode)}
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleInputChange}
+                  placeholder="Enter your last name"
+                  readOnly={!isEditMode}
+                />
+              </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="first_name">First Name</label>
-            <input
-              style={{
-                ...styles.input,
-                backgroundColor: isEditMode ? theme.surface : theme.surfaceContainer,
-                cursor: isEditMode ? 'text' : 'default',
-              }}
-              type="text"
-              id="first_name"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleInputChange}
-              placeholder="Enter your first name"
-              readOnly={!isEditMode}
-            />
-          </div>
+              <div css={formGroup}>
+                <label css={labelCss} htmlFor="bio">Bio</label>
+                <textarea
+                  css={[
+                    fieldCss(tokens, colors, isEditMode),
+                    { resize: 'vertical' as const, minHeight: 96 },
+                  ]}
+                  id="bio"
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  placeholder="Tell us about yourself"
+                  readOnly={!isEditMode}
+                />
+              </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="last_name">Last Name</label>
-            <input
-              style={{
-                ...styles.input,
-                backgroundColor: isEditMode ? theme.surface : theme.surfaceContainer,
-                cursor: isEditMode ? 'text' : 'default',
-              }}
-              type="text"
-              id="last_name"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleInputChange}
-              placeholder="Enter your last name"
-              readOnly={!isEditMode}
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="bio">Bio</label>
-            <textarea
-              style={{
-                ...styles.input,
-                ...styles.textarea,
-                backgroundColor: isEditMode ? theme.surface : theme.surfaceContainer,
-                cursor: isEditMode ? 'text' : 'default',
-              }}
-              id="bio"
-              name="bio"
-              value={formData.bio}
-              onChange={handleInputChange}
-              placeholder="Tell us about yourself"
-              readOnly={!isEditMode}
-            />
-          </div>
-
-          {isEditMode && (
-            <div style={styles.buttonGroup}>
+              {isEditMode && (
+                <div css={buttonRow}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleCancel}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="filled"
+                    onClick={handleSave}
+                    disabled={isSaving || !hasChanges}
+                  >
+                    {isSaving ? 'Saving…' : 'Save Changes'}
+                  </Button>
+                </div>
+              )}
+            </>
+          ),
+        },
+        {
+          content: (
+            <>
+              <h2 css={sectionTitle}>Account Actions</h2>
               <Button
                 variant="outlined"
-                onClick={handleCancel}
-                disabled={updateProfileMutation.isPending}
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                style={{ color: colors.primary, borderColor: colors.primary }}
               >
-                Cancel
+                {isLoggingOut ? 'Logging out…' : 'Logout'}
               </Button>
+            </>
+          ),
+        },
+        {
+          content: (
+            <>
+              <h2 css={dangerTitle}>Danger Zone</h2>
+              <p css={dangerText}>
+                Once you delete your account, there is no going back. Please be certain.
+              </p>
               <Button
                 variant="filled"
-                onClick={handleSave}
-                disabled={updateProfileMutation.isPending}
+                onClick={handleDeleteAccount}
+                style={{ backgroundColor: colors.error, color: colors.onError }}
               >
-                {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                Delete Account
               </Button>
-            </div>
-          )}
-        </div>
-
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Account Actions</h2>
-          <Button
-            variant="outlined"
-            onClick={handleLogout}
-            disabled={logoutMutation.isPending}
-            style={{
-              color: theme.primary,
-              borderColor: theme.primary,
-            }}
-          >
-            {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
-          </Button>
-        </div>
-
-        <div style={styles.dangerSection}>
-          <h2 style={styles.dangerTitle}>Danger Zone</h2>
-          <p style={styles.dangerText}>
-            Once you delete your account, there is no going back. Please be certain.
-          </p>
-          <Button
-            variant="filled"
-            onClick={handleDeleteAccount}
-            style={{
-              backgroundColor: theme.error,
-              color: theme.onError,
-            }}
-          >
-            Delete Account
-          </Button>
-        </div>
-      </div>
-    </div>
+            </>
+          ),
+        },
+      ]}
+    />
   );
 }
-
-export default AccountPage;

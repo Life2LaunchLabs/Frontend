@@ -9,26 +9,30 @@ export interface SkillBadge {
 
 export interface SkillBadgesGridProps {
   badges: SkillBadge[];
+  asFragment?: boolean;
 }
 
 export const SkillBadgesGrid: React.FC<SkillBadgesGridProps> = ({
-  badges
+  badges,
+  asFragment
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
+
+  const Container: React.ElementType = asFragment ? React.Fragment : 'div';
 
   const getStyles = () => ({
     container: {
-      backgroundColor: theme.surfaceContainer,
-      borderColor: theme.outline,
-      boxShadow: tokens.shadows.lg,
+      backgroundColor: colors.surfaceContainer,
+      borderColor: colors.outline,
+      boxShadow: tokens.shadows.large,
       borderRadius: tokens.borderRadius.large,
       padding: tokens.spacing[8],
-      border: `1px solid ${theme.outline}`,
+      border: `1px solid ${colors.outline}`,
       marginBottom: tokens.spacing[8],
     },
     title: {
       ...tokens.typography.headline.medium,
-      color: theme.onSurface,
+      color: colors.onSurface,
       margin: 0,
       marginBottom: tokens.spacing[6],
       fontWeight: '700',
@@ -61,14 +65,14 @@ export const SkillBadgesGrid: React.FC<SkillBadgesGridProps> = ({
     },
     badgeName: {
       ...tokens.typography.body.medium,
-      color: theme.onSurface,
+      color: colors.onSurface,
       margin: 0,
       marginBottom: tokens.spacing[1],
       fontWeight: '500',
     },
     badgeEarned: {
       ...tokens.typography.body.small,
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       margin: 0,
     },
   });
@@ -87,7 +91,7 @@ export const SkillBadgesGrid: React.FC<SkillBadgesGridProps> = ({
   }
 
   return (
-    <div style={styles.container} data-testid="skill-badges-grid">
+    <Container {...(!asFragment ? { style: styles.container, 'data-testid': 'skill-badges-grid' } : {})}>
       <h2 style={styles.title}>Featured Badges</h2>
 
       <div style={styles.badgesGrid}>
@@ -121,6 +125,6 @@ export const SkillBadgesGrid: React.FC<SkillBadgesGridProps> = ({
           </div>
         ))}
       </div>
-    </div>
+    </Container>
   );
 };

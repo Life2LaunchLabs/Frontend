@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
+/** @jsxImportSource @emotion/react */
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../../styles';
+import { Button } from '@shared/components';
 import { useLogin } from '../../api';
 import type { LoginCredentials } from '../../types';
 
 export interface LoginFormProps {
   onSwitchToRegister: () => void;
   className?: string;
-  style?: React.CSSProperties;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
-  onSwitchToRegister,
   className,
-  style,
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
@@ -79,189 +78,143 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
   };
 
-  const getStyles = () => ({
-    form: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[4] || '1rem',
-      ...style,
-    },
-    formGroup: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[2] || '0.5rem',
-    },
-    label: {
-      ...tokens.typography.body.medium,
-      color: theme.onSurface,
-      fontWeight: 600,
-    },
-    input: {
-      backgroundColor: theme.surfaceContainer,
-      color: theme.onSurface,
-      border: `1px solid ${theme.outline}`,
-      borderRadius: tokens.borderRadius.medium,
-      padding: tokens.spacing[3] || '0.75rem',
-      fontSize: tokens.typography.body.medium.fontSize,
-      outline: 'none',
-      transition: 'border-color 0.2s ease',
-    },
-    inputError: {
-      borderColor: theme.error,
-    },
-    inputFocus: {
-      borderColor: theme.primary,
-    },
-    error: {
-      ...tokens.typography.body.small,
-      color: theme.error,
-      marginTop: tokens.spacing[1] || '0.25rem',
-    },
-    button: {
-      backgroundColor: theme.primary,
-      color: theme.onPrimary,
-      border: 'none',
-      borderRadius: tokens.borderRadius.medium,
-      padding: `${tokens.spacing[4] || '1rem'} ${tokens.spacing[6] || '1.5rem'}`,
-      fontSize: tokens.typography.body.medium.fontSize,
-      fontWeight: 600,
-      cursor: loginMutation.isPending ? 'not-allowed' : 'pointer',
-      opacity: loginMutation.isPending ? 0.6 : 1,
-      transition: 'all 0.2s ease',
-      marginTop: tokens.spacing[2] || '0.5rem',
-    },
-    demoButton: {
-      backgroundColor: theme.surfaceContainerHighest,
-      color: theme.onSurface,
-      border: `1px solid ${theme.outline}`,
-      borderRadius: tokens.borderRadius.medium,
-      padding: `${tokens.spacing[3] || '0.75rem'} ${tokens.spacing[5] || '1.25rem'}`,
-      fontSize: tokens.typography.body.small.fontSize,
-      fontWeight: 500,
-      cursor: loginMutation.isPending ? 'not-allowed' : 'pointer',
-      opacity: loginMutation.isPending ? 0.6 : 1,
-      transition: 'all 0.2s ease',
-      marginTop: tokens.spacing[1] || '0.25rem',
-    },
-    switchText: {
-      ...tokens.typography.body.medium,
-      color: theme.onSurfaceVariant,
-      textAlign: 'center' as const,
-      marginTop: tokens.spacing[4] || '1rem',
-    },
-    switchLink: {
-      color: theme.primary,
-      textDecoration: 'none',
-      cursor: 'pointer',
-      fontWeight: 600,
-    },
-    demoHint: {
-      ...tokens.typography.body.small,
-      color: theme.onSurfaceVariant,
-      backgroundColor: theme.surfaceContainer,
-      padding: tokens.spacing[3] || '0.75rem',
-      borderRadius: tokens.borderRadius.small,
-      border: `1px solid ${theme.outline}`,
-      textAlign: 'center' as const,
-      fontStyle: 'italic',
-      marginBottom: tokens.spacing[4] || '1rem',
-    },
-  });
-
-  const styles = getStyles();
-
   return (
-    <form 
+    <form
       className={className}
-      style={styles.form}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacing[4],
+      }}
       onSubmit={handleSubmit}
       data-testid="login-form"
     >
-      <div style={styles.demoHint}>
-        💡 Demo credentials: <strong>sam@fake.com</strong> / <strong>samgarcia</strong>
-      </div>
 
-      <div style={styles.formGroup}>
-        <label style={styles.label} htmlFor="email">
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: tokens.spacing[2],
+        }}
+      >
+        <label
+          css={{
+            ...tokens.typography.body.medium,
+            color: colors.onSurface,
+            fontWeight: 600,
+          }}
+          htmlFor="email"
+        >
           Email
         </label>
         <input
           id="email"
-          style={{
-            ...styles.input,
-            ...(errors.email ? styles.inputError : {}),
+          css={{
+            backgroundColor: colors.surfaceContainer,
+            color: colors.onSurface,
+            border: `1px solid ${errors.email ? colors.error : colors.outline}`,
+            borderRadius: tokens.borderRadius.medium,
+            padding: tokens.spacing[3],
+            fontSize: tokens.typography.body.medium.fontSize,
+            outline: 'none',
+            transition: tokens.transitions.normal,
+            '&:focus': {
+              borderColor: colors.accentPrimary,
+            },
           }}
           type="email"
           value={credentials.email}
           onChange={(e) => handleInputChange('email', e.target.value)}
-          onFocus={(e) => e.target.style.borderColor = theme.primary}
-          onBlur={(e) => e.target.style.borderColor = errors.email ? theme.error : theme.outline}
           placeholder="Enter your email"
           autoComplete="email"
           data-testid="email-input"
         />
         {errors.email && (
-          <div style={styles.error} data-testid="email-error">
+          <div
+            css={{
+              ...tokens.typography.body.small,
+              color: colors.error,
+            }}
+            data-testid="email-error"
+          >
             {errors.email}
           </div>
         )}
       </div>
 
-      <div style={styles.formGroup}>
-        <label style={styles.label} htmlFor="password">
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: tokens.spacing[2],
+        }}
+      >
+        <label
+          css={{
+            ...tokens.typography.body.medium,
+            color: colors.onSurface,
+            fontWeight: 600,
+          }}
+          htmlFor="password"
+        >
           Password
         </label>
         <input
           id="password"
-          style={{
-            ...styles.input,
-            ...(errors.password ? styles.inputError : {}),
+          css={{
+            backgroundColor: colors.surfaceContainer,
+            color: colors.onSurface,
+            border: `1px solid ${errors.password ? colors.error : colors.outline}`,
+            borderRadius: tokens.borderRadius.medium,
+            padding: tokens.spacing[3],
+            fontSize: tokens.typography.body.medium.fontSize,
+            outline: 'none',
+            transition: tokens.transitions.normal,
+            '&:focus': {
+              borderColor: colors.accentPrimary,
+            },
           }}
           type="password"
           value={credentials.password}
           onChange={(e) => handleInputChange('password', e.target.value)}
-          onFocus={(e) => e.target.style.borderColor = theme.primary}
-          onBlur={(e) => e.target.style.borderColor = errors.password ? theme.error : theme.outline}
           placeholder="Enter your password"
           autoComplete="current-password"
           data-testid="password-input"
         />
         {errors.password && (
-          <div style={styles.error} data-testid="password-error">
+          <div
+            css={{
+              ...tokens.typography.body.small,
+              color: colors.error,
+            }}
+            data-testid="password-error"
+          >
             {errors.password}
           </div>
         )}
       </div>
 
-      <button
-        style={styles.button}
+      <Button
+        variant="filled"
         type="submit"
         disabled={loginMutation.isPending}
         data-testid="login-button"
+        css={{ width: '100%', marginTop: tokens.spacing[2] }}
       >
         {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
-      </button>
+      </Button>
 
-      <button
-        style={styles.demoButton}
+      <Button
+        variant="tonal"
         type="button"
         onClick={handleDemoLogin}
         disabled={loginMutation.isPending}
         data-testid="demo-login-button"
+        css={{ width: '100%' }}
       >
         🚀 Try Demo Account
-      </button>
+      </Button>
 
-      <div style={styles.switchText}>
-        Don't have an account?{' '}
-        <span
-          style={styles.switchLink}
-          onClick={onSwitchToRegister}
-          data-testid="switch-to-register"
-        >
-          Create one here
-        </span>
-      </div>
     </form>
   );
 };

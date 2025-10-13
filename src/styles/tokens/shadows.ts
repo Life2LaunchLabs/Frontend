@@ -1,11 +1,27 @@
 /**
  * Shadow design tokens
+ * Launchpad uses deeper shadows, Admin uses subtle shadows
  */
-export const shadows = {
+
+// Launchpad mode shadows (deeper, more dramatic)
+export const launchpadShadows = {
   none: 'none',
-  small: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-  medium: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-  large: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-  xlarge: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-  xxlarge: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+  small: '0 4px 16px rgba(0, 0, 0, 0.5)',
+  medium: '0 8px 32px rgba(0, 0, 0, 0.4)',
+  large: '0 16px 48px rgba(0, 0, 0, 0.5)',
+  glow: '0 0 16px rgba(255, 255, 255, 0.1)', // Inner glow effect
+  pane: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)', // Glassmorphic pane
 } as const;
+
+// Admin mode shadows (subtle, light)
+export const adminShadows = {
+  none: 'none',
+  small: '0 1px 3px rgba(0, 0, 0, 0.12)',
+  medium: '0 2px 4px rgba(0, 0, 0, 0.08)',
+  large: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  glow: 'none', // No glow in admin mode
+  pane: '0 1px 3px rgba(0, 0, 0, 0.12)', // Simple shadow
+} as const;
+
+// Legacy export (uses launchpad by default)
+export const shadows = launchpadShadows;

@@ -9,14 +9,16 @@ export interface ProfileHeaderProps {
   // Props are now optional since we fetch from backend
   fullName?: string;
   profilePhotoUrl?: string;
+  asFragment?: boolean;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   // Default props are now optional fallbacks
   fullName: defaultFullName,
-  profilePhotoUrl: defaultProfilePhotoUrl
+  profilePhotoUrl: defaultProfilePhotoUrl,
+  asFragment
 }) => {
-  const { theme, tokens } = useTheme();
+  const { colors, tokens } = useTheme();
   const { data: profileData, isLoading, error } = useProfileData();
   const updateProfileMutation = useUpdateProfileData();
 
@@ -24,6 +26,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const [editData, setEditData] = useState<ProfileHeaderEditData>({});
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  const Container: React.ElementType = asFragment ? React.Fragment : 'div';
 
   // Use backend data if available, fallback to props
   const fullName = profileData?.full_name || profileData?.first_name && profileData?.last_name
@@ -108,12 +112,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const getStyles = () => ({
     container: {
-      backgroundColor: theme.surfaceContainer,
-      borderColor: theme.outline,
+      backgroundColor: colors.surfaceContainer,
+      borderColor: colors.outline,
       boxShadow: tokens.shadows.large,
       borderRadius: tokens.borderRadius.large,
       padding: tokens.spacing[8],
-      border: `1px solid ${theme.outline}`,
+      border: `1px solid ${colors.outline}`,
       marginBottom: tokens.spacing[8],
       position: 'relative' as const,
     },
@@ -146,7 +150,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       height: '128px',
       borderRadius: tokens.borderRadius.large,
       overflow: 'hidden',
-      border: `4px solid ${theme.primary}`,
+      border: `4px solid ${colors.primary}`,
       boxShadow: tokens.shadows.large,
       transition: 'transform 0.3s ease',
       cursor: isEditMode ? 'pointer' : 'default',
@@ -182,7 +186,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     },
     name: {
       ...tokens.typography.headline.large,
-      color: theme.onSurface,
+      color: colors.onSurface,
       margin: 0,
       marginBottom: tokens.spacing[2],
       fontSize: '2rem',
@@ -190,14 +194,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     },
     titleText: {
       ...tokens.typography.headline.small,
-      color: theme.primary,
+      color: colors.primary,
       margin: 0,
       marginBottom: tokens.spacing[4],
       fontWeight: '500',
     },
     bio: {
       ...tokens.typography.body.large,
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       lineHeight: '1.6',
       marginBottom: tokens.spacing[6],
     },
@@ -212,34 +216,34 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       gap: tokens.spacing[2],
     },
     contactIcon: {
-      color: theme.primary,
+      color: colors.primary,
       fontSize: '1.2rem',
     },
     contactText: {
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
       textDecoration: 'none',
     },
     contactLink: {
-      color: theme.primary,
+      color: colors.primary,
       textDecoration: 'none',
     },
     input: {
       width: '100%',
       padding: tokens.spacing[2],
-      border: `1px solid ${theme.outline}`,
+      border: `1px solid ${colors.outline}`,
       borderRadius: tokens.borderRadius.medium,
-      backgroundColor: theme.surface,
-      color: theme.onSurface,
+      backgroundColor: colors.surface,
+      color: colors.onSurface,
       fontSize: 'inherit',
       fontFamily: 'inherit',
     },
     textarea: {
       width: '100%',
       padding: tokens.spacing[2],
-      border: `1px solid ${theme.outline}`,
+      border: `1px solid ${colors.outline}`,
       borderRadius: tokens.borderRadius.medium,
-      backgroundColor: theme.surface,
-      color: theme.onSurface,
+      backgroundColor: colors.surface,
+      color: colors.onSurface,
       fontSize: 'inherit',
       fontFamily: 'inherit',
       minHeight: '80px',
@@ -250,14 +254,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '200px',
-      color: theme.onSurfaceVariant,
+      color: colors.onSurfaceVariant,
     },
     errorState: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '200px',
-      color: theme.error,
+      color: colors.error,
     },
   });
 
@@ -286,7 +290,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   }
 
   return (
-    <div style={styles.container} data-testid="profile-header">
+    <Container {...(!asFragment ? { style: styles.container, 'data-testid': 'profile-header' } : {})}>
       {/* Edit Controls */}
       {!isEditMode ? (
         <div style={styles.editButton}>
@@ -437,6 +441,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   );
 };

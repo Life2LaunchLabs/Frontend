@@ -1,30 +1,42 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { DashboardService } from './DashboardService';
-import type { Milestone, Quest, DashboardData, UserProfile } from './types';
+import type { QuestItem, QuestEnrollment, DashboardData, UserProfile } from './types';
 
 /**
- * React Query hooks for dashboard data
+ * React Query hooks for dashboard data (unified quest system)
  */
 
 /**
- * Hook to fetch upcoming milestones for the todo list
+ * Hook to fetch upcoming quest items for the todo list
  */
-export const useUpcomingMilestones = (): UseQueryResult<Milestone[], Error> => {
+export const useUpcomingQuestItems = (): UseQueryResult<QuestItem[], Error> => {
   return useQuery({
-    queryKey: ['dashboard', 'upcoming-milestones'],
-    queryFn: DashboardService.getUpcomingMilestones,
+    queryKey: ['dashboard', 'upcoming-quest-items'],
+    queryFn: DashboardService.getUpcomingQuestItems,
     staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
     retry: 2,
   });
 };
 
 /**
- * Hook to fetch user's quests
+ * Hook to fetch user's active quest enrollments
  */
-export const useQuests = (): UseQueryResult<Quest[], Error> => {
+export const useActiveQuests = (): UseQueryResult<QuestEnrollment[], Error> => {
   return useQuery({
-    queryKey: ['dashboard', 'quests'],
-    queryFn: DashboardService.getQuests,
+    queryKey: ['dashboard', 'active-quests'],
+    queryFn: DashboardService.getActiveQuests,
+    staleTime: 10 * 60 * 1000, // Consider data stale after 10 minutes
+    retry: 2,
+  });
+};
+
+/**
+ * Hook to fetch all user's quest enrollments
+ */
+export const useAllQuests = (): UseQueryResult<QuestEnrollment[], Error> => {
+  return useQuery({
+    queryKey: ['dashboard', 'all-quests'],
+    queryFn: DashboardService.getAllQuests,
     staleTime: 10 * 60 * 1000, // Consider data stale after 10 minutes
     retry: 2,
   });
