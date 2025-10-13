@@ -26,7 +26,8 @@ export const ActivityResultsPage: React.FC = () => {
   }, [submissions, selectedSubmissionId]);
 
   const handleBack = () => {
-    navigate(`/activities/${activityId}`);
+    // Navigate back to detail page, replacing history to prevent loop
+    navigate(`/activities/${activityId}`, { replace: true });
   };
 
   const formatDate = (dateString: string) => {

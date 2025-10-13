@@ -12,7 +12,8 @@ export const ActivitySessionPage: React.FC = () => {
   const [isCompletingActivity, setIsCompletingActivity] = useState(false);
 
   const handleBack = () => {
-    navigate(`/activities/${activityId}`);
+    // Navigate back to detail page, replacing history to prevent loop
+    navigate(`/activities/${activityId}`, { replace: true });
   };
 
   // Validate activityId exists
