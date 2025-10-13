@@ -110,6 +110,40 @@ export const ActivityPageCard: React.FC<ActivityPageCardProps> = ({
     return media.find(m => m.media_id === mediaId);
   };
 
+  const renderQuestionSummary = (block: Block) => {
+    const questionConfig = block.config || {};
+    const displayType = questionConfig.question_type || block.block_type;
+    const nestedConfig = questionConfig.config || {};
+    const options = questionConfig.options || nestedConfig.options || [];
+    const prompts = questionConfig.prompts || nestedConfig.prompts || [];
+
+    return (
+      <div style={styles.questionContainer}>
+        <div style={styles.questionTitle}>
+          {questionConfig.title || questionConfig.question_text || 'Question'}
+        </div>
+        {questionConfig.subtitle && (
+          <div style={styles.questionSubtitle}>
+            {questionConfig.subtitle}
+          </div>
+        )}
+        <div style={{ ...styles.blockContent, marginTop: tokens.spacing[2], fontSize: '14px' }}>
+          Type: {displayType || 'Unknown'}{questionConfig.required && ' (Required)'}
+        </div>
+        {['multiple_choice', 'single_choice', 'dropdown_input'].includes(displayType) && options.length > 0 && (
+          <div style={{ ...styles.blockContent, marginTop: tokens.spacing[2], fontSize: '12px' }}>
+            Options: {options.map((opt: any) => opt.title || opt.label).join(', ')}
+          </div>
+        )}
+        {displayType === 'a_or_b_input' && prompts.length > 0 && (
+          <div style={{ ...styles.blockContent, marginTop: tokens.spacing[2], fontSize: '12px' }}>
+            Prompts: {prompts.map((prompt: any) => prompt.title).join(', ')}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderBlockContent = (block: Block) => {
     switch (block.block_type) {
       case 'text':
@@ -139,27 +173,11 @@ export const ActivityPageCard: React.FC<ActivityPageCardProps> = ({
         );
 
       case 'question':
-        return (
-          <div style={styles.questionContainer}>
-            <div style={styles.questionTitle}>
-              {block.config.title || block.config.question_text || 'Question'}
-            </div>
-            {block.config.subtitle && (
-              <div style={styles.questionSubtitle}>
-                {block.config.subtitle}
-              </div>
-            )}
-            <div style={{ ...styles.blockContent, marginTop: tokens.spacing[2], fontSize: '14px' }}>
-              Type: {block.config.question_type || 'Unknown'}
-              {block.config.required && ' (Required)'}
-            </div>
-            {block.config.options && (
-              <div style={{ ...styles.blockContent, marginTop: tokens.spacing[2], fontSize: '12px' }}>
-                Options: {block.config.options.map((opt: any) => opt.title || opt.label).join(', ')}
-              </div>
-            )}
-          </div>
-        );
+      case 'text_input':
+      case 'multiple_choice':
+      case 'dropdown_input':
+      case 'a_or_b_input':
+        return renderQuestionSummary(block);
 
       default:
         return (

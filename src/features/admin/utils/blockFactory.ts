@@ -51,6 +51,39 @@ export function createDefaultBlockConfig(blockType: string): Record<string, any>
         },
       };
 
+    case 'dropdown_input':
+      return {
+        question_id: `question_${Date.now()}`,
+        question_type: 'dropdown_input',
+        title: 'New Dropdown Question',
+        subtitle: '',
+        required: false,
+        config: {
+          placeholder: 'Select an option...',
+          options: [
+            { id: 'opt_1', title: 'Option 1', body: '' },
+            { id: 'opt_2', title: 'Option 2', body: '' },
+          ],
+        },
+      };
+
+    case 'a_or_b_input':
+      return {
+        question_id: `question_${Date.now()}`,
+        question_type: 'a_or_b_input',
+        title: 'New A or B Question',
+        subtitle: '',
+        required: false,
+        config: {
+          positive_label: 'Yes',
+          negative_label: 'No',
+          prompts: [
+            { id: 'prompt_1', title: 'First prompt', description: '' },
+            { id: 'prompt_2', title: 'Second prompt', description: '' },
+          ],
+        },
+      };
+
     default:
       return {};
   }
@@ -88,6 +121,8 @@ export function validateBlockConfig(block: BlockData): { valid: boolean; errors:
 
     case 'text_input':
     case 'multiple_choice':
+    case 'dropdown_input':
+    case 'a_or_b_input':
       if (!block.config.question_id) {
         errors.push('Question block must have question_id');
       }

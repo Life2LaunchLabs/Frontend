@@ -80,6 +80,23 @@ export interface TextInputConfig {
   multiline?: boolean;
 }
 
+export interface DropdownInputConfig {
+  placeholder?: string;
+  options: MultipleChoiceOption[];
+}
+
+export interface AorBPrompt {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+export interface AorBInputConfig {
+  prompts: AorBPrompt[];
+  positive_label?: string;
+  negative_label?: string;
+}
+
 // Block Type Configs
 export interface TextBlockConfig {
   style: 'h1' | 'h2' | 'h3' | 'body' | 'lead' | 'quote';
@@ -97,12 +114,12 @@ export interface MediaBlockConfig {
 
 export interface QuestionBlockConfig {
   question_id: string;
-  question_type: 'multiple_choice' | 'text_input' | 'single_choice';
+  question_type: 'multiple_choice' | 'text_input' | 'single_choice' | 'dropdown_input' | 'a_or_b_input';
   title: string;
   subtitle?: string;
   tooltip?: string;
   required: boolean;
-  config: MultipleChoiceConfig | TextInputConfig | Record<string, any>;
+  config: MultipleChoiceConfig | TextInputConfig | DropdownInputConfig | AorBInputConfig | Record<string, any>;
 }
 
 // Attempt and Response Types

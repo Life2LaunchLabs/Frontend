@@ -46,6 +46,20 @@ export const BLOCK_TYPES: Record<string, BlockTypeMetadata> = {
     category: 'question',
     description: 'Ask a multiple choice question',
   },
+  dropdown_input: {
+    type: 'dropdown_input',
+    icon: 'arrow_drop_down_circle',
+    label: 'Dropdown',
+    category: 'question',
+    description: 'Let respondents choose one option from a dropdown',
+  },
+  a_or_b_input: {
+    type: 'a_or_b_input',
+    icon: 'swap_horiz',
+    label: 'A or B',
+    category: 'question',
+    description: 'Step through prompts and capture yes/no decisions',
+  },
 };
 
 /**
