@@ -13,4 +13,6 @@ export { EditableTextBlock } from './EditableTextBlock';
 export { EditableMediaBlock } from './EditableMediaBlock';
 export { EditableTextInputBlock } from './EditableTextInputBlock';
 export { EditableMultipleChoiceBlock } from './EditableMultipleChoiceBlock';
+export { EditableDropdownInputBlock } from './EditableDropdownInputBlock';
+export { EditableAorBInputBlock } from './EditableAorBInputBlock';
 export { EditableBlockRenderer } from './EditableBlockRenderer';

@@ -33,6 +33,8 @@ case 'media':
 case 'question':
 case 'text_input':
 case 'multiple_choice':
+case 'dropdown_input':
+case 'a_or_b_input':
   return (
     <QuestionBlock
       config={block.config as any}

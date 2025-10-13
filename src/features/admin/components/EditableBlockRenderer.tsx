@@ -5,6 +5,8 @@ import { EditableTextBlock } from './EditableTextBlock';
 import { EditableMediaBlock } from './EditableMediaBlock';
 import { EditableTextInputBlock } from './EditableTextInputBlock';
 import { EditableMultipleChoiceBlock } from './EditableMultipleChoiceBlock';
+import { EditableDropdownInputBlock } from './EditableDropdownInputBlock';
+import { EditableAorBInputBlock } from './EditableAorBInputBlock';
 export interface EditableBlockRendererProps {
   block: Block;
   media: MediaAsset[];
@@ -60,6 +62,22 @@ export const EditableBlockRenderer: React.FC<EditableBlockRendererProps> = ({
       case 'multiple_choice':
         return (
           <EditableMultipleChoiceBlock
+            config={block.config as any}
+            onChange={handleConfigChange}
+          />
+        );
+
+      case 'dropdown_input':
+        return (
+          <EditableDropdownInputBlock
+            config={block.config as any}
+            onChange={handleConfigChange}
+          />
+        );
+
+      case 'a_or_b_input':
+        return (
+          <EditableAorBInputBlock
             config={block.config as any}
             onChange={handleConfigChange}
           />
