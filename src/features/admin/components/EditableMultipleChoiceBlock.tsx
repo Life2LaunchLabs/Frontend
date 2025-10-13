@@ -78,6 +78,25 @@ export const EditableMultipleChoiceBlock: React.FC<EditableMultipleChoiceBlockPr
     optionInput: {
       flex: 1,
     },
+    optionColumn: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: tokens.spacing[1],
+    },
+    textarea: {
+      ...tokens.typography.body.medium,
+      width: '100%',
+      minHeight: '60px',
+      padding: tokens.spacing[2],
+      border: `1px solid ${colors.outline}`,
+      borderRadius: tokens.borderRadius.small,
+      backgroundColor: colors.surface,
+      color: colors.onSurface,
+      outline: 'none',
+      fontFamily: 'inherit',
+      resize: 'vertical' as const,
+    },
     rangeRow: {
       display: 'flex',
       gap: tokens.spacing[3],
@@ -88,9 +107,17 @@ export const EditableMultipleChoiceBlock: React.FC<EditableMultipleChoiceBlockPr
 
   const styles = getStyles();
 
-  const options = ((config as any).options || []) as MultipleChoiceOption[];
-  const minSelect = (config as any).min_select || 1;
-  const maxSelect = (config as any).max_select || 1;
+  // Handle both nested config.config.options and flat config.options
+  const nestedConfig = (config as any).config || {};
+  const options = (nestedConfig.options || (config as any).options || []).map((opt: any) => ({
+    id: opt.id || opt.value || `option_${Date.now()}`,
+    title: opt.title || opt.label || '',
+    body: opt.body || '',
+    description: opt.description || '',
+  })) as MultipleChoiceOption[];
+
+  const minSelect = nestedConfig.min_select || (config as any).min_select || 1;
+  const maxSelect = nestedConfig.max_select || (config as any).max_select || 1;
 
   const handleChange = (field: keyof QuestionBlockConfig, value: any) => {
     onChange({
@@ -100,13 +127,22 @@ export const EditableMultipleChoiceBlock: React.FC<EditableMultipleChoiceBlockPr
   };
 
   const handleConfigChange = (field: string, value: any) => {
-    onChange({
-      ...config,
-      config: {
-        ...config.config,
+    // If we have a nested config structure, update it there
+    // Otherwise update at the root level for backward compatibility
+    if (config.config && typeof config.config === 'object') {
+      onChange({
+        ...config,
+        config: {
+          ...config.config,
+          [field]: value,
+        },
+      });
+    } else {
+      onChange({
+        ...config,
         [field]: value,
-      },
-    });
+      });
+    }
   };
 
   const handleAddOption = () => {
@@ -114,8 +150,10 @@ export const EditableMultipleChoiceBlock: React.FC<EditableMultipleChoiceBlockPr
       id: `option_${Date.now()}`,
       title: '',
       body: '',
+      description: '',
     };
-    handleConfigChange('options', [...options, newOption]);
+    const updatedOptions = [...options, newOption];
+    handleConfigChange('options', updatedOptions);
   };
 
   const handleUpdateOption = (index: number, field: keyof MultipleChoiceOption, value: string) => {
@@ -211,13 +249,21 @@ export const EditableMultipleChoiceBlock: React.FC<EditableMultipleChoiceBlockPr
                   <span style={{ ...tokens.typography.body.medium, color: colors.onSurfaceVariant }}>
                     {index + 1}.
                   </span>
-                  <input
-                    type="text"
-                    value={option.title}
-                    onChange={(e) => handleUpdateOption(index, 'title', e.target.value)}
-                    placeholder="Option text..."
-                    style={{ ...styles.input, ...styles.optionInput }}
-                  />
+                  <div style={styles.optionColumn}>
+                    <input
+                      type="text"
+                      value={option.title}
+                      onChange={(e) => handleUpdateOption(index, 'title', e.target.value)}
+                      placeholder="Option text..."
+                      style={styles.input}
+                    />
+                    <textarea
+                      value={option.description || ''}
+                      onChange={(e) => handleUpdateOption(index, 'description', e.target.value)}
+                      placeholder="Optional description..."
+                      style={styles.textarea}
+                    />
+                  </div>
                   <IconButton
                     icon="delete"
                     variant="text"

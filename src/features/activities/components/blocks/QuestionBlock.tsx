@@ -149,29 +149,34 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
   });
 
   const renderMultipleChoice = (questionConfig: MultipleChoiceConfig) => {
-    const selectedIds = Array.isArray(value)
-      ? value
-      : typeof value === 'string'
-        ? [value]
-        : [];
+    // Handle both old array format and new object format for backward compatibility
+    const selections = Array.isArray(value)
+      ? // Convert old array format to object format
+        value.reduce((acc, id) => ({ ...acc, [id]: true }), {} as Record<string, boolean>)
+      : typeof value === 'object' && value !== null
+        ? (value as Record<string, boolean>)
+        : {};
+
     // Handle both nested config and flat config from backend
     const options = questionConfig?.options || config.options || [];
+    const minSelect = questionConfig?.min_select || config.min_select || 0;
     const maxSelect = questionConfig?.max_select || config.max_select || 1;
     const isMultiple = maxSelect > 1;
 
     const handleOptionChange = (optionId: string, checked: boolean) => {
-      if (isMultiple) {
-        let newSelected = [...selectedIds];
-        if (checked) {
-          if (newSelected.length < maxSelect) {
-            newSelected.push(optionId);
-          }
-        } else {
-          newSelected = newSelected.filter(id => id !== optionId);
+      const selectedCount = Object.values(selections).filter(Boolean).length;
+
+      if (checked) {
+        // Check if we can add more selections
+        if (selectedCount >= maxSelect) {
+          return; // Already at max
         }
-        handleChange(newSelected);
+        handleChange({ ...selections, [optionId]: true });
       } else {
-        handleChange(checked ? [optionId] : []);
+        // Remove selection
+        const newSelections = { ...selections };
+        delete newSelections[optionId];
+        handleChange(newSelections);
       }
     };
 
@@ -209,10 +214,11 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
     return (
       <div>
         {options.map((option: any) => {
-          // Handle both formats: {id, title, body} and {value, label}
+          // Handle both formats: {id, title, body, description} and {value, label}
           const optionId = option.id || option.value;
           const optionTitle = option.title || option.label;
-          const isSelected = selectedIds.includes(optionId);
+          const optionDescription = option.description;
+          const isSelected = selections[optionId] === true;
 
           return (
             <div
@@ -228,8 +234,10 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
               />
               <div style={getOptionContentStyle()}>
                 <div style={getOptionTitleStyle()}>{optionTitle}</div>
-                {option.body && (
-                  <div style={getOptionBodyStyle()}>{option.body}</div>
+                {(option.body || optionDescription) && (
+                  <div style={getOptionBodyStyle()}>
+                    {optionDescription || option.body}
+                  </div>
                 )}
               </div>
             </div>

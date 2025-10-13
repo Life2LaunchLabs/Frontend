@@ -66,6 +66,7 @@ export interface MultipleChoiceOption {
   id: string;
   title: string;
   body?: string;
+  description?: string;
 }
 
 export interface MultipleChoiceConfig {

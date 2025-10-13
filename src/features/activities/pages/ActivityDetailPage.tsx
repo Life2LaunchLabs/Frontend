@@ -48,7 +48,7 @@ export const ActivityDetailPage: React.FC = () => {
   };
 
   const handleBack = () => {
-    navigate(-1);
+    navigate('/home');
   };
 
   if (!activityId) {

@@ -79,15 +79,19 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
     // Submit to backend if we have an attempt and page data
     if (attempt?.id && pageData) {
       try {
+        // Find the block with matching question_id (any question block type)
         const questionBlock = pageData.blocks.find(block =>
-          block.block_type === 'question' && block.config.question_id === questionId
+          block.config.question_id === questionId
         );
 
         if (questionBlock) {
+          // Use question_type from config, or fall back to block_type if needed
+          const questionType = questionBlock.config.question_type || questionBlock.block_type;
+
           await submitResponse(
             attempt.id,
             questionId,
-            questionBlock.config.question_type,
+            questionType,
             pageData.page.id,
             value,
             true
