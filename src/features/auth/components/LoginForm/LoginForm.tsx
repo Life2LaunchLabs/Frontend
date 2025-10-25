@@ -67,7 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const handleDemoLogin = async () => {
     const demoCredentials = {
       email: 'sam@fake.com',
-      password: 'samgarcia'
+      password: 'demo123'
     };
 
     try {
@@ -119,7 +119,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             outline: 'none',
             transition: tokens.transitions.normal,
             '&:focus': {
-              borderColor: colors.accentPrimary,
+              borderColor: colors.primary,
             },
           }}
           type="email"
@@ -171,7 +171,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             outline: 'none',
             transition: tokens.transitions.normal,
             '&:focus': {
-              borderColor: colors.accentPrimary,
+              borderColor: colors.primary,
             },
           }}
           type="password"

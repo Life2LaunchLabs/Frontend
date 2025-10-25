@@ -27,7 +27,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   const handleDemoAdminLogin = async () => {
     const demoCredentials = {
       email: 'sam@fake.com',
-      password: 'samgarcia'
+      password: 'demo123'
     };
 
     try {
