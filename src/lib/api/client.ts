@@ -71,6 +71,7 @@ export class ApiClient {
           headers: requestHeaders,
           body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
           signal: controller.signal,
+          credentials: 'include', // Include cookies for session-based auth
         });
 
         clearTimeout(timeoutId);

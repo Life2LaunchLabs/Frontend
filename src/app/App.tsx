@@ -7,13 +7,14 @@ import { ChatPage } from '../features/chat';
 import { DevPage, ChatSettingsPage, ActivityDemoPage } from '../features/dev';
 import { AuthPage, AuthGuard, useAuth } from '../features/auth';
 import { OrgSelectPage, AdminDashboard, AdminActivityDetailPage, AdminActivityEditPage, AdminQuestsPage, AdminQuestDetailPage, AdminAccountPage } from '../features/admin';
-import { ActivityDetailPage, ActivitySessionPage, ActivityResultsPage } from '../features/activities';
+import { ActivityDetailPage, ActivitySessionPage, ActivityResultsPage, PublicActivitySessionPage } from '../features/activities';
+import { LandingPage } from '../features/landing';
 import './App.css';
 
-// Component to handle root route redirects
-function RootRedirect() {
+// Component to handle home route redirects
+function HomeRedirect() {
   const { isAuthenticated, isInitialized } = useAuth();
-  
+
   if (!isInitialized) {
     return (
       <div style={{
@@ -28,7 +29,7 @@ function RootRedirect() {
       </div>
     );
   }
-  
+
   return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
 }
 
@@ -36,12 +37,15 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root route - redirects based on auth status */}
-        <Route path="/" element={<RootRedirect />} />
-        
+        {/* Root route - landing page */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Public auth routes */}
         <Route path="/login" element={<AuthPage initialMode="login" />} />
         <Route path="/register" element={<AuthPage initialMode="register" />} />
+
+        {/* Public onboarding route - no authentication required */}
+        <Route path="/welcome" element={<PublicActivitySessionPage />} />
         
         {/* Protected routes - require authentication */}
         <Route 
