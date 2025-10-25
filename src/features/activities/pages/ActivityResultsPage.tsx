@@ -1,15 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../styles';
 import { PageLayout, NavButton } from '@shared/components';
 import { useActivityResults, useSubmissionDetails } from '../api';
-import {
-  buildQuestionMetadataMap,
-  formatResponseValue,
-  getQuestionTitle,
-  FormattedResponseValue,
-} from '../utils/resultFormatting';
 
 export const ActivityResultsPage: React.FC = () => {
   const { activityId } = useParams<{ activityId: string }>();
@@ -23,11 +17,6 @@ export const ActivityResultsPage: React.FC = () => {
 
   // Fetch details for the selected submission
   const { data: submissionDetails, isLoading: detailsLoading, error: detailsError } = useSubmissionDetails(selectedSubmissionId);
-
-  const questionMetadata = useMemo(
-    () => buildQuestionMetadataMap(submissionDetails || undefined),
-    [submissionDetails]
-  );
 
   // Auto-select the most recent submission
   useEffect(() => {
@@ -277,230 +266,85 @@ export const ActivityResultsPage: React.FC = () => {
     };
 
     // Responses pane
-    const renderResponseContent = (formatted: FormattedResponseValue) => {
-      const containerStyle = {
-        backgroundColor: colors.surfaceVariant,
-        padding: tokens.spacing[4],
-        borderRadius: tokens.borderRadius.medium,
-        borderLeft: `4px solid ${colors.primary}`,
-      };
-
-      const optionTitleStyle = {
-        ...tokens.typography.body.medium,
-        color: colors.onSurface,
-        margin: 0,
-      };
-
-      const optionDescriptionStyle = {
-        ...tokens.typography.body.small,
-        color: colors.onSurfaceVariant,
-        marginTop: tokens.spacing[1],
-      };
-
-      switch (formatted.type) {
-        case 'text':
-          return (
-            <div
-              css={{
-                ...containerStyle,
-                ...tokens.typography.body.medium,
-                color: colors.onSurface,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            >
-              {formatted.text}
-            </div>
-          );
-        case 'option':
-          return (
-            <div css={containerStyle}>
-              <div css={optionTitleStyle}>{formatted.option.title}</div>
-              {formatted.option.description && (
-                <div css={optionDescriptionStyle}>{formatted.option.description}</div>
-              )}
-            </div>
-          );
-        case 'list':
-          return (
-            <div css={containerStyle}>
-              <ul
-                css={{
-                  margin: 0,
-                  paddingLeft: tokens.spacing[5],
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: tokens.spacing[2],
-                }}
-              >
-                {formatted.items.map((item) => (
-                  <li key={item.id} css={{ listStyle: 'disc' }}>
-                    <div css={optionTitleStyle}>{item.title}</div>
-                    {item.description && (
-                      <div css={optionDescriptionStyle}>{item.description}</div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        case 'prompts':
-          return (
-            <div css={containerStyle}>
-              <ul
-                css={{
-                  margin: 0,
-                  paddingLeft: tokens.spacing[5],
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: tokens.spacing[3],
-                }}
-              >
-                {formatted.prompts.map(({ prompt, label }) => (
-                  <li key={prompt.id} css={{ listStyle: 'disc' }}>
-                    <div css={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: tokens.spacing[1],
-                    }}>
-                      <div css={optionTitleStyle}>{prompt.title}</div>
-                      <span
-                        css={{
-                          ...tokens.typography.label.medium,
-                          color: colors.primary,
-                          backgroundColor: colors.primaryContainer,
-                          padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-                          borderRadius: tokens.borderRadius.full,
-                          alignSelf: 'flex-start',
-                        }}
-                      >
-                        {label}
-                      </span>
-                      {prompt.description && (
-                        <div css={optionDescriptionStyle}>{prompt.description}</div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        case 'raw':
-          return (
-            <pre
-              css={{
-                ...containerStyle,
-                ...tokens.typography.body.small,
-                color: colors.onSurface,
-                backgroundColor: colors.surfaceVariant,
-                margin: 0,
-                whiteSpace: 'pre-wrap',
-              }}
-            >
-              {formatted.raw}
-            </pre>
-          );
-        case 'empty':
-        default:
-          return (
-            <div
-              css={{
-                ...containerStyle,
-                ...tokens.typography.body.medium,
-                color: colors.onSurfaceVariant,
-                fontStyle: 'italic',
-              }}
-            >
-              No response provided
-            </div>
-          );
-      }
-    };
-
     const responsesPane = {
       content: (
         <>
-          <h3
-            css={{
-              ...tokens.typography.title.large,
-              color: colors.onSurface,
-              margin: 0,
-              marginBottom: tokens.spacing[4],
-            }}
-          >
+          <h3 css={{
+            ...tokens.typography.title.large,
+            color: colors.onSurface,
+            margin: 0,
+            marginBottom: tokens.spacing[4],
+          }}>
             Your Responses
           </h3>
           {submissionDetails.responses && submissionDetails.responses.length > 0 ? (
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: tokens.spacing[4],
-              }}
-            >
-              {submissionDetails.responses.map((response, index) => {
-                const metadata = questionMetadata.get(response.question_id);
-                const questionTitle = getQuestionTitle(response, metadata);
-                const formattedValue = formatResponseValue(response, metadata);
-
-                return (
-                  <div
-                    key={response.id || index}
-                    css={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: tokens.spacing[2],
-                    }}
-                  >
-                    <h4
-                      css={{
-                        ...tokens.typography.title.small,
-                        color: colors.onSurface,
-                        margin: 0,
-                      }}
-                    >
-                      {questionTitle}
-                    </h4>
-                    {renderResponseContent(formattedValue)}
+            <div css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: tokens.spacing[4],
+            }}>
+              {submissionDetails.responses.map((response, index) => (
+                <div
+                  key={response.id || index}
+                  css={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: tokens.spacing[2],
+                  }}
+                >
+                  <h4 css={{
+                    ...tokens.typography.label.large,
+                    color: colors.onSurfaceVariant,
+                    margin: 0,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    {response.question_id}
+                  </h4>
+                  <div css={{
+                    ...tokens.typography.body.medium,
+                    color: colors.onSurface,
+                    backgroundColor: colors.surfaceVariant,
+                    padding: tokens.spacing[4],
+                    borderRadius: tokens.borderRadius.medium,
+                    borderLeft: `4px solid ${colors.primary}`,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}>
+                    {typeof response.value === 'string'
+                      ? response.value
+                      : JSON.stringify(response.value, null, 2)}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           ) : (
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: tokens.spacing[8],
-                textAlign: 'center',
-              }}
-            >
-              <span
-                css={{
-                  fontSize: '48px',
-                  marginBottom: tokens.spacing[4],
-                  opacity: 0.5,
-                }}
-              >
+            <div css={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: tokens.spacing[8],
+              textAlign: 'center',
+            }}>
+              <span css={{
+                fontSize: '48px',
+                marginBottom: tokens.spacing[4],
+                opacity: 0.5,
+              }}>
                 📝
               </span>
-              <h4
-                css={{
-                  ...tokens.typography.headline.small,
-                  color: colors.onSurface,
-                  marginBottom: tokens.spacing[2],
-                }}
-              >
+              <h4 css={{
+                ...tokens.typography.headline.small,
+                color: colors.onSurface,
+                marginBottom: tokens.spacing[2],
+              }}>
                 No Responses
               </h4>
-              <p
-                css={{
-                  ...tokens.typography.body.medium,
-                  color: colors.onSurfaceVariant,
-                }}
-              >
+              <p css={{
+                ...tokens.typography.body.medium,
+                color: colors.onSurfaceVariant,
+              }}>
                 This submission doesn't have any recorded responses
               </p>
             </div>

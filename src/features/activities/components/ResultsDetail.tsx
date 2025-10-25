@@ -1,12 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTheme } from '../../../styles';
 import { useSubmissionDetails } from '../api';
-import {
-  buildQuestionMetadataMap,
-  formatResponseValue,
-  getQuestionTitle,
-  FormattedResponseValue,
-} from '../utils/resultFormatting';
 
 export interface ResultsDetailProps {
   activityId: string;
@@ -15,17 +9,12 @@ export interface ResultsDetailProps {
 }
 
 export const ResultsDetail: React.FC<ResultsDetailProps> = ({
-  activityId: _activityId,
+  activityId,
   submissionId,
   onTakeActivity,
 }) => {
   const { theme, tokens } = useTheme();
   const { data: submissionDetails, isLoading, error } = useSubmissionDetails(submissionId);
-
-  const questionMetadata = useMemo(
-    () => buildQuestionMetadataMap(submissionDetails || undefined),
-    [submissionDetails]
-  );
 
   const getStyles = () => ({
     container: {
@@ -110,74 +99,34 @@ export const ResultsDetail: React.FC<ResultsDetailProps> = ({
       color: theme.onSurface,
       marginBottom: tokens.spacing[2],
     },
-    responseCard: {
-      backgroundColor: theme.surfaceContainerHighest,
-      padding: tokens.spacing[4],
-      borderRadius: tokens.borderRadius.medium,
-      borderLeft: `4px solid ${theme.primary}`,
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[2],
+    questionText: {
+      ...tokens.typography.body.medium,
+      color: theme.onSurfaceVariant,
+      marginBottom: tokens.spacing[3],
+      lineHeight: 1.5,
+    },
+    responseLabel: {
+      ...tokens.typography.body.small,
+      color: theme.onSurfaceVariant,
+      marginBottom: tokens.spacing[1],
+      fontWeight: '500',
+      textTransform: 'uppercase' as const,
+      letterSpacing: '0.5px',
     },
     responseText: {
       ...tokens.typography.body.medium,
       color: theme.onSurface,
-      margin: 0,
-      whiteSpace: 'pre-wrap' as const,
-      wordBreak: 'break-word' as const,
+      backgroundColor: theme.surfaceContainerHighest,
+      padding: tokens.spacing[3],
+      borderRadius: tokens.borderRadius.medium,
+      borderLeft: `4px solid ${theme.primary}`,
+      fontStyle: 'italic',
     },
-    optionTitle: {
-      ...tokens.typography.body.medium,
-      color: theme.onSurface,
-      fontWeight: 600,
-      margin: 0,
-    },
-    optionDescription: {
-      ...tokens.typography.body.small,
-      color: theme.onSurfaceVariant,
-      margin: 0,
-    },
-    optionItemContent: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[1],
-    },
-    responseList: {
-      margin: 0,
-      paddingLeft: tokens.spacing[4],
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[2],
-    },
-    promptList: {
-      margin: 0,
-      paddingLeft: tokens.spacing[4],
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: tokens.spacing[3],
-    },
-    responseListItem: {
-      listStyleType: 'disc' as const,
-    },
-    promptBadge: {
-      ...tokens.typography.label.medium,
-      color: theme.primary,
-      backgroundColor: theme.primaryContainer,
-      borderRadius: tokens.borderRadius.full,
-      padding: `${tokens.spacing[1]}px ${tokens.spacing[2]}px`,
-      alignSelf: 'flex-start' as const,
-    },
-    rawResponse: {
-      ...tokens.typography.body.small,
-      color: theme.onSurface,
-      margin: 0,
-      whiteSpace: 'pre-wrap' as const,
-    },
-    emptyResponseText: {
+    noResponseText: {
       ...tokens.typography.body.medium,
       color: theme.onSurfaceVariant,
       fontStyle: 'italic',
-      margin: 0,
+      opacity: 0.7,
     },
     metadata: {
       display: 'flex',
@@ -203,74 +152,6 @@ export const ResultsDetail: React.FC<ResultsDetailProps> = ({
   });
 
   const styles = getStyles();
-
-  const renderResponseContent = (formatted: FormattedResponseValue) => {
-    switch (formatted.type) {
-      case 'text':
-        return (
-          <div style={styles.responseCard}>
-            <p style={styles.responseText}>{formatted.text}</p>
-          </div>
-        );
-      case 'option':
-        return (
-          <div style={styles.responseCard}>
-            <div style={styles.optionTitle}>{formatted.option.title}</div>
-            {formatted.option.description && (
-              <div style={styles.optionDescription}>{formatted.option.description}</div>
-            )}
-          </div>
-        );
-      case 'list':
-        return (
-          <div style={styles.responseCard}>
-            <ul style={styles.responseList}>
-              {formatted.items.map((item) => (
-                <li key={item.id} style={styles.responseListItem}>
-                  <div style={styles.optionItemContent}>
-                    <div style={styles.optionTitle}>{item.title}</div>
-                    {item.description && (
-                      <div style={styles.optionDescription}>{item.description}</div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      case 'prompts':
-        return (
-          <div style={styles.responseCard}>
-            <ul style={styles.promptList}>
-              {formatted.prompts.map(({ prompt, label }) => (
-                <li key={prompt.id} style={styles.responseListItem}>
-                  <div style={styles.optionItemContent}>
-                    <div style={styles.optionTitle}>{prompt.title}</div>
-                    <span style={styles.promptBadge}>{label}</span>
-                    {prompt.description && (
-                      <div style={styles.optionDescription}>{prompt.description}</div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      case 'raw':
-        return (
-          <div style={styles.responseCard}>
-            <pre style={styles.rawResponse}>{formatted.raw}</pre>
-          </div>
-        );
-      case 'empty':
-      default:
-        return (
-          <div style={styles.responseCard}>
-            <div style={styles.emptyResponseText}>No response provided</div>
-          </div>
-        );
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -358,18 +239,25 @@ export const ResultsDetail: React.FC<ResultsDetailProps> = ({
 
       <div style={styles.content}>
         {submissionDetails.responses && submissionDetails.responses.length > 0 ? (
-          submissionDetails.responses.map((response, index) => {
-            const metadata = questionMetadata.get(response.question_id);
-            const questionTitle = getQuestionTitle(response, metadata);
-            const formattedValue = formatResponseValue(response, metadata);
+          submissionDetails.responses.map((response, index) => (
+            <div key={response.id || index} style={styles.responseItem}>
+              <h4 style={styles.questionTitle}>
+                {response.question_type} - {response.question_id}
+              </h4>
 
-            return (
-              <div key={response.id || index} style={styles.responseItem}>
-                <h4 style={styles.questionTitle}>{questionTitle}</h4>
-                {renderResponseContent(formattedValue)}
-              </div>
-            );
-          })
+              <div style={styles.responseLabel}>Your Response</div>
+
+              {response.value ? (
+                <div style={styles.responseText}>
+                  {typeof response.value === 'string' ? `"${response.value}"` : JSON.stringify(response.value, null, 2)}
+                </div>
+              ) : (
+                <div style={styles.noResponseText}>
+                  No response provided
+                </div>
+              )}
+            </div>
+          ))
         ) : (
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>📝</div>
