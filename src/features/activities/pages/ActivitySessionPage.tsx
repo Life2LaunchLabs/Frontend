@@ -21,13 +21,10 @@ export const ActivitySessionPage: React.FC = () => {
     return (
       <PageLayout
         pageName="Activity Session"
-        layoutMode="utility"
-        utilityHeader={{
-          title: 'Activity',
-          leftAction: { type: 'back', onClick: () => navigate('/quests') }
-        }}
+        layoutMode="activity"
         panes={[
           {
+            invisible: true,
             content: (
               <div css={{
                 textAlign: 'center',
@@ -75,13 +72,10 @@ export const ActivitySessionPage: React.FC = () => {
     <>
       <PageLayout
         pageName="Activity Session"
-        layoutMode="utility"
-        utilityHeader={{
-          title: 'Activity',
-          leftAction: { type: 'back', onClick: handleBack }
-        }}
+        layoutMode="activity"
         panes={[
           {
+            invisible: true,
             content: (
               <ActivityViewer
                 activityId={activityId}

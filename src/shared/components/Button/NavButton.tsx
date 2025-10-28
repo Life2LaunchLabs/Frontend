@@ -11,6 +11,7 @@ export interface NavButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEle
   align?: 'center' | 'left';
   collapsed?: boolean;
   active?: boolean;
+  color?: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -22,6 +23,7 @@ export const NavButton: React.FC<NavButtonProps> = ({
   align = 'center',
   collapsed = false,
   active = false,
+  color,
   onClick,
   ...props
 }) => {
@@ -48,7 +50,7 @@ export const NavButton: React.FC<NavButtonProps> = ({
       case 'text':
       case 'elevated':
       default:
-        return colors.primary;
+        return color || colors.primary;
     }
   };
 
@@ -116,7 +118,7 @@ export const NavButton: React.FC<NavButtonProps> = ({
       case 'outlined':
         return {
           backgroundColor: 'transparent',
-          color: colors.primary,
+          color: color || colors.primary,
           border: `1px solid ${colors.outline}`,
           boxShadow: stateLayerOpacityValue > 0
             ? `inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacityValue)}`
@@ -124,8 +126,8 @@ export const NavButton: React.FC<NavButtonProps> = ({
         };
       case 'text':
         return {
-          backgroundColor: active ? withOpacity(colors.primary, 0.12) : 'transparent',
-          color: colors.primary,
+          backgroundColor: active ? withOpacity(color || colors.primary, 0.12) : 'transparent',
+          color: color || colors.primary,
           border: 'none',
           boxShadow: stateLayerOpacityValue > 0
             ? `inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacityValue)}`
@@ -138,14 +140,14 @@ export const NavButton: React.FC<NavButtonProps> = ({
             left: 0,
             width: active || isHovered ? '100%' : '0%',
             height: '2px',
-            backgroundColor: colors.primary,
+            backgroundColor: color || colors.primary,
             transition: 'width 0.3s ease-out',
           },
         };
       case 'elevated':
         return {
           backgroundColor: colors.surface,
-          color: colors.primary,
+          color: color || colors.primary,
           border: 'none',
           boxShadow: stateLayerOpacityValue > 0
             ? `${tokens.shadows.small}, inset 0 0 0 1000px ${stateLayer(stateLayerColorValue, stateLayerOpacityValue)}`
@@ -177,7 +179,7 @@ export const NavButton: React.FC<NavButtonProps> = ({
         ...baseStyles,
         ...getVariantStyles(),
         '&:focus-visible': {
-          outline: `2px solid ${colors.primary}`,
+          outline: `2px solid ${color || colors.primary}`,
           outlineOffset: '2px',
         },
       }}

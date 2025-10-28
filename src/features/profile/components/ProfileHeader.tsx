@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../../../styles';
-import { IconButton } from '../../../shared/components';
-import { useProfileData, useUpdateProfileData } from '../api/hooks';
-import type { ProfileHeaderEditData } from '../types';
+import { useProfileData } from '../api/hooks';
 import defaultProfilePhoto from '../../../shared/assets/images/default_profile_photo.png';
+import { Icon } from '../../../shared/components';
 
 export interface ProfileHeaderProps {
   // Props are now optional since we fetch from backend
@@ -20,12 +19,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 }) => {
   const { colors, tokens } = useTheme();
   const { data: profileData, isLoading, error } = useProfileData();
-  const updateProfileMutation = useUpdateProfileData();
-
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editData, setEditData] = useState<ProfileHeaderEditData>({});
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const Container: React.ElementType = asFragment ? React.Fragment : 'div';
 
@@ -38,77 +31,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const email = profileData?.email || '';
   const profilePhotoUrl = profileData?.profile_photo_url || defaultProfilePhotoUrl || '';
 
-  const handleEditToggle = () => {
-    if (isEditMode) {
-      // Cancel edit mode
-      setEditData({});
-      setSelectedPhoto(null);
-      setPhotoPreview(null);
-      setIsEditMode(false);
-    } else {
-      // Enter edit mode
-      setEditData({
-        first_name: profileData?.first_name || '',
-        last_name: profileData?.last_name || '',
-        bio: profileData?.bio || '',
-        email: profileData?.email || '',
-        tagline: profileData?.tagline || '',
-      });
-      setIsEditMode(true);
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const updateData = { ...editData };
-      if (selectedPhoto) {
-        updateData.profile_photo = selectedPhoto;
-      }
-      await updateProfileMutation.mutateAsync(updateData);
-      setIsEditMode(false);
-      setEditData({});
-      setSelectedPhoto(null);
-      setPhotoPreview(null);
-    } catch (error) {
-      // Error is handled by the mutation hook with toast
-    }
-  };
-
-  const handleInputChange = (field: keyof ProfileHeaderEditData, value: string) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handlePhotoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size must be less than 5MB');
-        return;
-      }
-
-      setSelectedPhoto(file);
-
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handlePhotoClick = () => {
-    if (isEditMode) {
-      document.getElementById('photo-upload-input')?.click();
-    }
-  };
 
   const getStyles = () => ({
     container: {
@@ -119,22 +41,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       padding: tokens.spacing[8],
       border: `1px solid ${colors.outline}`,
       marginBottom: tokens.spacing[8],
-      position: 'relative' as const,
-    },
-    editButton: {
-      position: 'absolute' as const,
-      top: tokens.spacing[4],
-      right: tokens.spacing[4],
-    },
-    saveButton: {
-      position: 'absolute' as const,
-      top: tokens.spacing[4],
-      right: tokens.spacing[12], // Make room for cancel button
-    },
-    cancelButton: {
-      position: 'absolute' as const,
-      top: tokens.spacing[4],
-      right: tokens.spacing[4],
     },
     content: {
       display: 'flex',
@@ -143,111 +49,64 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     },
     photoContainer: {
       flexShrink: 0,
-      position: 'relative' as const,
     },
     photo: {
       width: '128px',
       height: '128px',
       borderRadius: tokens.borderRadius.large,
       overflow: 'hidden',
-      border: `4px solid ${colors.primary}`,
+      border: `4px solid ${colors.onSurface}`,
       boxShadow: tokens.shadows.large,
-      transition: 'transform 0.3s ease',
-      cursor: isEditMode ? 'pointer' : 'default',
-    },
-    photoUploadOverlay: {
-      position: 'absolute' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: tokens.borderRadius.large,
-      opacity: 0,
-      transition: 'opacity 0.3s ease',
-      color: 'white',
-      fontSize: '0.875rem',
-      fontWeight: '500',
-      textAlign: 'center' as const,
-    },
-    hiddenInput: {
-      display: 'none',
     },
     photoImg: {
       width: '100%',
       height: '100%',
       objectFit: 'cover' as const,
     },
-    infoContainer: {
+    leftColumn: {
       flex: 1,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: tokens.spacing[2],
+    },
+    rightColumn: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'flex-start',
+      gap: tokens.spacing[2],
+      paddingTop: tokens.spacing[2],
     },
     name: {
-      ...tokens.typography.headline.large,
+      ...tokens.typography.title.large,
       color: colors.onSurface,
       margin: 0,
-      marginBottom: tokens.spacing[2],
       fontSize: '2rem',
       fontWeight: '700',
     },
-    titleText: {
-      ...tokens.typography.headline.small,
-      color: colors.primary,
+    tagline: {
+      ...tokens.typography.title.medium,
+      color: colors.onSurface,
       margin: 0,
-      marginBottom: tokens.spacing[4],
       fontWeight: '500',
     },
     bio: {
-      ...tokens.typography.body.large,
+      ...tokens.typography.body.small,
       color: colors.onSurfaceVariant,
       lineHeight: '1.6',
-      marginBottom: tokens.spacing[6],
+      marginTop: tokens.spacing[2],
     },
-    contactInfo: {
-      display: 'flex',
-      flexWrap: 'wrap' as const,
-      gap: tokens.spacing[6],
-    },
-    contactItem: {
+    emailContainer: {
       display: 'flex',
       alignItems: 'center',
       gap: tokens.spacing[2],
     },
-    contactIcon: {
-      color: colors.primary,
+    emailIcon: {
+      color: colors.onSurface,
       fontSize: '1.2rem',
     },
-    contactText: {
+    emailText: {
+      ...tokens.typography.body.medium,
       color: colors.onSurfaceVariant,
-      textDecoration: 'none',
-    },
-    contactLink: {
-      color: colors.primary,
-      textDecoration: 'none',
-    },
-    input: {
-      width: '100%',
-      padding: tokens.spacing[2],
-      border: `1px solid ${colors.outline}`,
-      borderRadius: tokens.borderRadius.medium,
-      backgroundColor: colors.surface,
-      color: colors.onSurface,
-      fontSize: 'inherit',
-      fontFamily: 'inherit',
-    },
-    textarea: {
-      width: '100%',
-      padding: tokens.spacing[2],
-      border: `1px solid ${colors.outline}`,
-      borderRadius: tokens.borderRadius.medium,
-      backgroundColor: colors.surface,
-      color: colors.onSurface,
-      fontSize: 'inherit',
-      fontFamily: 'inherit',
-      minHeight: '80px',
-      resize: 'vertical' as const,
     },
     loadingState: {
       display: 'flex',
@@ -291,153 +150,44 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   return (
     <Container {...(!asFragment ? { style: styles.container, 'data-testid': 'profile-header' } : {})}>
-      {/* Edit Controls */}
-      {!isEditMode ? (
-        <div style={styles.editButton}>
-          <IconButton
-            icon="edit"
-            variant="standard"
-            onClick={handleEditToggle}
-            disabled={updateProfileMutation.isPending}
-          />
-        </div>
-      ) : (
-        <>
-          <div style={styles.saveButton}>
-            <IconButton
-              icon="check"
-              variant="filled"
-              onClick={handleSave}
-              disabled={updateProfileMutation.isPending}
-            />
-          </div>
-          <div style={styles.cancelButton}>
-            <IconButton
-              icon="close"
-              variant="outlined"
-              onClick={handleEditToggle}
-              disabled={updateProfileMutation.isPending}
-            />
-          </div>
-        </>
-      )}
-
       <div style={styles.content}>
         <div style={styles.photoContainer}>
-          <div
-            style={styles.photo}
-            onClick={handlePhotoClick}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-              if (isEditMode) {
-                const overlay = e.currentTarget.querySelector('.photo-upload-overlay') as HTMLElement;
-                if (overlay) overlay.style.opacity = '1';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              if (isEditMode) {
-                const overlay = e.currentTarget.querySelector('.photo-upload-overlay') as HTMLElement;
-                if (overlay) overlay.style.opacity = '0';
-              }
-            }}
-          >
+          <div style={styles.photo}>
             <img
-              src={photoPreview || profilePhotoUrl || defaultProfilePhoto}
+              src={profilePhotoUrl || defaultProfilePhoto}
               alt={`${fullName}'s profile`}
               style={styles.photoImg}
               onError={(e) => {
-                if (!photoPreview) {
-                  e.currentTarget.src = defaultProfilePhoto;
-                }
+                e.currentTarget.src = defaultProfilePhoto;
               }}
             />
-            {isEditMode && (
-              <div className="photo-upload-overlay" style={styles.photoUploadOverlay}>
-                📸<br />Click to<br />change photo
-              </div>
-            )}
           </div>
-          <input
-            id="photo-upload-input"
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoSelect}
-            style={styles.hiddenInput}
-          />
         </div>
 
-        <div style={styles.infoContainer}>
-          {/* Name */}
-          {isEditMode ? (
-            <div style={{ display: 'flex', gap: tokens.spacing[2], marginBottom: tokens.spacing[2] }}>
-              <input
-                type="text"
-                placeholder="First name"
-                value={editData.first_name || ''}
-                onChange={(e) => handleInputChange('first_name', e.target.value)}
-                style={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Last name"
-                value={editData.last_name || ''}
-                onChange={(e) => handleInputChange('last_name', e.target.value)}
-                style={styles.input}
-              />
+        <div style={styles.leftColumn}>
+          {fullName && <h1 style={styles.name}>{fullName}</h1>}
+          {tagline && <p style={styles.tagline}>{tagline}</p>}
+          {bio && <p style={styles.bio}>{bio}</p>}
+        </div>
+
+        <div style={styles.rightColumn}>
+          {email && (
+            <div style={styles.emailContainer}>
+              <Icon name="mail" size={20} color="surface" />
+              <span style={styles.emailText}>{email}</span>
             </div>
-          ) : (
-            fullName && <h1 style={styles.name}>{fullName}</h1>
           )}
-
-          {/* Tagline */}
-          {isEditMode ? (
-            <input
-              type="text"
-              placeholder="Your professional tagline..."
-              value={editData.tagline || ''}
-              onChange={(e) => handleInputChange('tagline', e.target.value)}
-              style={styles.input}
-            />
-          ) : (
-            tagline && <p style={styles.titleText}>{tagline}</p>
-          )}
-
-          {/* Bio */}
-          {isEditMode ? (
-            <textarea
-              placeholder="Tell us about yourself..."
-              value={editData.bio || ''}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
-              style={styles.textarea}
-            />
-          ) : (
-            bio && <p style={styles.bio}>{bio}</p>
-          )}
-
-          <div style={styles.contactInfo}>
-            {/* Email */}
-            {isEditMode ? (
-              <div style={styles.contactItem}>
-                <span style={styles.contactIcon}>✉</span>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={editData.email || ''}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  style={styles.input}
-                />
-              </div>
-            ) : (
-              email && (
-                <div style={styles.contactItem}>
-                  <span style={styles.contactIcon}>✉</span>
-                  <span style={styles.contactText}>{email}</span>
-                </div>
-              )
-            )}
-
-            {/* Location and LinkedIn removed */}
+          <div style={styles.emailContainer}>
+            <Icon name="instagram" size={20} color="surface" />
+            <a href="https://instagram.com/username" style={styles.emailText} target="_blank" rel="noopener noreferrer">@username</a>
+          </div>
+          <div style={styles.emailContainer}>
+            <Icon name="twitter" size={20} color="surface" />
+            <a href="https://twitter.com/username" style={styles.emailText} target="_blank" rel="noopener noreferrer">@username</a>
+          </div>
+          <div style={styles.emailContainer}>
+            <Icon name="globe" size={20} color="surface" />
+            <a href="https://portfolio.example.com" style={styles.emailText} target="_blank" rel="noopener noreferrer">portfolio.example.com</a>
           </div>
         </div>
       </div>

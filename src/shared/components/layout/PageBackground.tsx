@@ -2,7 +2,8 @@
 import { CSSObject } from '@emotion/react';
 import { ReactNode } from 'react';
 import { useTheme } from '@/styles/providers/hooks';
-import auroraBg from '@/shared/assets/images/aurora_bg.png';
+// import auroraBg from '@/shared/assets/images/aurora_bg.png';
+import blueGradientBG from '@/shared/assets/images/launchpad_background_plain.png';
 
 export interface PageBackgroundProps {
   children: ReactNode;
@@ -25,9 +26,12 @@ export const PageBackground = ({ children, className }: PageBackgroundProps) => 
   };
 
   const launchpadStyles: CSSObject = {
+    // background: `
+    //   linear-gradient(#00000080, #00000080),
+    //   url(${blueGradientBG})
+    // `,
     background: `
-      linear-gradient(#00000080, #00000080),
-      url(${auroraBg})
+      url(${blueGradientBG})
     `,
     backgroundSize: 'cover',
     backgroundPosition: 'center',

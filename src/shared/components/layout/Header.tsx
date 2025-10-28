@@ -4,8 +4,9 @@ import { CSSObject } from '@emotion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { IconButton, NavButton, Button } from '@shared/components'; // ensure Button exists
 import { useTheme } from '@/styles/providers/hooks';
+import { glassify } from '@/styles/tokens';
 import { Transparent } from '../surfaces';
-import galaxyLogo from '@/shared/assets/images/Galaxy Launchpad Logo 1.png';
+import galaxyLogo from '@/shared/assets/images/launchpad_dome_logo.png';
 
 export interface HeaderProps {
   pageName?: string;
@@ -28,9 +29,13 @@ export const Header = ({
   leftAction,
   rightAction,
 }: HeaderProps) => {
-  const { colors, tokens } = useTheme();
+  const { colors, tokens, mode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const surfaceColor = mode === 'launchpad'
+    ? (colors as typeof import('@/styles/tokens').launchpadColors).surface
+    : (colors as typeof import('@/styles/tokens').adminColors).surface;
 
   const headerStyles: CSSObject = {
     display: 'flex',
@@ -40,8 +45,8 @@ export const Header = ({
   };
 
   const logoStyles: CSSObject = {
-    width: '48px',
-    height: 'auto',
+    height: '3rem',
+    width: 'auto',
     display: 'block',
     transition: tokens.transitions.normal,
   };
@@ -58,6 +63,7 @@ export const Header = ({
         onClick={() => navigate('/admin/dashboard')}
         aria-label="Dashboard"
         data-testid="admin-dashboard-button"
+        color={colors.onSurface}
       >
         Dashboard
       </NavButton>
@@ -69,6 +75,7 @@ export const Header = ({
         onClick={() => navigate('/admin/quests')}
         aria-label="Quests"
         data-testid="admin-quests-button"
+        color={colors.onSurface}
       >
         Quests
       </NavButton>
@@ -85,6 +92,7 @@ export const Header = ({
         onClick={() => navigate('/home')}
         aria-label="Home"
         data-testid="home-button"
+        color={colors.onSurface}
       >
         Home
       </NavButton>
@@ -96,6 +104,7 @@ export const Header = ({
         onClick={() => navigate('/chat')}
         aria-label="Chat"
         data-testid="chat-button"
+        color={colors.onSurface}
       >
         Chat
       </NavButton>
@@ -107,6 +116,7 @@ export const Header = ({
         onClick={() => navigate('/profile')}
         aria-label="Profile"
         data-testid="profile-button"
+        color={colors.onSurface}
       >
         Profile
       </NavButton>
@@ -118,6 +128,7 @@ export const Header = ({
         onClick={() => navigate('/quests')}
         aria-label="Quests"
         data-testid="quests-button"
+        color={colors.onSurface}
       >
         Quests
       </NavButton>
@@ -129,6 +140,7 @@ export const Header = ({
         onClick={() => navigate('/explore')}
         aria-label="Explore"
         data-testid="explore-button"
+        color={colors.onSurface}
       >
         Explore
       </NavButton>
@@ -159,7 +171,7 @@ export const Header = ({
           )}
 
           {/* Title */}
-          <h1 css={{ ...tokens.typography.headline.large, color: colors.primary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <h1 css={{ ...tokens.typography.headline.large, color: colors.onSurface, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {pageName}
           </h1>
         </div>
@@ -184,9 +196,6 @@ export const Header = ({
   return (
     <Transparent as="header" className={className} css={headerStyles}>
       <img src={galaxyLogo} alt="Galaxy Launchpad" css={logoStyles} />
-      <h1 css={{ ...tokens.typography.headline.large, color: colors.primary }}>
-        {pageName}
-      </h1>
 
       {showNav && (
         <>
@@ -203,9 +212,13 @@ export const Header = ({
                 display: 'flex',
                 gap: tokens.spacing[2],
                 alignItems: 'center',
-                backgroundColor: colors.surface,
                 padding: tokens.spacing[2],
-                borderRadius: tokens.borderRadius.large,
+                borderRadius: tokens.borderRadius.xl,
+                ...glassify(surfaceColor, 0.4, {
+                  blur: tokens.blur.medium,
+                  borderColor: colors.outline,
+                  shadow: tokens.shadows.small,
+                }),
               }}
             >
               {navMode === 'admin' ? renderAdminLinks() : renderLaunchpadLinks()}
@@ -216,6 +229,7 @@ export const Header = ({
             icon="person"
             variant="standard"
             onClick={handleUserClick}
+            color={colors.onSurface}
             style={{ width: '48px', height: '48px', backgroundColor: 'white' }}
           />
         </>

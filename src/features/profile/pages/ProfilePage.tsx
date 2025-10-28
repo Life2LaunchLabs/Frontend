@@ -1,7 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { PageLayout } from '@shared/components';
-import { Experience, ExperienceSection, ProfileHeader, SkillBadge, SkillBadgesGrid } from '../components';
+import { PageLayout, Pane } from '@shared/components';
+import { useTheme } from '@/styles';
+import { Experience, ExperienceSection, ProfileHeader, SkillBadge, SkillBadgesGrid, SoftSkillsSection, CredentialsSection } from '../components';
 
 export const ProfilePage: React.FC = () => {
   const demo_experiences: Experience[]  = [
@@ -41,50 +42,67 @@ export const ProfilePage: React.FC = () => {
   ]
   const demo_badges: SkillBadge[]  = [
     {
-      name: "OES: Adaptability Badge",
-      color: "#123456",
-      earned: "Sept 5, 2025"
+      name: "Life2Launch: Outer World",
+      color: "#fe6f2f",
+      earned: "Sept 5, 2025",
+      icon: "globe"
     },
     {
-      name: "Life2Launch: Advanced Launcher",
-      color: "#654321",
-      earned: "April 3, 2025"
+      name: "Life2Launch: Personal Drivers",
+      color: "#1aa7ff",
+      earned: "April 3, 2025",
+      icon: "gears"
     },
     {
-      name: "OES: Digital Literacy Badge",
-      color: "#125634",
-      earned: "Sept 9, 2025"
+      name: "Life2Launch: Personal OS",
+      color: "#0e1550",
+      earned: "Sept 9, 2025",
+      icon: "home"
     },
   ]
+
+  const { tokens } = useTheme();
+
+  const customGrid = (
+    <div
+      css={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr minmax(420px, 1fr)',
+        gridTemplateRows: 'auto auto auto',
+        gridTemplateAreas: `
+          "a a b"
+          "c c b"
+          "d e b"
+        `,
+        gap: tokens.spacing[5],
+        alignItems: 'stretch',
+        justifyItems: 'stretch',
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      <Pane css={{ gridArea: 'a', height: '100%' }}>
+        <ProfileHeader asFragment />
+      </Pane>
+      <Pane css={{ gridArea: 'b', height: '100%', minHeight: 0, overflow: 'hidden' }}>
+        <ExperienceSection experiences={demo_experiences} asFragment />
+      </Pane>
+      <Pane css={{ gridArea: 'c', height: '100%' }}>
+        <SkillBadgesGrid badges={demo_badges} asFragment />
+      </Pane>
+      <Pane css={{ gridArea: 'd', height: '100%' }}>
+        <SoftSkillsSection asFragment />
+      </Pane>
+      <Pane css={{ gridArea: 'e', height: '100%' }}>
+        <CredentialsSection asFragment />
+      </Pane>
+    </div>
+  );
 
   return (
     <PageLayout
       pageName="Profile"
-      gridParams={{
-        cols: [
-          { id: 'left', width: 'auto' }, // left column
-          { id: 'right', width: 'minmax(420px, 1fr)' }, // right column
-        ],
-        stackAt: { base: false },
-        alignItems: 'stretch',
-        justifyItems: 'stretch',
-      }}
-      panes={[
-        {
-          column: 'left',
-          content: <ProfileHeader asFragment />,
-        },
-        {
-          column: 'left',
-          content: <SkillBadgesGrid badges={demo_badges} asFragment />,
-        },
-        {
-          column: 'right',
-          content: <ExperienceSection experiences={demo_experiences} asFragment />,
-          spanRows: true,
-          css: { minHeight: 0, overflow: 'hidden' },
-        },
-      ]}
+      customContent={customGrid}
     />
   );
 };

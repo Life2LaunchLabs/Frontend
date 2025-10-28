@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../styles';
 import { ActivitiesService } from '../api';
-import { useActivityPage, useCreateAttempt, useSubmitResponse } from '../hooks';
+import { useAllActivityPages, useCreateAttempt, useSubmitResponse } from '../hooks';
 import { BlockRenderer } from './BlockRenderer';
 import { Attempt, ActivityPageResponse } from '../types';
+import { ProgressBar } from '../../../shared/components';
 
 export interface ActivityViewerProps {
   activityId: string;
@@ -21,13 +22,12 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [totalPages, setTotalPages] = useState<number | null>(null);
 
-  // Current page data
-  const { pageData, loading: pageLoading, error: pageError } = useActivityPage(activityId, currentPageIndex);
+  // Load all pages at once
+  const { pages, loading: pagesLoading, error: pagesError } = useAllActivityPages(activityId);
 
-  // Check if we're on the last page by attempting to fetch next page
-  const { pageData: nextPageData, error: nextPageError } = useActivityPage(activityId, currentPageIndex + 1);
+  // Get current page data
+  const pageData = pages[currentPageIndex] || null;
 
   // Hooks for attempt management
   const { createAttempt, loading: createLoading, error: createError } = useCreateAttempt();
@@ -54,19 +54,8 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
     initializeAttempt();
   }, [pageData?.activity_version?.id, attempt, createLoading, isCompleted, hasAttemptedCreate]);
 
-  // Determine total pages based on next page availability
-  useEffect(() => {
-    if (nextPageError && currentPageIndex > 0) {
-      // If next page fails to load and we're past the first page, we're likely on the last page
-      setTotalPages(currentPageIndex + 1);
-    } else if (nextPageData) {
-      // If next page loads successfully, we're not on the last page yet
-      setTotalPages(null);
-    }
-  }, [nextPageData, nextPageError, currentPageIndex]);
-
   const isOnLastPage = () => {
-    return totalPages !== null && currentPageIndex === totalPages - 1;
+    return currentPageIndex === pages.length - 1;
   };
 
   const handleResponseChange = async (questionId: string, value: any) => {
@@ -165,60 +154,39 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
 
   // Styles
   const getStyles = () => ({
-    container: {
-      maxWidth: '900px',
+    wrapper: {
+      width: '100%',
+      maxWidth: '600px',
+      height: '100%',
       margin: '0 auto',
-      padding: tokens.spacing[6],
-      minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column' as const,
       gap: tokens.spacing[6],
     },
     header: {
-      backgroundColor: colors.surfaceVariant,
-      borderRadius: tokens.borderRadius.large,
-      padding: tokens.spacing[8],
-      boxShadow: tokens.shadows.small,
-      textAlign: 'center' as const,
+      flexShrink: 0,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: tokens.spacing[4],
     },
     title: {
       ...tokens.typography.headline.large,
       color: colors.onSurface,
       margin: 0,
-      marginBottom: tokens.spacing[2],
-    },
-    pageTitle: {
-      ...tokens.typography.title.large,
-      color: colors.onSurfaceVariant,
-      margin: 0,
-      marginBottom: tokens.spacing[4],
-    },
-    progressBadge: {
-      ...tokens.typography.label.medium,
-      color: colors.primary,
-      backgroundColor: colors.primaryContainer,
-      padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-      borderRadius: tokens.borderRadius.full,
-      display: 'inline-block',
+      textAlign: 'left' as const,
     },
     contentCard: {
-      backgroundColor: colors.surfaceVariant,
-      borderRadius: tokens.borderRadius.large,
-      padding: tokens.spacing[8],
-      boxShadow: tokens.shadows.medium,
-      border: `1px solid ${colors.outline}`,
       flex: 1,
+      overflow: 'auto',
+      minHeight: 0,
     },
     navigation: {
+      flexShrink: 0,
       display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      backgroundColor: colors.surfaceVariant,
-      borderRadius: tokens.borderRadius.large,
-      padding: tokens.spacing[6],
-      boxShadow: tokens.shadows.small,
+      gap: tokens.spacing[4],
     },
     button: (variant: 'primary' | 'secondary' = 'primary', disabled = false) => ({
+      flex: 1,
       backgroundColor: disabled
         ? colors.surfaceContainerLow
         : variant === 'primary' ? colors.primary : colors.surface,
@@ -238,14 +206,6 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
         backgroundColor: variant === 'primary' ? colors.primary : colors.surfaceVariant,
       },
     }),
-    pageIndicator: {
-      ...tokens.typography.label.large,
-      color: colors.onSurfaceVariant,
-      backgroundColor: colors.surface,
-      padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-      borderRadius: tokens.borderRadius.medium,
-      border: `1px solid ${colors.outline}`,
-    },
     loadingState: {
       display: 'flex',
       alignItems: 'center',
@@ -289,9 +249,9 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const styles = getStyles();
 
   // Loading state
-  if (pageLoading || createLoading) {
+  if (pagesLoading || createLoading) {
     return (
-      <div style={styles.container}>
+      <div style={styles.wrapper}>
         <div style={styles.loadingState}>
           Loading activity...
         </div>
@@ -300,11 +260,11 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   }
 
   // Error state
-  if (pageError || createError) {
+  if (pagesError || createError) {
     return (
-      <div style={styles.container}>
+      <div style={styles.wrapper}>
         <div style={styles.errorState}>
-          Error loading activity: {pageError || createError}
+          Error loading activity: {pagesError || createError}
         </div>
       </div>
     );
@@ -313,7 +273,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   // No data
   if (!pageData) {
     return (
-      <div style={styles.container}>
+      <div style={styles.wrapper}>
         <div style={styles.errorState}>
           Activity not found
         </div>
@@ -324,7 +284,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   // Completion state
   if (isCompleted) {
     return (
-      <div style={styles.container}>
+      <div style={styles.wrapper}>
         <div style={styles.completionState}>
           <h1 style={styles.completionTitle}>Activity Completed!</h1>
           <p style={styles.completionMessage}>
@@ -344,16 +304,14 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const { activity_version, page, blocks, media } = pageData;
 
   return (
-    <div style={styles.container}>
+    <div style={styles.wrapper}>
       {/* Header */}
       <div style={styles.header}>
         <h1 style={styles.title}>{activity_version.title}</h1>
-        {page.title && (
-          <h2 style={styles.pageTitle}>{page.title}</h2>
-        )}
-        <div style={styles.progressBadge}>
-          Page {currentPageIndex + 1}{totalPages ? ` of ${totalPages}` : ''}
-        </div>
+        <ProgressBar
+          current={currentPageIndex + 1}
+          total={pages.length}
+        />
       </div>
 
       {/* Content */}
@@ -378,10 +336,6 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
         >
           ← Previous
         </button>
-
-        <div style={styles.pageIndicator}>
-          Page {currentPageIndex + 1}
-        </div>
 
         <button
           style={styles.button('primary')}

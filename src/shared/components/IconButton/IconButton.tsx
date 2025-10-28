@@ -8,6 +8,7 @@ export interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLBut
   disabled?: boolean;
   toggle?: boolean;
   toggled?: boolean;
+  color?: string;
   onToggle?: (toggled: boolean) => void;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -18,6 +19,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   disabled = false,
   toggle = false,
   toggled: controlledToggled,
+  color,
   onToggle,
   onClick,
   ...props
@@ -66,7 +68,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
         case 'standard':
         case 'elevated':
         default:
-          return colors.primary;
+          return color || colors.primary;
       }
     };
 
@@ -143,15 +145,15 @@ export const IconButton: React.FC<IconButtonProps> = ({
         return {
           ...baseStyle,
           backgroundColor: toggleBg || 'transparent',
-          color: isToggled ? colors.onPrimaryContainer : colors.primary,
-          border: `1px solid ${colors.primary}`,
+          color: isToggled ? colors.onPrimaryContainer : (color || colors.primary),
+          border: `1px solid ${color || colors.primary}`,
           boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
         };
       case 'standard':
         return {
           ...baseStyle,
           backgroundColor: toggleBg || 'transparent',
-          color: isToggled ? colors.onPrimaryContainer : colors.primary,
+          color: isToggled ? colors.onPrimaryContainer : (color || colors.primary),
           border: 'none',
           boxShadow: stateLayerOpacity > 0 ? `inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})` : 'none',
         };
@@ -159,9 +161,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
         return {
           ...baseStyle,
           backgroundColor: toggleBg || 'transparent',
-          color: isToggled ? colors.onPrimaryContainer : colors.primary,
+          color: isToggled ? colors.onPrimaryContainer : (color || colors.primary),
           border: 'none',
-          boxShadow: stateLayerOpacity > 0 
+          boxShadow: stateLayerOpacity > 0
             ? `0 2px 4px rgba(0, 0, 0, 0.1), inset 0 0 0 1000px rgba(${hexToRgb(stateLayerColor)}, ${stateLayerOpacity})`
             : '0 2px 4px rgba(0, 0, 0, 0.1)',
         };

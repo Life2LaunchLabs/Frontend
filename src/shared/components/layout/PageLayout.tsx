@@ -17,6 +17,7 @@ export interface PaneContent {
   area?: string; // named grid area
   column?: string;
   spanRows?: boolean;
+  invisible?: boolean;
 }
 
 type AreasMatrix = string[];
@@ -32,7 +33,7 @@ export interface PaneGridSpec {
   justifyContent?: Responsive<React.CSSProperties['justifyContent']>;
 }
 
-export type LayoutMode = 'default' | 'auth' | 'utility';
+export type LayoutMode = 'default' | 'auth' | 'utility' | 'activity';
 
 export interface UtilityHeaderControls {
   /** Title in the utility header (e.g., "Settings") */
@@ -51,10 +52,13 @@ export interface PageLayoutProps {
   navMode?: 'launchpad' | 'admin';
   toolbars?: React.ReactNode[];
   sidebar?: React.ReactNode;
-  
+
   gridMode?: GridModeFn<StackedColumnsParams>;
   gridParams?: StackedColumnsParams;
   fillRowIndex?: number;
+
+  /** Pass a pre-assembled custom grid fragment, bypassing the pane assembly logic */
+  customContent?: React.ReactNode;
 
   layoutMode?: LayoutMode;
   utilityHeader?: UtilityHeaderControls;
@@ -97,6 +101,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   gridParams,
   fillRowIndex = 0,
 
+  customContent,
+
   layoutMode = 'default',
   utilityHeader,
   showFooter,
@@ -111,6 +117,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   const defaultFooterByMode =
     layoutMode === 'default' ? true :
     layoutMode === 'auth' ? true :      // your "auth with only footer" request
+    layoutMode === 'activity' ? false :
     /* utility */ false;
 
   const shouldShowFooter =
@@ -198,6 +205,9 @@ const { normalizedPanes, countsByCol, spanCols } = useMemo(() => {
 }, [baseSpec, countsByCol, fillRowIndex, resolvedGridParams.stackAt, resolvedGridParams.cols, spanCols]);
 
   const renderGrid = () => {
+    // If customContent is provided, use it directly
+    if (customContent) return customContent;
+
     if (!panes) return children;
 
     const gridCss: any = {
@@ -243,11 +253,12 @@ const { normalizedPanes, countsByCol, spanCols } = useMemo(() => {
         {normalizedPanes.map((pane, i) => (
           <Pane
             key={i}
+            invisible={pane.invisible}
             css={{
               gridArea: pane.area,   // 'a' | 'b' etc. (template uses these)
               minWidth: 0,
               minHeight: 0,
-              height: verticalCenter ? 'auto' : '100%', 
+              height: verticalCenter ? 'auto' : '100%',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',

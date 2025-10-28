@@ -15,3 +15,9 @@ export type { EducationSectionProps, Education } from './EducationSection';
 
 export { SkillsSection } from './SkillsSection';
 export type { SkillsSectionProps, SkillCategory } from './SkillsSection';
+
+export { SoftSkillsSection } from './SoftSkillsSection';
+export type { SoftSkillsSectionProps } from './SoftSkillsSection';
+
+export { CredentialsSection } from './CredentialsSection';
+export type { CredentialsSectionProps } from './CredentialsSection';

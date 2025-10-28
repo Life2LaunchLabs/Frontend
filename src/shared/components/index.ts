@@ -4,6 +4,9 @@ export * from './surfaces';
 // Layout components (new design system)
 export * from './layout';
 
+// Feedback components
+export { ProgressBar } from './feedback/ProgressBar';
+
 // Legacy components (to be refactored)
 export { Button, NavButton } from './Button';
 export {Carousel, CarouselCard} from './Carousel';
@@ -21,9 +24,10 @@ export { DailyUpdate } from './DailyUpdate';
 export { Modal } from './Modal';
 
 // Export types
+export type { ProgressBarProps } from './feedback/ProgressBar';
 export type { ButtonProps, NavButtonProps } from './Button';
 export type {CarouselProps, CarouselHandle, CarouselCardProps} from './Carousel';
-export type { IconProps } from './Icon';
+export type { IconProps, MappedIconName } from './Icon';
 export type { IconButtonProps } from './IconButton';
 export type { ChipProps } from './Chip';
 export type { ToastProps } from './Toast';

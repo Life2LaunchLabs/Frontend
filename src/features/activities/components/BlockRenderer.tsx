@@ -19,7 +19,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   const { colors, tokens } = useTheme();
 
   const getContainerStyle = () => ({
-    marginBottom: tokens.spacing[4],
+    marginBottom: tokens.spacing[3],
   });
 
   const renderBlock = () => {
@@ -35,6 +35,7 @@ case 'text_input':
 case 'multiple_choice':
 case 'dropdown_input':
 case 'a_or_b_input':
+case 'rating':
   return (
     <QuestionBlock
       config={block.config as any}

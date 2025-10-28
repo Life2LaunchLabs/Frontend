@@ -5,6 +5,7 @@ export {
   withOpacity,
   stateLayer,
   stateOpacity,
+  glassify,
   // Legacy exports
   colorPrimitives,
 } from './colors';

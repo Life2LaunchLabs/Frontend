@@ -2,11 +2,13 @@
 import { CSSObject } from '@emotion/react';
 import { ReactNode, forwardRef } from 'react';
 import { useTheme } from '@/styles/providers/hooks';
+import { glassify } from '@/styles/tokens';
 
 export interface PaneProps {
   children: ReactNode;
   className?: string;
   css?: CSSObject;
+  invisible?: boolean;
 }
 
 /**
@@ -16,7 +18,7 @@ export interface PaneProps {
  * Admin: Solid fill with subtle shadow
  */
 export const Pane = forwardRef<HTMLDivElement, PaneProps>(
-  ({ children, className, css: customCss, ...props }, ref) => {
+  ({ children, className, css: customCss, invisible = false, ...props }, ref) => {
     const { mode, colors, tokens } = useTheme();
 
     const baseStyles: CSSObject = {
@@ -24,13 +26,19 @@ export const Pane = forwardRef<HTMLDivElement, PaneProps>(
       padding: tokens.spacing[6],
     };
 
-    const launchpadStyles: CSSObject = {
-      background: colors.glass,
-      backdropFilter: `blur(${tokens.blur.medium})`,
-      WebkitBackdropFilter: `blur(${tokens.blur.medium})`,
-      border: `1px solid ${colors.outline}`,
-      boxShadow: tokens.shadows.pane,
-    };
+    const surfaceColor = mode === 'launchpad'
+      ? (colors as typeof import('@/styles/tokens').launchpadColors).surface
+      : (colors as typeof import('@/styles/tokens').adminColors).surface;
+
+    const launchpadStyles: CSSObject = glassify(
+      surfaceColor,
+      0.4,
+      {
+        blur: tokens.blur.medium,
+        borderColor: colors.outline,
+        shadow: tokens.shadows.pane,
+      }
+    );
 
     const adminStyles: CSSObject = {
       background: (colors as any).surfaceVariant || colors.surfaceContainer,
@@ -38,7 +46,15 @@ export const Pane = forwardRef<HTMLDivElement, PaneProps>(
       boxShadow: tokens.shadows.pane,
     };
 
-    const modeStyles = mode === 'launchpad' ? launchpadStyles : adminStyles;
+    const invisibleStyles: CSSObject = {
+      background: 'transparent',
+      border: 'none',
+      boxShadow: 'none',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
+    };
+
+    const modeStyles = invisible ? invisibleStyles : (mode === 'launchpad' ? launchpadStyles : adminStyles);
 
     const combinedStyles: CSSObject = {
       ...baseStyles,

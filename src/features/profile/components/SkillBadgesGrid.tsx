@@ -1,10 +1,12 @@
 import React from 'react';
 import { useTheme } from '../../../styles';
+import { Icon } from '../../../shared/components';
 
 export interface SkillBadge {
   name: string;
   color: string;
   earned: string;
+  icon?: string; // Icon name from our icon mapping
 }
 
 export interface SkillBadgesGridProps {
@@ -118,7 +120,11 @@ export const SkillBadgesGrid: React.FC<SkillBadgesGridProps> = ({
                 backgroundColor: badge.color,
               }}
             >
-              ⭐
+              {badge.icon ? (
+                <Icon name={badge.icon} size={24} style={{ color: 'white' }} />
+              ) : (
+                '⭐'
+              )}
             </div>
             <h3 style={styles.badgeName}>{badge.name}</h3>
             <p style={styles.badgeEarned}>Earned {badge.earned}</p>

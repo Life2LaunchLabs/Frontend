@@ -98,6 +98,14 @@ export interface AorBInputConfig {
   negative_label?: string;
 }
 
+export interface RatingInputConfig {
+  min: number;
+  max: number;
+  step?: number;
+  label_min?: string;
+  label_max?: string;
+}
+
 // Block Type Configs
 export interface TextBlockConfig {
   style: 'h1' | 'h2' | 'h3' | 'body' | 'lead' | 'quote';
@@ -115,12 +123,12 @@ export interface MediaBlockConfig {
 
 export interface QuestionBlockConfig {
   question_id: string;
-  question_type: 'multiple_choice' | 'text_input' | 'single_choice' | 'dropdown_input' | 'a_or_b_input';
+  question_type: 'multiple_choice' | 'text_input' | 'single_choice' | 'dropdown_input' | 'a_or_b_input' | 'rating';
   title: string;
   subtitle?: string;
   tooltip?: string;
   required: boolean;
-  config: MultipleChoiceConfig | TextInputConfig | DropdownInputConfig | AorBInputConfig | Record<string, any>;
+  config: MultipleChoiceConfig | TextInputConfig | DropdownInputConfig | AorBInputConfig | RatingInputConfig | Record<string, any>;
 }
 
 // Attempt and Response Types

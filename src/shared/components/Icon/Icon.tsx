@@ -1,18 +1,21 @@
 import React from 'react';
 import { useTheme } from '../../../styles';
+import { iconMapping } from './iconMapping';
 
 export interface IconProps {
   name: string;
-  typography: 'display-large' | 'display-medium' | 'display-small' | 'headline-large' | 'headline-medium' | 'headline-small' | 'title-large' | 'title-medium' | 'title-small' | 'label-large' | 'label-medium' | 'label-small' | 'body-large' | 'body-medium' | 'body-small';
+  typography?: 'display-large' | 'display-medium' | 'display-small' | 'headline-large' | 'headline-medium' | 'headline-small' | 'title-large' | 'title-medium' | 'title-small' | 'label-large' | 'label-medium' | 'label-small' | 'body-large' | 'body-medium' | 'body-small';
   active?: boolean;
   color?: 'primary' | 'secondary' | 'tertiary' | 'surface' | 'inherit';
+  size?: number; // For custom icon libraries
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 const getIconStyles = (
   typography: IconProps['typography'], 
   active: boolean = false, 
-  theme: any, 
-  color: IconProps['color'] = 'inherit'
+  color: any
 ) => {
   const iconConfig = {
     'display-large': { fontSize: '48px', fontWeight: '500', opticalSize: 48 },
@@ -38,13 +41,13 @@ const getIconStyles = (
   const getColor = () => {
     switch (color) {
       case 'primary':
-        return theme.primary;
+        return color.primary;
       case 'secondary':
-        return theme.secondary;
+        return color.secondary;
       case 'tertiary':
-        return theme.tertiary;
+        return color.tertiary;
       case 'surface':
-        return theme.onSurface;
+        return color.onSurface;
       case 'inherit':
       default:
         return 'inherit';
@@ -60,19 +63,83 @@ const getIconStyles = (
   };
 };
 
-export const Icon: React.FC<IconProps> = ({ 
-  name, 
-  typography, 
-  active = false, 
-  color = 'inherit' 
+export const Icon: React.FC<IconProps> = ({
+  name,
+  typography,
+  active = false,
+  color = 'inherit',
+  size,
+  className,
+  style,
 }) => {
-  const { theme } = useTheme();
-  const iconStyles = getIconStyles(typography, active, theme, color);
+  const { colors } = useTheme();
+
+  // Check if icon is in our custom mapping
+  const mappedIcon = iconMapping[name as keyof typeof iconMapping];
+
+  const getColor = () => {
+    switch (color) {
+      case 'primary':
+        return colors.primary;
+      case 'secondary':
+        return colors.secondary;
+      case 'tertiary':
+        return colors.tertiary;
+      case 'surface':
+        return colors.onSurface;
+      case 'inherit':
+      default:
+        return 'inherit';
+    }
+  };
+
+  if (mappedIcon) {
+    const iconSize = size || 20;
+
+    // Hugeicons (component-based)
+    if (mappedIcon.library === 'hugeicons' && 'component' in mappedIcon) {
+      const IconComponent = mappedIcon.component;
+      return (
+        <IconComponent
+          size={iconSize}
+          color={getColor()}
+          className={className}
+          style={style}
+        />
+      );
+    }
+
+    // Material Symbols from mapping (font-based)
+    if (mappedIcon.library === 'material' && 'symbolName' in mappedIcon) {
+      return (
+        <span
+          className={`l2l-icon ${className || ''}`}
+          style={{
+            fontFamily: '"Material Symbols Rounded"',
+            fontSize: `${iconSize}px`,
+            color: getColor(),
+            fontVariationSettings: `"FILL" ${active ? 1 : 0}, "wght" 400, "GRAD" 0, "opsz" 48`,
+            ...style,
+          }}
+        >
+          {mappedIcon.symbolName}
+        </span>
+      );
+    }
+  }
+
+  // Fallback to Material Symbols for backwards compatibility
+  if (!typography) {
+    console.warn(`Icon "${name}" not found in mapping and no typography specified for Material Symbol fallback`);
+    return null;
+  }
+
+  const iconStyles = getIconStyles(typography, active, color);
 
   return (
     <span
-      className="l2l-icon"
-      style={iconStyles}
+      className={`l2l-icon ${className || ''}`}
+      style={{ ...iconStyles, ...style }}
       data-testid="icon"
     >
       {name}

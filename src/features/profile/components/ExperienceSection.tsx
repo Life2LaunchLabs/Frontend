@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../../styles';
+import { glassify } from '../../../styles/tokens';
 
 export interface Experience {
   id: number;
@@ -51,11 +52,11 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       gap: tokens.spacing[4],
     },
     experienceCard: {
-      backgroundColor: colors.surfaceVariant,
-      borderColor: colors.outline,
+      ...glassify(colors.surface, 0.0, {
+        blur: tokens.blur.none,
+      }),
       borderRadius: tokens.borderRadius.medium,
       padding: tokens.spacing[6],
-      border: `1px solid ${colors.outline}`,
       cursor: 'pointer',
       transition: 'all 0.15s ease-in-out',
     },
@@ -105,7 +106,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     },
     companyInfo: {
       ...tokens.typography.body.large,
-      color: colors.primary,
+      color: colors.onSurface,
       margin: 0,
       marginBottom: tokens.spacing[1],
       fontWeight: '500',

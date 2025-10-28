@@ -8,6 +8,7 @@ import {
   DropdownInputConfig,
   AorBInputConfig,
   AorBPrompt,
+  RatingInputConfig,
 } from '../../types';
 import { Button } from '../../../../shared/components';
 
@@ -33,6 +34,8 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
         return '';
       case 'a_or_b_input':
         return {};
+      case 'rating':
+        return 0;
       default:
         return null;
     }
@@ -122,11 +125,8 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
   };
 
   const getContainerStyle = () => ({
-    marginBottom: tokens.spacing[6],
-    padding: tokens.spacing[4],
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: tokens.borderRadius.medium,
-    border: `1px solid ${colors.outline}`,
+    marginBottom: tokens.spacing[4],
+    padding: 0,
   });
 
   const getTitleStyle = () => ({
@@ -491,6 +491,52 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
     );
   };
 
+  const renderRating = (questionConfig: RatingInputConfig) => {
+    const max = questionConfig?.max || 5;
+    const numericValue = typeof value === 'number' ? value : 0;
+
+    const containerStyle = {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: tokens.spacing[3],
+    };
+
+    const starsContainerStyle = {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      gap: '2rem',
+    };
+
+    const starStyle = (index: number) => ({
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+      fontSize: '2rem',
+      textAlign: 'center' as const,
+      color: index < numericValue ? colors.primary : colors.surfaceContainerHighest,
+    });
+
+    const handleStarClick = (starIndex: number) => {
+      handleChange(starIndex + 1);
+    };
+
+    return (
+      <div style={containerStyle}>
+        <div style={starsContainerStyle}>
+          {Array.from({ length: max }, (_, index) => (
+            <div
+              key={index}
+              style={starStyle(index)}
+              onClick={() => handleStarClick(index)}
+            >
+              ★
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderQuestionContent = () => {
     switch (config.question_type) {
       case 'multiple_choice':
@@ -502,6 +548,8 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
         return renderDropdown((config.config || {}) as DropdownInputConfig);
       case 'a_or_b_input':
         return renderAorB((config.config || {}) as AorBInputConfig);
+      case 'rating':
+        return renderRating((config.config || {}) as RatingInputConfig);
       default:
         return (
           <div style={{

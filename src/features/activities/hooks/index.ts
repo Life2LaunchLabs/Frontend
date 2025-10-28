@@ -56,6 +56,51 @@ export const useActivityPage = (slug: string, pageIndex: number = 0) => {
   return { pageData, loading, error };
 };
 
+export const useAllActivityPages = (slug: string) => {
+  const [pages, setPages] = useState<ActivityPageResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAllPages = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch the activity once
+        const activity = await ActivitiesService.getActivity(slug);
+
+        if (!activity.activity_version) {
+          throw new Error('No published version found for this activity');
+        }
+
+        const activityPages = activity.activity_version.pages || [];
+        const media = activity.media || [];
+
+        // Transform all pages to ActivityPageResponse format
+        const allPages = activityPages.map(page => ({
+          page: page,
+          blocks: page.blocks || [],
+          media: media,
+          activity_version: activity.activity_version
+        }));
+
+        setPages(allPages);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch activity pages');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchAllPages();
+    }
+  }, [slug]);
+
+  return { pages, loading, error };
+};
+
 
 // Attempt Management Hooks
 export const useCreateAttempt = () => {
