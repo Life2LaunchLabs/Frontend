@@ -33,6 +33,7 @@ export interface Page {
   id: string;
   index: number;
   title: string;
+  message: string;
   meta: Record<string, any>;
 }
 

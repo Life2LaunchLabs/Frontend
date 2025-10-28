@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../styles';
-import { ActivitiesService } from '../api';
+import { ActivitiesService, PublicActivitiesService } from '../api';
 import { useAllActivityPages, useCreateAttempt, useSubmitResponse } from '../hooks';
 import { BlockRenderer } from './BlockRenderer';
+import { ChatBuddy } from './ChatBuddy';
 import { Attempt, ActivityPageResponse } from '../types';
 import { ProgressBar } from '../../../shared/components';
 
 export interface ActivityViewerProps {
-  activityId: string;
+  activityId?: string;
+  activitySlug?: string;
+  isPublic?: boolean;
   onComplete?: (submissionId?: string) => void;
   onError?: (error: string) => void;
 }
 
 export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   activityId,
+  activitySlug,
+  isPublic = false,
   onComplete,
   onError
 }) => {
@@ -23,26 +28,75 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // Load all pages at once
-  const { pages, loading: pagesLoading, error: pagesError } = useAllActivityPages(activityId);
+  // Load all pages at once (only for authenticated mode)
+  const { pages, loading: pagesLoading, error: pagesError } = useAllActivityPages(isPublic ? undefined : activityId);
 
-  // Get current page data
-  const pageData = pages[currentPageIndex] || null;
+  // For public mode, load page manually
+  const [pageData, setPageData] = useState<any>(null);
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicError, setPublicError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState<number | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Hooks for attempt management
+  // Hooks for attempt management (authenticated mode)
   const { createAttempt, loading: createLoading, error: createError } = useCreateAttempt();
   const { submitResponse } = useSubmitResponse();
 
   // Track if we've attempted to create an attempt to prevent infinite retries
   const [hasAttemptedCreate, setHasAttemptedCreate] = useState(false);
 
+  // Load page data for public mode
+  useEffect(() => {
+    if (!isPublic || !activitySlug) return;
+
+    const loadPage = async () => {
+      try {
+        // Only show loading indicator on initial page load
+        if (isInitialLoad) {
+          setPublicLoading(true);
+        }
+        setPublicError(null);
+        const data = await PublicActivitiesService.getPublicActivityPage(activitySlug, currentPageIndex);
+        setPageData(data);
+
+        // Try to load next page to determine if we're on the last page
+        try {
+          await PublicActivitiesService.getPublicActivityPage(activitySlug, currentPageIndex + 1);
+          setTotalPages(null);
+        } catch {
+          setTotalPages(currentPageIndex + 1);
+        }
+      } catch (err) {
+        setPublicError(err instanceof Error ? err.message : 'Failed to load page');
+        onError?.('Failed to load activity page');
+      } finally {
+        if (isInitialLoad) {
+          setPublicLoading(false);
+          setIsInitialLoad(false);
+        }
+      }
+    };
+
+    loadPage();
+  }, [isPublic, activitySlug, currentPageIndex, onError, isInitialLoad]);
+
+  // Set pageData for authenticated mode
+  useEffect(() => {
+    if (!isPublic && pages.length > 0) {
+      setPageData(pages[currentPageIndex] || null);
+      setTotalPages(pages.length);
+    }
+  }, [isPublic, pages, currentPageIndex]);
+
   // Create attempt when we first load the activity
   useEffect(() => {
     const initializeAttempt = async () => {
-      if (pageData?.activity_version?.id && !attempt && !createLoading && !isCompleted && !hasAttemptedCreate) {
+      if (pageData?.activity_version?.id && !attempt && !isCompleted && !hasAttemptedCreate) {
         setHasAttemptedCreate(true);
         try {
-          const newAttempt = await createAttempt(pageData.activity_version.id);
+          const newAttempt = isPublic
+            ? await PublicActivitiesService.createGuestAttempt(pageData.activity_version.id)
+            : await createAttempt(pageData.activity_version.id);
           setAttempt(newAttempt);
         } catch (error) {
           console.error('Failed to create attempt:', error);
@@ -52,10 +106,10 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
     };
 
     initializeAttempt();
-  }, [pageData?.activity_version?.id, attempt, createLoading, isCompleted, hasAttemptedCreate]);
+  }, [pageData?.activity_version?.id, attempt, isCompleted, hasAttemptedCreate, isPublic]);
 
   const isOnLastPage = () => {
-    return currentPageIndex === pages.length - 1;
+    return totalPages !== null && currentPageIndex === totalPages - 1;
   };
 
   const handleResponseChange = async (questionId: string, value: any) => {
@@ -69,7 +123,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
     if (attempt?.id && pageData) {
       try {
         // Find the block with matching question_id (any question block type)
-        const questionBlock = pageData.blocks.find(block =>
+        const questionBlock = pageData.blocks.find((block: any) =>
           block.config.question_id === questionId
         );
 
@@ -77,14 +131,25 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
           // Use question_type from config, or fall back to block_type if needed
           const questionType = questionBlock.config.question_type || questionBlock.block_type;
 
-          await submitResponse(
-            attempt.id,
-            questionId,
-            questionType,
-            pageData.page.id,
-            value,
-            true
-          );
+          if (isPublic) {
+            await PublicActivitiesService.submitGuestResponse(
+              attempt.id,
+              questionId,
+              questionType,
+              pageData.page.id,
+              value,
+              true
+            );
+          } else {
+            await submitResponse(
+              attempt.id,
+              questionId,
+              questionType,
+              pageData.page.id,
+              value,
+              true
+            );
+          }
         }
       } catch (error) {
         console.error('Failed to submit response:', error);
@@ -114,16 +179,25 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const saveProgressIfNeeded = async () => {
     if (attempt?.id && pageData) {
       try {
-        await ActivitiesService.updatePageProgress(
-          attempt.id,
-          pageData.page.id,
-          true,
-          {
-            visited_at: new Date().toISOString(),
-            page_index: currentPageIndex,
-            responses_count: Object.keys(responses).length
-          }
-        );
+        if (isPublic) {
+          await PublicActivitiesService.updateGuestPageProgress(
+            attempt.id,
+            pageData.page.id,
+            true,
+            { completed_at: new Date().toISOString() }
+          );
+        } else {
+          await ActivitiesService.updatePageProgress(
+            attempt.id,
+            pageData.page.id,
+            true,
+            {
+              visited_at: new Date().toISOString(),
+              page_index: currentPageIndex,
+              responses_count: Object.keys(responses).length
+            }
+          );
+        }
       } catch (error) {
         console.error('Failed to save progress:', error);
         // Non-critical - continue
@@ -142,7 +216,11 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       await saveProgressIfNeeded();
 
       // Complete the attempt (this creates the submission and deletes the attempt)
-      await ActivitiesService.completeAttempt(attempt.id);
+      if (isPublic) {
+        await PublicActivitiesService.completeGuestAttempt(attempt.id);
+      } else {
+        await ActivitiesService.completeAttempt(attempt.id);
+      }
 
       setIsCompleted(true);
       onComplete?.();
@@ -249,7 +327,10 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const styles = getStyles();
 
   // Loading state
-  if (pagesLoading || createLoading) {
+  const loading = isPublic ? publicLoading : (pagesLoading || createLoading);
+  const error = isPublic ? publicError : (pagesError || createError);
+
+  if (loading) {
     return (
       <div style={styles.wrapper}>
         <div style={styles.loadingState}>
@@ -260,11 +341,11 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   }
 
   // Error state
-  if (pagesError || createError) {
+  if (error) {
     return (
       <div style={styles.wrapper}>
         <div style={styles.errorState}>
-          Error loading activity: {pagesError || createError}
+          Error loading activity: {error}
         </div>
       </div>
     );
@@ -308,11 +389,18 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       {/* Header */}
       <div style={styles.header}>
         <h1 style={styles.title}>{activity_version.title}</h1>
-        <ProgressBar
-          current={currentPageIndex + 1}
-          total={pages.length}
-        />
+        {totalPages && (
+          <ProgressBar
+            current={currentPageIndex + 1}
+            total={totalPages}
+          />
+        )}
       </div>
+
+      {/* Chat Buddy Message */}
+      {page.message && (
+        <ChatBuddy message={page.message} />
+      )}
 
       {/* Content */}
       <div style={styles.contentCard}>

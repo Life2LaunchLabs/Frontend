@@ -187,3 +187,4 @@ export class ActivitiesService {
 // Export new results-related services and hooks
 export * from './hooks';
 export * from './ActivityResultsService';
+export { PublicActivitiesService } from './PublicActivitiesService';

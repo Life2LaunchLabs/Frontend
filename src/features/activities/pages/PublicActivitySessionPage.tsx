@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../styles';
 import { PageLayout, Button, Modal } from '@shared/components';
-import { PublicActivityViewer } from '../components/PublicActivityViewer';
+import { ActivityViewer } from '../components';
 
 /**
  * Public activity session page for unauthenticated users.
@@ -42,16 +42,14 @@ export const PublicActivitySessionPage: React.FC = () => {
     <>
       <PageLayout
         pageName="Welcome to Launchpad"
-        layoutMode="utility"
-        utilityHeader={{
-          title: 'Welcome',
-          leftAction: { type: 'back', onClick: handleBack }
-        }}
+        layoutMode="activity"
         panes={[
           {
+            invisible: true,
             content: (
-              <PublicActivityViewer
+              <ActivityViewer
                 activitySlug={activitySlug}
+                isPublic={true}
                 onComplete={handleComplete}
                 onError={handleError}
               />

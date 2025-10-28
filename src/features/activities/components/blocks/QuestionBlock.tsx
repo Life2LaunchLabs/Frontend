@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useTheme } from '../../../../styles';
+import { useTheme, glassify } from '../../../../styles';
 import {
   QuestionBlockConfig,
   MultipleChoiceOption,
@@ -161,7 +161,6 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
     const options = questionConfig?.options || config.options || [];
     const minSelect = questionConfig?.min_select || config.min_select || 0;
     const maxSelect = questionConfig?.max_select || config.max_select || 1;
-    const isMultiple = maxSelect > 1;
 
     const handleOptionChange = (optionId: string, checked: boolean) => {
       const selectedCount = Object.values(selections).filter(Boolean).length;
@@ -185,15 +184,16 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
       alignItems: 'flex-start',
       padding: tokens.spacing[3],
       marginBottom: tokens.spacing[2],
-      backgroundColor: isSelected ? colors.primaryContainer : colors.surface,
-      border: `2px solid ${isSelected ? colors.primary : colors.outline}`,
+      ...(isSelected
+        ? glassify(colors.onSurface, 0.4, { borderColor: colors.outline })
+        : glassify(colors.surface, 0.2, { borderColor: colors.outline })
+      ),
       borderRadius: tokens.borderRadius.medium,
       cursor: 'pointer',
       transition: 'all 0.2s ease',
     });
 
     const getOptionContentStyle = () => ({
-      marginLeft: tokens.spacing[3],
       flex: 1,
     });
 
@@ -226,12 +226,6 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
               style={getOptionStyle(isSelected)}
               onClick={() => handleOptionChange(optionId, !isSelected)}
             >
-              <input
-                type={isMultiple ? 'checkbox' : 'radio'}
-                checked={isSelected}
-                onChange={() => {}} // Handled by div click
-                style={{ marginTop: '2px' }}
-              />
               <div style={getOptionContentStyle()}>
                 <div style={getOptionTitleStyle()}>{optionTitle}</div>
                 {(option.body || optionDescription) && (
