@@ -9,6 +9,7 @@ import { AuthPage, AuthGuard, useAuth } from '../features/auth';
 import { OrgSelectPage, AdminDashboard, AdminActivityDetailPage, AdminActivityEditPage, AdminQuestsPage, AdminQuestDetailPage, AdminAccountPage } from '../features/admin';
 import { ActivityDetailPage, ActivitySessionPage, ActivityResultsPage, PublicActivitySessionPage } from '../features/activities';
 import { LandingPage } from '../features/landing';
+import { OnboardingFlowProvider } from '../features/onboarding';
 import './App.css';
 
 // Component to handle home route redirects
@@ -44,8 +45,23 @@ function App() {
         <Route path="/login" element={<AuthPage initialMode="login" />} />
         <Route path="/register" element={<AuthPage initialMode="register" />} />
 
-        {/* Public onboarding route - no authentication required */}
-        <Route path="/welcome" element={<PublicActivitySessionPage />} />
+        {/* Public onboarding routes - no authentication required */}
+        <Route
+          path="/welcome"
+          element={
+            <OnboardingFlowProvider>
+              <PublicActivitySessionPage />
+            </OnboardingFlowProvider>
+          }
+        />
+        <Route
+          path="/welcome/:stepSlug"
+          element={
+            <OnboardingFlowProvider>
+              <PublicActivitySessionPage />
+            </OnboardingFlowProvider>
+          }
+        />
         
         {/* Protected routes - require authentication */}
         <Route 
