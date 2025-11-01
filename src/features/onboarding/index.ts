@@ -19,3 +19,6 @@ export { OnboardingFlowProvider, OnboardingFlowContext } from './context/Onboard
 
 // Hooks
 export { useOnboardingFlow } from './hooks/useOnboardingFlow';
+
+// Pages
+export { WelcomeResultsPage } from './pages';

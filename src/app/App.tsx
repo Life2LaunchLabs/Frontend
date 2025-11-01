@@ -9,7 +9,7 @@ import { AuthPage, AuthGuard, useAuth } from '../features/auth';
 import { OrgSelectPage, AdminDashboard, AdminActivityDetailPage, AdminActivityEditPage, AdminQuestsPage, AdminQuestDetailPage, AdminAccountPage } from '../features/admin';
 import { ActivityDetailPage, ActivitySessionPage, ActivityResultsPage, PublicActivitySessionPage } from '../features/activities';
 import { LandingPage } from '../features/landing';
-import { OnboardingFlowProvider } from '../features/onboarding';
+import { OnboardingFlowProvider, WelcomeResultsPage } from '../features/onboarding';
 import './App.css';
 
 // Component to handle home route redirects
@@ -51,6 +51,14 @@ function App() {
           element={
             <OnboardingFlowProvider>
               <PublicActivitySessionPage />
+            </OnboardingFlowProvider>
+          }
+        />
+        <Route
+          path="/welcome/results"
+          element={
+            <OnboardingFlowProvider>
+              <WelcomeResultsPage />
             </OnboardingFlowProvider>
           }
         />

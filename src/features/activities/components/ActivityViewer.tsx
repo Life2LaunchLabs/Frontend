@@ -223,7 +223,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       }
 
       setIsCompleted(true);
-      onComplete?.();
+      onComplete?.(attempt.id);
     } catch (error) {
       console.error('Failed to complete activity:', error);
       onError?.('Failed to save your completion. Please try again.');
@@ -373,7 +373,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
           </p>
           <button
             style={styles.button('primary')}
-            onClick={() => onComplete?.()}
+            onClick={() => onComplete?.(attempt?.id)}
           >
             Continue
           </button>

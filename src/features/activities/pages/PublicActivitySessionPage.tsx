@@ -17,7 +17,6 @@ export const PublicActivitySessionPage: React.FC = () => {
   const { colors, tokens } = useTheme();
   const { stepSlug } = useParams<{ stepSlug?: string }>();
   const [isCompletingActivity, setIsCompletingActivity] = useState(false);
-  const [currentAttemptId, setCurrentAttemptId] = useState<string | null>(null);
 
   // Get flow context
   const { flowState, loading: flowLoading, error: flowError, updateProgress, completeFlow } = useOnboardingFlow();
@@ -33,7 +32,11 @@ export const PublicActivitySessionPage: React.FC = () => {
   const handleComplete = async (attemptId?: string) => {
     if (!flowState || !currentStep) {
       console.error('No flow state or current step available');
-      navigate('/register?onboarding_complete=true');
+      return;
+    }
+
+    if (!attemptId) {
+      console.error('No attempt ID provided to handleComplete');
       return;
     }
 
@@ -44,10 +47,11 @@ export const PublicActivitySessionPage: React.FC = () => {
       // Small delay to ensure backend has processed the activity completion
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Update flow progress
+      // Update flow progress with the attempt ID
+      console.log('Updating progress with:', { step_id: currentStep.id, attempt_id: attemptId });
       const updatedState = await updateProgress({
         step_id: currentStep.id,
-        attempt_id: currentAttemptId || attemptId,
+        attempt_id: attemptId,
         action: 'complete'
       });
 
@@ -55,19 +59,14 @@ export const PublicActivitySessionPage: React.FC = () => {
       if (updatedState.is_complete) {
         // Mark entire flow as complete
         await completeFlow();
-
-        // Navigate to registration
-        navigate('/register?flow_complete=true');
-      } else {
-        // Navigate to next step
-        const nextRoute = getNextRoute(updatedState);
-        navigate(nextRoute);
       }
+
+      // Navigate to next route (either next step or results page)
+      const nextRoute = getNextRoute(updatedState);
+      navigate(nextRoute);
     } catch (error) {
       console.error('Failed to complete activity:', error);
       setIsCompletingActivity(false);
-      // Fall back to direct registration
-      navigate('/register?onboarding_complete=true');
     } finally {
       setIsCompletingActivity(false);
     }

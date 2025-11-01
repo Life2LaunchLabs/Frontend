@@ -2,6 +2,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/styles/providers/hooks';
 import { Button } from '@shared/components';
+import acornTalk from '@shared/assets/images/acorn_talk.png';
+import launchpadDomeLogo from '@shared/assets/images/launchpad_dome_logo.png';
 
 export const GetStartedSection = () => {
   const { colors, tokens } = useTheme();
@@ -24,39 +26,73 @@ export const GetStartedSection = () => {
           padding: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
         }}
       >
-        <div css={{ ...tokens.typography.title.large, fontWeight: 600 }}>
-          Launchpad
-        </div>
+        <img
+          src={launchpadDomeLogo}
+          alt="Launchpad"
+          css={{
+            height: '40px',
+            width: 'auto',
+          }}
+        />
         <Button variant="outlined" onClick={() => navigate('/login')}>
           Sign In
         </Button>
       </div>
 
-      {/* Content area - centered */}
+      {/* Content area - two horizontal halves */}
       <div
         css={{
           flex: 1,
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
           alignItems: 'center',
-          gap: tokens.spacing[6],
+          gap: tokens.spacing[8],
           padding: tokens.spacing[6],
-          textAlign: 'center',
+          background: 'transparent',
         }}
       >
-        <h1
+        {/* Left side - acorn image (right-aligned) */}
+        <div
           css={{
-            ...tokens.typography.display.large,
-            maxWidth: '800px',
-            color: colors.onSurface,
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
           }}
         >
-          Discover the resources you need to launch your life with confidence
-        </h1>
-        <Button variant="filled" size="large" onClick={() => navigate('/welcome')}>
-          Get Started
-        </Button>
+          <img
+            src={acornTalk}
+            alt="Acorn"
+            css={{
+              maxWidth: '400px',
+              width: '100%',
+              height: 'auto',
+            }}
+          />
+        </div>
+
+        {/* Right side - text and button (left-aligned) */}
+        <div
+          css={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: tokens.spacing[4],
+            alignItems: 'flex-start',
+          }}
+        >
+          <h1
+            css={{
+              ...tokens.typography.display.large,
+              color: colors.onSurface,
+              textAlign: 'left',
+            }}
+          >
+            Ready to take control of your life launching journey?
+          </h1>
+          <Button variant="filled" size="large" onClick={() => navigate('/welcome')}>
+            Get Started
+          </Button>
+        </div>
       </div>
     </div>
   );

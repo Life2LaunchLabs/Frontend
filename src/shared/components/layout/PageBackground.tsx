@@ -3,7 +3,7 @@ import { CSSObject } from '@emotion/react';
 import { ReactNode } from 'react';
 import { useTheme } from '@/styles/providers/hooks';
 // import auroraBg from '@/shared/assets/images/aurora_bg.png';
-import blueGradientBG from '@/shared/assets/images/launchpad_background_plain.png';
+import blueGradientBG from '@/shared/assets/images/launchpad_background_dark.png';
 
 export interface PageBackgroundProps {
   children: ReactNode;

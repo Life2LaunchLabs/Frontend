@@ -1,0 +1,1 @@
+export { WelcomeResultsPage } from './WelcomeResultsPage';

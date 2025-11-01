@@ -23,8 +23,8 @@ export function getStepRoutePath(step: FlowStep): string {
  */
 export function getNextRoute(flowState: FlowState): string {
   if (flowState.is_complete || flowState.current_step_index >= flowState.total_steps) {
-    // Flow is complete, redirect to registration
-    return '/register?flow_complete=true';
+    // Flow is complete, redirect to results page
+    return '/welcome/results';
   }
 
   // Navigate to the current step
