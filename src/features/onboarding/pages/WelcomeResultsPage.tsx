@@ -170,9 +170,9 @@ export const WelcomeResultsPage: React.FC = () => {
       {/* Print-specific styles */}
       <style>{`
         @media print {
-          /* Set page margins */
+          /* Set page margins to none - let content padding handle spacing */
           @page {
-            margin: 0.75in;
+            margin: 0;
             size: letter;
           }
 
