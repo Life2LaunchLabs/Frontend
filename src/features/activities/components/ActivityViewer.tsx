@@ -261,8 +261,20 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
         return false;
       }
 
-      // For objects (a_or_b_input), check if at least one answer exists
-      if (typeof response === 'object' && !Array.isArray(response) && Object.keys(response).length === 0) {
+      // For objects (a_or_b_input), check if ALL prompts have been answered
+      if (block.block_type === 'a_or_b_input' && typeof response === 'object' && !Array.isArray(response)) {
+        const promptsConfig = block.config.config as any;
+        const prompts = promptsConfig?.prompts || promptsConfig?.options || [];
+        const answeredCount = Object.keys(response).length;
+
+        // Must answer all prompts
+        if (answeredCount < prompts.length) {
+          return false;
+        }
+      }
+
+      // For other objects, just check if it's not empty
+      if (block.block_type !== 'a_or_b_input' && typeof response === 'object' && !Array.isArray(response) && Object.keys(response).length === 0) {
         return false;
       }
 
