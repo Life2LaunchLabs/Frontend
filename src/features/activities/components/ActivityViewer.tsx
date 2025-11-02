@@ -235,6 +235,35 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
     }
   };
 
+  // Check if all required questions on the current page have been answered
+  const areRequiredQuestionsAnswered = (): boolean => {
+    if (!pageData) return true;
+
+    const requiredQuestions = pageData.blocks.filter((block: any) => {
+      // Check if this is a question block with required field
+      const isQuestionBlock = ['question', 'text_input', 'multiple_choice', 'single_choice', 'dropdown_input', 'a_or_b_input'].includes(block.block_type);
+      return isQuestionBlock && block.config.required === true;
+    });
+
+    // Check if all required questions have responses
+    return requiredQuestions.every((block: any) => {
+      const questionId = block.config.question_id;
+      const response = responses[questionId];
+
+      // Check if response exists and is not empty
+      if (response === undefined || response === null || response === '') {
+        return false;
+      }
+
+      // For arrays (multiple choice), check if at least one item is selected
+      if (Array.isArray(response) && response.length === 0) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
   // Styles
   const getStyles = () => ({
     wrapper: {
@@ -440,8 +469,9 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
         </button>
 
         <button
-          css={styles.button('primary')}
+          css={styles.button('primary', !areRequiredQuestionsAnswered())}
           onClick={handleNextPage}
+          disabled={!areRequiredQuestionsAnswered()}
         >
           {isOnLastPage() ? 'Complete Activity' : 'Next →'}
         </button>

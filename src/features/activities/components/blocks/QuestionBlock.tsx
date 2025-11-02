@@ -423,9 +423,28 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
 
     const buttonRowStyle = {
       display: 'flex',
-      gap: tokens.spacing[2],
+      gap: tokens.spacing[4],
       marginTop: tokens.spacing[3],
       flexWrap: 'wrap' as const,
+      justifyContent: 'flex-end' as const,
+    };
+
+    const getButtonStyle = (type: 'yes' | 'no' | 'back', isSelected: boolean) => {
+      if (type === 'yes') {
+        return {
+          backgroundColor: isSelected ? '#22c55e' : 'transparent',
+          color: isSelected ? '#ffffff' : '#22c55e',
+          borderColor: '#22c55e',
+        };
+      }
+      if (type === 'no') {
+        return {
+          backgroundColor: isSelected ? '#ef4444' : 'transparent',
+          color: isSelected ? '#ffffff' : '#ef4444',
+          borderColor: '#ef4444',
+        };
+      }
+      return {};
     };
 
     const handleAnswer = (decision: boolean) => {
@@ -462,23 +481,25 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
         </div>
         <div style={buttonRowStyle}>
           <Button
-            variant={currentAnswer === true ? 'filled' : 'outlined'}
-            onClick={() => handleAnswer(true)}
-          >
-            {yesLabel}
-          </Button>
-          <Button
-            variant={currentAnswer === false ? 'filled' : 'outlined'}
-            onClick={() => handleAnswer(false)}
-          >
-            {noLabel}
-          </Button>
-          <Button
             variant="text"
             onClick={handleBack}
             disabled={aOrBIndex === 0}
           >
             Back
+          </Button>
+          <Button
+            variant={currentAnswer === false ? 'filled' : 'outlined'}
+            onClick={() => handleAnswer(false)}
+            style={getButtonStyle('no', currentAnswer === false)}
+          >
+            {noLabel}
+          </Button>
+          <Button
+            variant={currentAnswer === true ? 'filled' : 'outlined'}
+            onClick={() => handleAnswer(true)}
+            style={getButtonStyle('yes', currentAnswer === true)}
+          >
+            {yesLabel}
           </Button>
         </div>
       </div>
