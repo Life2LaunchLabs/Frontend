@@ -239,13 +239,14 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const areRequiredQuestionsAnswered = (): boolean => {
     if (!pageData) return true;
 
+    // Treat ALL question blocks as required, ignoring the config.required field
     const requiredQuestions = pageData.blocks.filter((block: any) => {
-      // Check if this is a question block with required field
-      const isQuestionBlock = ['question', 'text_input', 'multiple_choice', 'single_choice', 'dropdown_input', 'a_or_b_input'].includes(block.block_type);
-      return isQuestionBlock && block.config.required === true;
+      // Check if this is a question block
+      const isQuestionBlock = ['question', 'text_input', 'multiple_choice', 'single_choice', 'dropdown_input', 'a_or_b_input', 'rating'].includes(block.block_type);
+      return isQuestionBlock;
     });
 
-    // Check if all required questions have responses
+    // Check if all questions have responses
     return requiredQuestions.every((block: any) => {
       const questionId = block.config.question_id;
       const response = responses[questionId];
@@ -257,6 +258,11 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
 
       // For arrays (multiple choice), check if at least one item is selected
       if (Array.isArray(response) && response.length === 0) {
+        return false;
+      }
+
+      // For objects (a_or_b_input), check if at least one answer exists
+      if (typeof response === 'object' && !Array.isArray(response) && Object.keys(response).length === 0) {
         return false;
       }
 

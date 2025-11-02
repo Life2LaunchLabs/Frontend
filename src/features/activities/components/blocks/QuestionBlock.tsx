@@ -432,16 +432,18 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
     const getButtonStyle = (type: 'yes' | 'no' | 'back', isSelected: boolean) => {
       if (type === 'yes') {
         return {
-          backgroundColor: isSelected ? '#22c55e' : 'transparent',
-          color: isSelected ? '#ffffff' : '#22c55e',
+          backgroundColor: '#22c55e',
+          color: '#ffffff',
           borderColor: '#22c55e',
+          opacity: isSelected ? 1 : 0.7,
         };
       }
       if (type === 'no') {
         return {
-          backgroundColor: isSelected ? '#ef4444' : 'transparent',
-          color: isSelected ? '#ffffff' : '#ef4444',
+          backgroundColor: '#ef4444',
+          color: '#ffffff',
           borderColor: '#ef4444',
+          opacity: isSelected ? 1 : 0.7,
         };
       }
       return {};
