@@ -8,7 +8,7 @@ import { DevPage, ChatSettingsPage, ActivityDemoPage } from '../features/dev';
 import { AuthPage, AuthGuard, useAuth } from '../features/auth';
 import { OrgSelectPage, AdminDashboard, AdminActivityDetailPage, AdminActivityEditPage, AdminQuestsPage, AdminQuestDetailPage, AdminAccountPage } from '../features/admin';
 import { ActivityDetailPage, ActivitySessionPage, ActivityResultsPage, PublicActivitySessionPage } from '../features/activities';
-import { LandingPage } from '../features/landing';
+import { LandingPage, StayTunedPage } from '../features/landing';
 import { WelcomeResultsPage } from '../features/onboarding';
 import './App.css';
 
@@ -41,9 +41,9 @@ function App() {
         {/* Root route - landing page */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Public auth routes */}
-        <Route path="/login" element={<AuthPage initialMode="login" />} />
-        <Route path="/register" element={<AuthPage initialMode="register" />} />
+        {/* Public auth routes - redirected to stay tuned */}
+        <Route path="/login" element={<StayTunedPage />} />
+        <Route path="/register" element={<StayTunedPage />} />
 
         {/* Public onboarding routes - no authentication required */}
         <Route path="/welcome" element={<PublicActivitySessionPage />} />
