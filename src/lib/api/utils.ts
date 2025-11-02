@@ -4,8 +4,8 @@ import { ApiError, ErrorResponse } from './types';
  * Handle API error responses
  */
 export async function handleApiError(response: Response): Promise<ApiError> {
-  let errorData: ErrorResponse;
-  
+  let errorData: ErrorResponse & { error?: string };
+
   try {
     errorData = await response.json();
   } catch {
@@ -15,8 +15,11 @@ export async function handleApiError(response: Response): Promise<ApiError> {
     };
   }
 
+  // Backend sometimes returns 'error' field instead of 'message'
+  const errorMessage = errorData.message || errorData.error || 'An error occurred';
+
   return new ApiError(
-    errorData.message || 'An error occurred',
+    errorMessage,
     response.status,
     errorData.code,
     errorData.details

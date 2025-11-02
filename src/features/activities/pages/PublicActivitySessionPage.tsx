@@ -1,40 +1,28 @@
 /** @jsxImportSource @emotion/react */
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../../styles';
 import { PageLayout, Modal } from '@shared/components';
 import { ActivityViewer } from '../components';
-import { useOnboardingFlow } from '../../onboarding';
-import { getNextRoute, getActivitySlugFromRoute } from '../../onboarding';
 
 /**
  * Public activity session page for unauthenticated users.
- * Used for onboarding activities before account creation.
- * Now supports multi-step onboarding flows.
+ * Simple flow: welcome → pathways → results
  */
 export const PublicActivitySessionPage: React.FC = () => {
   const navigate = useNavigate();
   const { colors, tokens } = useTheme();
-  const { stepSlug } = useParams<{ stepSlug?: string }>();
+  const location = useLocation();
   const [isCompletingActivity, setIsCompletingActivity] = useState(false);
 
-  // Get flow context
-  const { flowState, loading: flowLoading, error: flowError, updateProgress, completeFlow } = useOnboardingFlow();
+  // Determine activity and page title based on route
+  const isWelcome = location.pathname === '/welcome';
+  const isPathways = location.pathname === '/pathways';
 
-  // Determine which activity to show
-  const activitySlug = getActivitySlugFromRoute(stepSlug, flowState);
-
-  // Track the current step based on activity slug
-  const currentStep = flowState?.flow_config?.steps.find(
-    step => step.activitySlug === activitySlug
-  );
+  const activitySlug = isWelcome ? 'welcome' : 'pathways-assessment';
+  const pageTitle = isWelcome ? 'Welcome to Launchpad' : 'Career Pathways Assessment';
 
   const handleComplete = async (attemptId?: string) => {
-    if (!flowState || !currentStep) {
-      console.error('No flow state or current step available');
-      return;
-    }
-
     if (!attemptId) {
       console.error('No attempt ID provided to handleComplete');
       return;
@@ -47,23 +35,14 @@ export const PublicActivitySessionPage: React.FC = () => {
       // Small delay to ensure backend has processed the activity completion
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Update flow progress with the attempt ID
-      console.log('Updating progress with:', { step_id: currentStep.id, attempt_id: attemptId });
-      const updatedState = await updateProgress({
-        step_id: currentStep.id,
-        attempt_id: attemptId,
-        action: 'complete'
-      });
-
-      // Check if flow is complete
-      if (updatedState.is_complete) {
-        // Mark entire flow as complete
-        await completeFlow();
+      // Navigate to next step: welcome → pathways → results
+      if (isWelcome) {
+        navigate('/pathways');
+      } else if (isPathways) {
+        // Store pathways attempt ID in sessionStorage for the results page
+        sessionStorage.setItem('pathways_attempt_id', attemptId);
+        navigate('/welcome/results');
       }
-
-      // Navigate to next route (either next step or results page)
-      const nextRoute = getNextRoute(updatedState);
-      navigate(nextRoute);
     } catch (error) {
       console.error('Failed to complete activity:', error);
       setIsCompletingActivity(false);
@@ -75,95 +54,12 @@ export const PublicActivitySessionPage: React.FC = () => {
   const handleError = (error: string) => {
     console.error('Activity error:', error);
     setIsCompletingActivity(false);
-    // Could show a toast notification or error modal here
   };
-
-  // Show loading state while flow initializes
-  if (flowLoading) {
-    return (
-      <PageLayout
-        pageName="Loading..."
-        layoutMode="activity"
-        panes={[
-          {
-            invisible: true,
-            content: (
-              <div css={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '50vh',
-                ...tokens.typography.body.large,
-                color: colors.onSurfaceVariant,
-              }}>
-                Initializing onboarding flow...
-              </div>
-            ),
-          },
-        ]}
-      />
-    );
-  }
-
-  // Show error state if flow failed to initialize
-  if (flowError || !flowState) {
-    return (
-      <PageLayout
-        pageName="Error"
-        layoutMode="activity"
-        panes={[
-          {
-            invisible: true,
-            content: (
-              <div css={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '50vh',
-                padding: tokens.spacing[6],
-                gap: tokens.spacing[4],
-              }}>
-                <div css={{
-                  ...tokens.typography.headline.medium,
-                  color: colors.error,
-                }}>
-                  Failed to Initialize Onboarding
-                </div>
-                <div css={{
-                  ...tokens.typography.body.large,
-                  color: colors.onSurfaceVariant,
-                  textAlign: 'center',
-                }}>
-                  {flowError || 'Flow state is not available'}
-                </div>
-                <button
-                  css={{
-                    marginTop: tokens.spacing[4],
-                    padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`,
-                    backgroundColor: colors.primary,
-                    color: colors.onPrimary,
-                    border: 'none',
-                    borderRadius: tokens.borderRadius.medium,
-                    cursor: 'pointer',
-                    ...tokens.typography.label.large,
-                  }}
-                  onClick={() => window.location.reload()}
-                >
-                  Retry
-                </button>
-              </div>
-            ),
-          },
-        ]}
-      />
-    );
-  }
 
   return (
     <>
       <PageLayout
-        pageName={currentStep?.title || "Welcome to Launchpad"}
+        pageName={pageTitle}
         layoutMode="activity"
         panes={[
           {
