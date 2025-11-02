@@ -8,12 +8,13 @@ import { FlowConfig } from '../types';
 export const DEFAULT_ONBOARDING_FLOW: FlowConfig = {
   flow_id: 'user-onboarding-v1',
   steps: [
-    {
-      id: 'welcome',
-      type: 'activity',
-      activitySlug: 'welcome',
-      title: 'Welcome to Launchpad'
-    },
+    // Welcome step temporarily skipped - jump directly to pathways
+    // {
+    //   id: 'welcome',
+    //   type: 'activity',
+    //   activitySlug: 'welcome',
+    //   title: 'Welcome to Launchpad'
+    // },
     {
       id: 'pathways',
       type: 'activity',
