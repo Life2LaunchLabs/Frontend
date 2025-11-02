@@ -109,7 +109,7 @@ export const GetStartedSection = () => {
           >
             Ready to take control of your life launching journey?
           </h1>
-          <Button variant="filled" onClick={() => navigate('/welcome')}>
+          <Button variant="filled" onClick={() => navigate('/pathways')}>
             Get Started
           </Button>
         </div>
