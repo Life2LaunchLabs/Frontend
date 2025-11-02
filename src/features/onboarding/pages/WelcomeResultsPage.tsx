@@ -242,6 +242,9 @@ export const WelcomeResultsPage: React.FC = () => {
           alignItems: 'center',
           padding: tokens.spacing[6],
           gap: tokens.spacing[6],
+          '@media (max-width: 768px)': {
+            padding: 0,
+          },
         }}>
         {/* Print Preview Card - Letter Size */}
         <div
@@ -254,6 +257,12 @@ export const WelcomeResultsPage: React.FC = () => {
             borderRadius: tokens.borderRadius.large,
             padding: tokens.spacing[8],
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            '@media (max-width: 768px)': {
+              borderRadius: 0,
+              boxShadow: 'none',
+              padding: tokens.spacing[4],
+              minHeight: '100vh',
+            },
           }}
         >
           {/* Print-only Banner */}
@@ -273,6 +282,14 @@ export const WelcomeResultsPage: React.FC = () => {
               '@media print': {
                 display: 'block !important',
               },
+              '@media (max-width: 768px)': {
+                display: 'block',
+                marginLeft: `-${tokens.spacing[4]}`,
+                marginRight: `-${tokens.spacing[4]}`,
+                marginTop: `-${tokens.spacing[4]}`,
+                marginBottom: tokens.spacing[4],
+                height: '80px',
+              },
             }}
           >
             <img
@@ -285,6 +302,10 @@ export const WelcomeResultsPage: React.FC = () => {
                 transform: 'translateY(-50%)',
                 height: '80px',
                 width: 'auto',
+                '@media (max-width: 768px)': {
+                  height: '50px',
+                  right: tokens.spacing[4],
+                },
               }}
             />
           </div>
@@ -294,6 +315,9 @@ export const WelcomeResultsPage: React.FC = () => {
             ...tokens.typography.headline.large,
             color: '#000000',
             marginBottom: tokens.spacing[3],
+            '@media (max-width: 768px)': {
+              ...tokens.typography.headline.medium,
+            },
           }}>
             Life & Career Pathways Profile Builder
           </h1>
@@ -303,6 +327,9 @@ export const WelcomeResultsPage: React.FC = () => {
             ...tokens.typography.body.medium,
             color: '#666666',
             marginBottom: tokens.spacing[3],
+            '@media (max-width: 768px)': {
+              ...tokens.typography.body.small,
+            },
           }}>
             {resultsData?.completed_at ? new Date(resultsData.completed_at).toLocaleDateString('en-US', {
               year: 'numeric',
@@ -321,6 +348,10 @@ export const WelcomeResultsPage: React.FC = () => {
             color: '#000000',
             marginBottom: tokens.spacing[8],
             lineHeight: 1.6,
+            '@media (max-width: 768px)': {
+              ...tokens.typography.body.medium,
+              marginBottom: tokens.spacing[4],
+            },
           }}>
             Here's your personalized Life2Launch Pathways Snapshot based on what excites you, your natural strengths, and the global issues you care about. This is your starting point to design a life and career path with purpose and confidence.
           </p>
@@ -338,6 +369,9 @@ export const WelcomeResultsPage: React.FC = () => {
                 ...tokens.typography.title.large,
                 color: '#000000',
                 marginBottom: tokens.spacing[3],
+                '@media (max-width: 768px)': {
+                  ...tokens.typography.title.medium,
+                },
               }}>
                 What Activities Excite You Most
               </h2>
@@ -347,6 +381,10 @@ export const WelcomeResultsPage: React.FC = () => {
                 color: '#000000',
                 marginBottom: tokens.spacing[5],
                 lineHeight: 1.6,
+                '@media (max-width: 768px)': {
+                  ...tokens.typography.body.small,
+                  marginBottom: tokens.spacing[3],
+                },
               }}>
                 These reflect how you're naturally motivated to spend your time, energy, and talents. Lean into your top 1–2 pathways—they're powerful clues about what will build confidence, agency, and flow. Use them to guide what skills to build, what opportunities to say yes to, and how to stay inspired.
               </p>
@@ -407,6 +445,9 @@ export const WelcomeResultsPage: React.FC = () => {
                       color: pathway.color,
                       marginBottom: tokens.spacing[1],
                       fontWeight: 700,
+                      '@media (max-width: 768px)': {
+                        ...tokens.typography.title.small,
+                      },
                     }}>
                       {pathway.title}
                     </h3>
@@ -415,6 +456,9 @@ export const WelcomeResultsPage: React.FC = () => {
                       color: '#000000',
                       lineHeight: 1.5,
                       marginBottom: tokens.spacing[1],
+                      '@media (max-width: 768px)': {
+                        ...tokens.typography.body.small,
+                      },
                     }}>
                       {pathway.description}
                     </p>
@@ -455,6 +499,9 @@ export const WelcomeResultsPage: React.FC = () => {
                         marginBottom: tokens.spacing[3],
                         paddingBottom: tokens.spacing[2],
                         borderBottom: '2px solid #e0e0e0',
+                        '@media (max-width: 768px)': {
+                          ...tokens.typography.title.medium,
+                        },
                       }}>
                         {section.section_title}
                       </h2>
@@ -466,6 +513,9 @@ export const WelcomeResultsPage: React.FC = () => {
                           color: '#000000',
                           marginBottom: tokens.spacing[4],
                           lineHeight: 1.6,
+                          '@media (max-width: 768px)': {
+                            ...tokens.typography.body.small,
+                          },
                         }}>
                           These capacities aren't always measured in school, but they're central to how you learn, grow, and lead. Knowing your strengths helps you build confidence, make better choices, and launch with purpose.
                         </p>
@@ -477,6 +527,9 @@ export const WelcomeResultsPage: React.FC = () => {
                           color: '#000000',
                           marginBottom: tokens.spacing[4],
                           lineHeight: 1.6,
+                          '@media (max-width: 768px)': {
+                            ...tokens.typography.body.small,
+                          },
                         }}>
                           Aligning your work, volunteering, or study with the world's greatest needs creates the conditions for meaningful impact. Let this guide the kind of change you want to be part of.
                         </p>
@@ -496,6 +549,9 @@ export const WelcomeResultsPage: React.FC = () => {
                           ...tokens.typography.title.medium,
                           color: '#000000',
                           marginBottom: tokens.spacing[2],
+                          '@media (max-width: 768px)': {
+                            ...tokens.typography.title.small,
+                          },
                         }}>
                           {item.question}
                         </h3>
@@ -513,6 +569,9 @@ export const WelcomeResultsPage: React.FC = () => {
                                 color: '#000000',
                                 lineHeight: 1.6,
                                 marginBottom: tokens.spacing[1],
+                                '@media (max-width: 768px)': {
+                                  ...tokens.typography.body.medium,
+                                },
                               }}>
                                 {answerItem.text}
                               </li>
@@ -523,6 +582,9 @@ export const WelcomeResultsPage: React.FC = () => {
                             ...tokens.typography.body.large,
                             color: '#000000',
                             lineHeight: 1.6,
+                            '@media (max-width: 768px)': {
+                              ...tokens.typography.body.medium,
+                            },
                           }}>
                             {item.answer.text}
                           </p>
@@ -567,6 +629,9 @@ export const WelcomeResultsPage: React.FC = () => {
               ...tokens.typography.title.large,
               color: '#000000',
               marginBottom: tokens.spacing[4],
+              '@media (max-width: 768px)': {
+                ...tokens.typography.title.medium,
+              },
             }}>
               Next Steps
             </h2>
@@ -575,6 +640,9 @@ export const WelcomeResultsPage: React.FC = () => {
               ...tokens.typography.body.large,
               color: '#000000',
               lineHeight: 1.6,
+              '@media (max-width: 768px)': {
+                ...tokens.typography.body.medium,
+              },
             }}>
               Your pathway isn't a one-time choice—it's a navigation journey. Explore, test, reflect, and grow. You've just taken the first step toward designing a life driven by purpose, powered by your strengths, and aligned with what you care most about.
             </p>

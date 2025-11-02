@@ -24,6 +24,9 @@ export const Pane = forwardRef<HTMLDivElement, PaneProps>(
     const baseStyles: CSSObject = {
       borderRadius: tokens.borderRadius.large,
       padding: tokens.spacing[6],
+      '@media (max-width: 768px)': {
+        padding: invisible ? tokens.spacing[2] : tokens.spacing[4],
+      },
     };
 
     const surfaceColor = mode === 'launchpad'

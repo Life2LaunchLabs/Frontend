@@ -48,6 +48,11 @@ export const GetStartedSection = () => {
           gap: tokens.spacing[8],
           padding: tokens.spacing[6],
           background: 'transparent',
+          '@media (max-width: 768px)': {
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: tokens.spacing[4],
+          },
         }}
       >
         {/* Left side - acorn image (right-aligned) */}
@@ -57,6 +62,10 @@ export const GetStartedSection = () => {
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'center',
+            '@media (max-width: 768px)': {
+              justifyContent: 'center',
+              flex: 'none',
+            },
           }}
         >
           <img
@@ -66,6 +75,9 @@ export const GetStartedSection = () => {
               maxWidth: '400px',
               width: '100%',
               height: 'auto',
+              '@media (max-width: 768px)': {
+                maxWidth: '80px',
+              },
             }}
           />
         </div>
@@ -78,6 +90,10 @@ export const GetStartedSection = () => {
             flexDirection: 'column',
             gap: tokens.spacing[4],
             alignItems: 'flex-start',
+            '@media (max-width: 768px)': {
+              alignItems: 'center',
+              flex: 'none',
+            },
           }}
         >
           <h1
@@ -85,11 +101,15 @@ export const GetStartedSection = () => {
               ...tokens.typography.display.large,
               color: colors.onSurface,
               textAlign: 'left',
+              '@media (max-width: 768px)': {
+                ...tokens.typography.display.small,
+                textAlign: 'center',
+              },
             }}
           >
             Ready to take control of your life launching journey?
           </h1>
-          <Button variant="filled" size="large" onClick={() => navigate('/welcome')}>
+          <Button variant="filled" onClick={() => navigate('/welcome')}>
             Get Started
           </Button>
         </div>

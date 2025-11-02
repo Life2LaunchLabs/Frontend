@@ -18,6 +18,10 @@ export const ChatBuddy: React.FC<ChatBuddyProps> = ({ message }) => {
       width: '100%',
       padding: tokens.spacing[4],
       backgroundColor: 'transparent',
+      '@media (max-width: 768px)': {
+        flexDirection: 'column',
+        alignItems: 'center',
+      },
     },
     acornContainer: {
       flexShrink: 0,
@@ -51,12 +55,21 @@ export const ChatBuddy: React.FC<ChatBuddyProps> = ({ message }) => {
         borderBottom: '8px solid transparent',
         borderRight: `8px solid ${colors.surfaceContainerHigh}`,
       },
+      '@media (max-width: 768px)': {
+        padding: tokens.spacing[4],
+        '&::before': {
+          display: 'none',
+        },
+      },
     },
     messageText: {
       ...tokens.typography.body.large,
       color: colors.onSurface,
       margin: 0,
       lineHeight: 1.6,
+      '@media (max-width: 768px)': {
+        ...tokens.typography.body.medium,
+      },
     },
   };
 

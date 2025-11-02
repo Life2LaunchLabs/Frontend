@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../styles';
 import { ActivitiesService, PublicActivitiesService } from '../api';
@@ -165,6 +166,8 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       // Save progress only when navigating
       await saveProgressIfNeeded();
       setCurrentPageIndex(prev => prev + 1);
+      // Scroll to top of page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -173,6 +176,8 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       // Save progress only when navigating
       await saveProgressIfNeeded();
       setCurrentPageIndex(prev => prev - 1);
+      // Scroll to top of page
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -240,18 +245,27 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       display: 'flex',
       flexDirection: 'column' as const,
       gap: tokens.spacing[6],
+      '@media (max-width: 768px)': {
+        gap: tokens.spacing[4],
+      },
     },
     header: {
       flexShrink: 0,
       display: 'flex',
       flexDirection: 'column' as const,
       gap: tokens.spacing[4],
+      '@media (max-width: 768px)': {
+        display: 'none',
+      },
     },
     title: {
       ...tokens.typography.headline.large,
       color: colors.onSurface,
       margin: 0,
       textAlign: 'left' as const,
+      '@media (max-width: 768px)': {
+        display: 'none',
+      },
     },
     contentCard: {
       flex: 1,
@@ -385,10 +399,10 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
   const { activity_version, page, blocks, media } = pageData;
 
   return (
-    <div style={styles.wrapper}>
+    <div css={styles.wrapper}>
       {/* Header */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>{activity_version.title}</h1>
+      <div css={styles.header}>
+        <h1 css={styles.title}>{activity_version.title}</h1>
         {totalPages && (
           <ProgressBar
             current={currentPageIndex + 1}
@@ -403,7 +417,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       )}
 
       {/* Content */}
-      <div style={styles.contentCard}>
+      <div css={styles.contentCard}>
         {blocks.map((block) => (
           <BlockRenderer
             key={block.id}
@@ -416,9 +430,9 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
       </div>
 
       {/* Navigation */}
-      <div style={styles.navigation}>
+      <div css={styles.navigation}>
         <button
-          style={styles.button('secondary', currentPageIndex === 0)}
+          css={styles.button('secondary', currentPageIndex === 0)}
           onClick={handlePreviousPage}
           disabled={currentPageIndex === 0}
         >
@@ -426,7 +440,7 @@ export const ActivityViewer: React.FC<ActivityViewerProps> = ({
         </button>
 
         <button
-          style={styles.button('primary')}
+          css={styles.button('primary')}
           onClick={handleNextPage}
         >
           {isOnLastPage() ? 'Complete Activity' : 'Next →'}

@@ -306,6 +306,10 @@ const { normalizedPanes, countsByCol, spanCols } = useMemo(() => {
           alignItems: verticalCenter ? 'center' : 'stretch',
           padding: tokens.spacing[6],
           minHeight: 0,
+          '@media (max-width: 768px)': {
+            padding: tokens.spacing[3],
+            gap: tokens.spacing[3],
+          },
         }}
       >
         {sidebar && (
